@@ -7,7 +7,14 @@ from contextlib import closing
 from hashlib import sha256
 from pathlib import Path
 
-from aams.contracts import EpistemicState, Evidence, EvidenceStatus, MemoryFormation, MemoryKind
+from aams.contracts import (
+    BeliefProposal,
+    EpistemicState,
+    Evidence,
+    EvidenceStatus,
+    MemoryFormation,
+    MemoryKind,
+)
 from aams.retrieval_telemetry import _SCHEMA as _TELEMETRY_SCHEMA
 from aams.storage import (
     _BELIEF_SCHEMA,
@@ -86,6 +93,18 @@ class ScopedIdentityTest(unittest.TestCase):
         store_6 = SQLiteMemoryStore.__new__(SQLiteMemoryStore)
         store_6.path = self.path
         access = self.ingest(store_6, "scope-a")
+        prior = store_6.revise(
+            access,
+            "belief-shared",
+            None,
+            BeliefProposal(
+                "Sensor reading",
+                EpistemicState.INFERRED,
+                "Supported by original reading",
+                TIME,
+                support_ids=("ev-shared",),
+            ),
+        )
         store = SQLiteMemoryStore(self.path)
         with closing(sqlite3.connect(self.path)) as db:
             self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 7)
@@ -95,6 +114,7 @@ class ScopedIdentityTest(unittest.TestCase):
         formation, evidence = records("scope-a")
         self.assertEqual(store.get_formation(access, "fm-shared"), formation)
         self.assertEqual(store.get_evidence(access, "ev-shared"), evidence)
+        self.assertEqual(store.belief_history(access, "belief-shared"), (prior,))
         self.assertEqual(store.ingest(access, "request", formation, (evidence,)), formation)
         self.ingest(store, "scope-b")
         store.verify_integrity()
