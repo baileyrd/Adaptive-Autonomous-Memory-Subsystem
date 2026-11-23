@@ -132,8 +132,8 @@ print(store.get_formation(access, "fm-1").formation_id)
 
     def test_unsupported_schema_is_preserved(self):
         with sqlite3.connect(self.path) as db:
-            db.execute("PRAGMA user_version=2")
+            db.execute("PRAGMA user_version=99")
         with self.assertRaises(StoreIntegrityError):
             SQLiteMemoryStore(self.path)
         with sqlite3.connect(self.path) as db:
-            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 2)
+            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 99)
