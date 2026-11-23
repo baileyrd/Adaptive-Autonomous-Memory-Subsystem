@@ -267,3 +267,70 @@ RepresentationIndex(PausedStore(sys.argv[1])).rebuild(
         self.assertEqual(exact["retrieval"]["status"], "exact_canonical")
         self.assertIsNone(self.store.get_belief(self.author, "one"))
         self.assertIsNone(self.store.get_candidate(self.author, "one"))
+
+    def test_positive_telemetry_and_rollback_leave_canonical_history_unchanged(self):
+        from dataclasses import replace
+
+        from aams.contracts import BeliefProposal
+        from aams.learning import LearningCandidate
+        from aams.recall import CognitiveMemory, CognitiveNeed
+        from aams.retrieval_routing import ROUTING_POLICY_VERSION, RetrievalMode
+        from aams.retrieval_telemetry import (
+            MeasuredOutcome,
+            RetrievalObservation,
+            RetrievalTelemetry,
+        )
+
+        self.ingest(self.author, "one")
+        evidence = self.store.get_evidence(self.author, "one")
+        self.store.revise(
+            self.author,
+            "belief",
+            None,
+            BeliefProposal(
+                "One reported result",
+                EpistemicState.INFERRED,
+                "Fixture",
+                TIME,
+                support_ids=("one",),
+            ),
+        )
+        history = self.store.belief_history(self.author, "belief")
+        candidate = self.store.create_candidate(
+            self.author,
+            "candidate",
+            LearningCandidate(
+                "candidate",
+                self.author.scope,
+                self.author.principal,
+                "One possible conclusion",
+                TIME,
+                ("one",),
+            ),
+        )
+        memory = CognitiveMemory(self.store)
+        need = CognitiveNeed(query="one")
+        baseline = memory.recall(self.author, need)
+        self.index.rebuild(self.author, self.provider)
+        route = memory.recall(
+            self.author, need, provider=self.provider, requested_mode=RetrievalMode.HYBRID
+        )["retrieval"]
+        self.assertEqual(route["mode"], "hybrid")
+        telemetry = RetrievalTelemetry(self.store)
+        grant = replace(self.author, telemetry=True)
+        telemetry.record(
+            grant,
+            RetrievalObservation(
+                "e" * 32, ROUTING_POLICY_VERSION, RetrievalMode.HYBRID, MeasuredOutcome.SATISFIED, 1
+            ),
+        )
+        self.assertEqual(memory.recall(self.author, need), baseline)
+        self.index.invalidate(self.author, self.provider.spec)
+        result = memory.recall(
+            self.author, need, provider=self.provider, requested_mode=RetrievalMode.HYBRID
+        )
+        self.assertEqual(result.pop("retrieval")["mode"], "lexical")
+        self.assertEqual(result, baseline)
+        self.assertEqual(self.store.get_evidence(self.author, "one"), evidence)
+        self.assertEqual(self.store.belief_history(self.author, "belief"), history)
+        self.assertEqual(self.store.get_candidate(self.author, "candidate"), candidate)
