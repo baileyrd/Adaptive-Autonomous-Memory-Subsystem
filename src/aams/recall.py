@@ -21,6 +21,7 @@ from .retrieval_routing import (
     RetrievalRoutingRequest,
     choose_retrieval_mode,
 )
+from .shadow_observer import ShadowObserver
 from .storage import AccessContext, SQLiteMemoryStore, StoreIntegrityError
 from .vector_index import RepresentationIndex
 
@@ -100,8 +101,11 @@ class CognitiveNeed:
 
 
 class CognitiveMemory:
-    def __init__(self, store: SQLiteMemoryStore) -> None:
+    def __init__(self, store: SQLiteMemoryStore, *, shadow: ShadowObserver | None = None) -> None:
+        if shadow is not None and type(shadow) is not ShadowObserver:
+            raise ValueError("Expected a native ShadowObserver")
         self.store = store
+        self._shadow = shadow
 
     def recall(
         self,
@@ -111,6 +115,21 @@ class CognitiveMemory:
         provider: RepresentationProvider | None = None,
         requested_mode: RetrievalMode | None = None,
     ) -> dict:
+        result = self._recall(access, need, provider, requested_mode)
+        if self._shadow is not None and need.identifier is None and result["items"]:
+            try:
+                self._shadow.submit(
+                    access,
+                    short_query=len(need.query.split()) <= 4,
+                    opt_in=requested_mode is RetrievalMode.HYBRID
+                    or (requested_mode is None and provider is not None),
+                )
+            except Exception:
+                # Optional observation must never affect an already-authorized response.
+                pass
+        return result
+
+    def _recall(self, access, need, provider, requested_mode) -> dict:
         mode = requested_mode
         if mode is None:
             mode = RetrievalMode.HYBRID if provider is not None else RetrievalMode.LEXICAL

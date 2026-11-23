@@ -181,12 +181,13 @@ class AccessContext:
     writable: bool = False
     candidate_review: bool = False
     telemetry: bool = False
+    shadow_observe: bool = False
 
     def __post_init__(self) -> None:
         require_text(self.principal, self.scope)
         if any(
             type(grant) is not bool
-            for grant in (self.writable, self.candidate_review, self.telemetry)
+            for grant in (self.writable, self.candidate_review, self.telemetry, self.shadow_observe)
         ):
             raise ValueError("Access grants must be boolean")
 
