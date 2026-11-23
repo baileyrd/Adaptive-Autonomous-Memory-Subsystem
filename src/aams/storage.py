@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from collections.abc import Iterator
 from contextlib import closing
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
@@ -211,13 +212,17 @@ class SQLiteMemoryStore:
     def get_evidence(self, access: AccessContext, evidence_id: str) -> Evidence | None:
         try:
             with closing(self._connect()) as db:
-                row = db.execute(
-                    "SELECT * FROM evidence WHERE scope=? AND evidence_id=?",
-                    (access.scope, evidence_id),
-                ).fetchone()
-                return self._decode_evidence(row) if row is not None else None
+                return self._read_evidence(db, access.scope, evidence_id)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify evidence") from error
+
+    def _read_evidence(
+        self, db: sqlite3.Connection, scope: str, evidence_id: str
+    ) -> Evidence | None:
+        row = db.execute(
+            "SELECT * FROM evidence WHERE scope=? AND evidence_id=?", (scope, evidence_id)
+        ).fetchone()
+        return self._decode_evidence(row) if row is not None else None
 
     @staticmethod
     def _decode_evidence(row: sqlite3.Row) -> Evidence:
@@ -380,16 +385,26 @@ class SQLiteMemoryStore:
         try:
             with closing(self._connect()) as db, db:
                 db.execute("BEGIN")
-                row = db.execute(
-                    """SELECT * FROM belief_revision WHERE scope=? AND belief_id=?
-                       AND (? IS NULL OR recorded_at<=?)
-                       AND (? IS NULL OR (valid_from<=? AND (valid_until IS NULL OR ?<valid_until)))
-                       ORDER BY sequence DESC LIMIT 1""",
-                    (access.scope, belief_id, recorded, recorded, effective, effective, effective),
-                ).fetchone()
-                return self._decode_revision(db, row) if row is not None else None
+                return self._read_belief(db, access.scope, belief_id, recorded, effective)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify belief revision") from error
+
+    def _read_belief(
+        self,
+        db: sqlite3.Connection,
+        scope: str,
+        belief_id: str,
+        recorded: str | None,
+        effective: str | None,
+    ) -> BeliefRevision | None:
+        row = db.execute(
+            """SELECT * FROM belief_revision WHERE scope=? AND belief_id=?
+               AND (? IS NULL OR recorded_at<=?)
+               AND (? IS NULL OR (valid_from<=? AND (valid_until IS NULL OR ?<valid_until)))
+               ORDER BY sequence DESC LIMIT 1""",
+            (scope, belief_id, recorded, recorded, effective, effective, effective),
+        ).fetchone()
+        return self._decode_revision(db, row) if row is not None else None
 
     @staticmethod
     def _decode_revision(db: sqlite3.Connection, row: sqlite3.Row) -> BeliefRevision:
@@ -421,35 +436,55 @@ class SQLiteMemoryStore:
             proposal,
         )
 
-    def recall_candidates(
-        self, access: AccessContext, *, recorded_as_of: str | None, effective_at: str | None
-    ) -> tuple[tuple[str, str], ...]:
-        """Enumerate scoped stable identities eligible for canonical lookups."""
+    def scan_recall(
+        self,
+        access: AccessContext,
+        *,
+        recorded_as_of: str | None,
+        effective_at: str | None,
+        kinds: tuple[MemoryKind, ...],
+    ) -> Iterator[tuple[MemoryFormation | BeliefRevision, dict[str, Evidence]]]:
+        """Yield allowed records and their resolved evidence from one SQLite snapshot."""
         try:
-            with closing(self._connect()) as db:
-                rows = db.execute(
-                    """SELECT 'formation' AS entity, formation_id AS id FROM formation
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN")
+                for row in db.execute(
+                    """SELECT * FROM formation
                        WHERE scope=? AND (? IS NULL OR created_at<=?)
-                         AND (? IS NULL OR created_at<=?)
-                       UNION
-                       SELECT 'belief', belief_id FROM belief_revision
-                       WHERE scope=? AND (? IS NULL OR recorded_at<=?)
-                         AND (? IS NULL OR (valid_from<=? AND (valid_until IS NULL OR ?<valid_until)))
-                       ORDER BY entity, id""",
-                    (
-                        access.scope,
-                        recorded_as_of,
-                        recorded_as_of,
-                        effective_at,
-                        effective_at,
-                        access.scope,
-                        recorded_as_of,
-                        recorded_as_of,
-                        effective_at,
-                        effective_at,
-                        effective_at,
-                    ),
-                )
-                return tuple((row["entity"], row["id"]) for row in rows)
-        except sqlite3.DatabaseError as error:
-            raise StoreIntegrityError("Cannot enumerate memory") from error
+                       AND (? IS NULL OR created_at<=?)""",
+                    (access.scope, recorded_as_of, recorded_as_of, effective_at, effective_at),
+                ):
+                    formation = self._decode_formation(db, row)
+                    if not kinds or formation.kind in kinds:
+                        yield (
+                            formation,
+                            self._resolve_evidence(db, access.scope, formation.evidence_ids),
+                        )
+                if kinds:
+                    return
+                for row in db.execute(
+                    "SELECT DISTINCT belief_id FROM belief_revision WHERE scope=?", (access.scope,)
+                ):
+                    revision = self._read_belief(
+                        db, access.scope, row["belief_id"], recorded_as_of, effective_at
+                    )
+                    if revision is not None:
+                        proposal = revision.proposal
+                        links = proposal.support_ids + proposal.refute_ids
+                        yield revision, self._resolve_evidence(db, access.scope, links)
+        except (sqlite3.DatabaseError, ValueError, TypeError) as error:
+            raise StoreIntegrityError("Cannot scan canonical memory") from error
+
+    def _resolve_evidence(
+        self,
+        db: sqlite3.Connection,
+        scope: str,
+        identifiers: tuple[str, ...],
+    ) -> dict[str, Evidence]:
+        evidence = {}
+        for identifier in identifiers:
+            record = self._read_evidence(db, scope, identifier)
+            if record is None:
+                raise StoreIntegrityError("Canonical evidence link cannot be resolved")
+            evidence[identifier] = record
+        return evidence

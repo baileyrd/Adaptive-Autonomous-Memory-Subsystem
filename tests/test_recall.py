@@ -3,6 +3,7 @@ import tempfile
 import unittest
 from hashlib import sha256
 from pathlib import Path
+from unittest.mock import patch
 
 from aams.contracts import (
     BeliefProposal,
@@ -129,3 +130,17 @@ class RecallTest(unittest.TestCase):
         self.assertEqual([edge["role"] for edge in latest["citations"]], ["support", "refute"])
         self.assertEqual(original["revision_id"], initial.revision_id)
         self.assertFalse(original["contradictory_evidence"])
+        ranked_as_of = self.memory.recall(
+            self.access, CognitiveNeed(query="rain storm", recorded_as_of=initial.recorded_at)
+        )
+        belief = next(item for item in ranked_as_of["items"] if item["entity"] == "belief")
+        self.assertEqual(belief["revision_id"], initial.revision_id)
+        self.assertEqual([edge["role"] for edge in belief["citations"]], ["support"])
+
+    def test_ranked_scan_uses_one_scoped_snapshot(self):
+        with patch.object(self.store, "_connect", wraps=self.store._connect) as connections:
+            result = self.memory.recall(
+                self.access, CognitiveNeed(query="rain storm", kinds=(MemoryKind.EXPERIENCE,))
+            )
+        self.assertEqual(connections.call_count, 1)
+        self.assertEqual([item["id"] for item in result["items"]], ["a", "b", "copy", "noise"])

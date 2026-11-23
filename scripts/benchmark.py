@@ -37,10 +37,10 @@ def summary(samples):
     }
 
 
-def measure(path, records, samples, warmup):
+def measure(path, records, samples, warmup, scope_count, belief_count):
     store = SQLiteMemoryStore(path)
     memory = CognitiveMemory(store)
-    scopes = [AccessContext("fixture", f"domain-{number}", True) for number in range(4)]
+    scopes = [AccessContext("fixture", f"domain-{number}", True) for number in range(scope_count)]
     rng = random.Random(SEED)
     observations = ("rain storm", "heavy rain", "overdue calibration", "clear weather")
     ingests = []
@@ -74,27 +74,32 @@ def measure(path, records, samples, warmup):
         if index >= warmup:
             ingests.append(perf_counter_ns() - start)
     access = scopes[0]
-    first = store.revise(
-        access,
-        "weather",
-        None,
-        BeliefProposal(
-            "Rain expected", EpistemicState.INFERRED, "Fixture", TIME, support_ids=("e0",)
-        ),
-    )
-    store.revise(
-        access,
-        "weather",
-        first.revision_id,
-        BeliefProposal(
-            "Rain contested",
-            EpistemicState.CONTESTED,
-            "Conflicting sample",
-            TIME,
-            support_ids=("e0",),
-            refute_ids=("e4",),
-        ),
-    )
+    for index in range(belief_count):
+        scope = scopes[index % scope_count]
+        support = f"e{index % scope_count}"
+        refute = f"e{index % scope_count + scope_count}"
+        identifier = f"weather-{index}"
+        first = store.revise(
+            scope,
+            identifier,
+            None,
+            BeliefProposal(
+                "Rain expected", EpistemicState.INFERRED, "Fixture", TIME, support_ids=(support,)
+            ),
+        )
+        store.revise(
+            scope,
+            identifier,
+            first.revision_id,
+            BeliefProposal(
+                "Rain contested",
+                EpistemicState.CONTESTED,
+                "Conflicting sample",
+                TIME,
+                support_ids=(support,),
+                refute_ids=(refute,),
+            ),
+        )
     exact = CognitiveNeed(entity="formation", identifier="f0")
     ranked = CognitiveNeed(query="rain storm", max_items=5)
     stats = {}
@@ -123,8 +128,8 @@ def measure(path, records, samples, warmup):
         "fixture": {
             "seed": SEED,
             "formations": records + warmup,
-            "scopes": 4,
-            "belief_revisions": 2,
+            "scopes": scope_count,
+            "belief_revisions": 2 * belief_count,
         },
         "samples": {"ingest": records, "each_recall": samples, "warmup": warmup},
         "ingest": {
@@ -142,11 +147,22 @@ def main():
     parser.add_argument("--records", type=int, default=256)
     parser.add_argument("--samples", type=int, default=40)
     parser.add_argument("--warmup", type=int, default=8)
+    parser.add_argument("--scopes", type=int, default=4)
+    parser.add_argument("--beliefs", type=int, default=1)
     args = parser.parse_args()
     if args.records < 8 or args.samples < 1 or args.warmup < 1:
         parser.error("Use at least eight records, one sample and one warmup")
+    if args.scopes < 1 or args.beliefs < 0 or args.records + args.warmup < 2 * args.scopes:
+        parser.error("Use positive scopes and at least two formations per scope")
     with tempfile.TemporaryDirectory(prefix="aams-bench-") as directory:
-        result = measure(Path(directory) / "bench.sqlite3", args.records, args.samples, args.warmup)
+        result = measure(
+            Path(directory) / "bench.sqlite3",
+            args.records,
+            args.samples,
+            args.warmup,
+            args.scopes,
+            args.beliefs,
+        )
     print(json.dumps(result, indent=2))
 
 
