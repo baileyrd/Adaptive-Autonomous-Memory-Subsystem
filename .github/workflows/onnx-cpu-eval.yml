@@ -44,8 +44,13 @@ jobs:
           split = sys.argv[1]
           result = json.load(open(f"out/{split}.json"))
           print(f"::notice title=CPU {split} environment::{result['processor']} {result['python']}")
-          for arm, row in result["arms"].items():
-              print(f"::notice title=CPU {split} {arm}::{json.dumps(row, separators=(',', ':'))}")
+          keys = ("wall_ms", "cpu_ms", "load_ms", "load_rss_kib", "peak_rss_kib",
+                  "added_p95_ms", "rss_ratio", "max_vector_delta", "ranking_parity", "qualifies")
+          summary = {arm: {name: row[name] for name in keys if name in row}
+                     for arm, row in result["arms"].items()}
+          print(f"::notice title=CPU {split} summary::{json.dumps(summary, separators=(',', ':'))}")
+          phases = {arm: row["phase_ms"] for arm, row in result["arms"].items() if "phase_ms" in row}
+          print(f"::notice title=CPU {split} phases::{json.dumps(phases, separators=(',', ':'))}")
           PY
           done
       - uses: actions/upload-artifact@v4
