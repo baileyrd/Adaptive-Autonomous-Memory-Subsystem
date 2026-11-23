@@ -76,9 +76,14 @@ def measure(args):
             cold = perf_counter_ns()
             vectors = [provider.encode(need.query) for _, need in workload]
             fields["first_query_pass_ms"] = round((perf_counter_ns() - cold) / 1e6, 3)
-            args.vectors.write_text(json.dumps(vectors))
+        rankings = []
         for access, need in workload:
-            memory.recall(access, need, provider=provider, requested_mode=RetrievalMode.HYBRID)
+            packet = memory.recall(
+                access, need, provider=provider, requested_mode=RetrievalMode.HYBRID
+            )
+            rankings.append([item["id"] for item in packet["items"]])
+        if args.arm != "guarded":
+            args.vectors.write_text(json.dumps({"vectors": vectors, "rankings": rankings}))
         if args.arm != "guarded":
             provider.phase_timings_ns.clear()
         wall, cpu = [], []
@@ -108,7 +113,23 @@ def run(args):
     rows = {}
     with tempfile.TemporaryDirectory(prefix="aams-onnx-cpu-") as directory:
         groups = Path(directory) / "groups.json"
-        groups.write_text(json.dumps(groups_for(args.data, args.partition)))
+        subprocess.run(
+            [
+                sys.executable,
+                str(Path(__file__).resolve()),
+                "--model",
+                str(args.model),
+                "--data",
+                str(args.data),
+                "--partition",
+                args.partition,
+                "--prepare",
+                "--groups",
+                str(groups),
+            ],
+            check=True,
+            timeout=90,
+        )
         for arm in ("guarded", *CPU_PROFILES):
             vectors = Path(directory) / f"{arm}.json"
             command = [
@@ -130,7 +151,7 @@ def run(args):
                 str(args.repetitions),
             ]
             completed = subprocess.run(
-                command, check=True, capture_output=True, text=True, timeout=180
+                command, check=True, stdout=subprocess.PIPE, text=True, timeout=180
             )
             rows[arm] = json.loads(completed.stdout)
             if arm == "guarded":
@@ -140,16 +161,18 @@ def run(args):
                 reference = actual
             error = max(
                 abs(a - b)
-                for left, right in zip(reference, actual, strict=True)
+                for left, right in zip(reference["vectors"], actual["vectors"], strict=True)
                 for a, b in zip(left, right, strict=True)
             )
             added = rows[arm]["wall_ms"][1] - rows["guarded"]["wall_ms"][1]
             ratio = rows[arm]["peak_rss_kib"] / rows["guarded"]["peak_rss_kib"]
+            same_rankings = actual["rankings"] == reference["rankings"]
             rows[arm].update(
                 max_vector_delta=error,
+                ranking_parity=same_rankings,
                 added_p95_ms=round(added, 3),
                 rss_ratio=round(ratio, 3),
-                qualifies=error <= PARITY_TOLERANCE and added <= 5 and ratio <= 2,
+                qualifies=error <= PARITY_TOLERANCE and same_rankings and added <= 5 and ratio <= 2,
             )
     return {
         "partition": args.partition,
@@ -171,12 +194,16 @@ def main():
     parser.add_argument("--partition", choices=tuple(DATASET_PINS), required=True)
     parser.add_argument("--repetitions", type=int, default=10)
     parser.add_argument("--arm", choices=("guarded", *CPU_PROFILES), help=argparse.SUPPRESS)
+    parser.add_argument("--prepare", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--groups", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--vectors", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not 1 <= args.repetitions <= 20:
         parser.error("Use 1 to 20 repetitions")
-    print(json.dumps(measure(args) if args.arm else run(args)))
+    if args.prepare:
+        args.groups.write_text(json.dumps(groups_for(args.data, args.partition)))
+    else:
+        print(json.dumps(measure(args) if args.arm else run(args)))
 
 
 if __name__ == "__main__":
