@@ -412,3 +412,36 @@ class SQLiteMemoryStore:
             row["recorded_at"],
             proposal,
         )
+
+    def recall_candidates(
+        self, access: AccessContext, *, recorded_as_of: str | None, effective_at: str | None
+    ) -> tuple[tuple[str, str], ...]:
+        """Enumerate scoped stable identities eligible for canonical lookups."""
+        try:
+            with closing(self._connect()) as db:
+                rows = db.execute(
+                    """SELECT 'formation' AS entity, formation_id AS id FROM formation
+                       WHERE scope=? AND (? IS NULL OR created_at<=?)
+                         AND (? IS NULL OR created_at<=?)
+                       UNION
+                       SELECT 'belief', belief_id FROM belief_revision
+                       WHERE scope=? AND (? IS NULL OR recorded_at<=?)
+                         AND (? IS NULL OR (valid_from<=? AND (valid_until IS NULL OR ?<valid_until)))
+                       ORDER BY entity, id""",
+                    (
+                        access.scope,
+                        recorded_as_of,
+                        recorded_as_of,
+                        effective_at,
+                        effective_at,
+                        access.scope,
+                        recorded_as_of,
+                        recorded_as_of,
+                        effective_at,
+                        effective_at,
+                        effective_at,
+                    ),
+                )
+                return tuple((row["entity"], row["id"]) for row in rows)
+        except sqlite3.DatabaseError as error:
+            raise StoreIntegrityError("Cannot enumerate memory") from error
