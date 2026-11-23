@@ -101,3 +101,5 @@ The [v0.5 acceptance matrix](docs/acceptance/MVP-v0.5.md) documents guarded rout
 The [v0.6 offline research acceptance](docs/acceptance/MVP-v0.6.md) records the staged policy, held-out comparison, and activation limits.
 
 The [v0.7 shadow-mode acceptance](docs/acceptance/MVP-v0.7.md) records the isolated observer, public and synthetic replays, and activation boundaries.
+
+The [v0.8 retrieval optimization acceptance](docs/acceptance/MVP-v0.8.md) records the root causes behind the routing tie, the article-grouped benchmark, the opt-in scoped BM25 ranker and its held-out gains over guarded retrieval, and the rejected or blocked experiments.
