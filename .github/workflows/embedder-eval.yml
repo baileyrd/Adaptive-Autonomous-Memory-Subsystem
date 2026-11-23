@@ -1,0 +1,153 @@
+name: Embedder eval (#84)
+
+# Manual, eval-only run of the pinned ONNX encoder. Nothing here changes product defaults.
+# stage=pins: resolve a revision, hash its files, cross-check HF LFS ids (or git blob sha1), probe the encoder and
+#   upload the proposed scripts/onnx_pins.json. Commit that file before running stage=full.
+# stage=full: verify against the committed pins, then the measured run for Slice B/C.
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "pins or full"
+        type: choice
+        options: [pins, full]
+        default: pins
+      revision:
+        description: "pins only: HF commit sha (default: current main)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  HF_REPO: BAAI/bge-small-en-v1.5
+  SQUAD_BASE: https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset
+  SQUAD_DEV_SHA256: 95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9
+  SQUAD_TRAIN_SHA256: 3527663986b8295af4f7fcdff1ba1ff3f72d07d61a20f487cb238a6ef92fd955
+  SCIFACT_URL: https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz
+  SCIFACT_SHA256: 11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be
+  PYTHONHASHSEED: "0"
+
+jobs:
+  eval:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the package and pinned eval-only runtime
+        run: python -m pip install . onnxruntime==1.32.0 tokenizers==0.23.3 numpy==2.5.3
+      - name: Record the environment
+        run: |
+          mkdir -p out
+          { python --version; nproc; grep -m1 "model name" /proc/cpuinfo; } > out/environment.txt
+          python -m pip freeze > out/pip-freeze.txt
+      - name: Resolve pins from HF (revision, sha256, HF id cross-check)
+        if: inputs.stage == 'pins'
+        env:
+          REVISION: ${{ inputs.revision }}
+        run: |
+          rev=${REVISION:-$(curl -fsSL --retry 3 "https://huggingface.co/api/models/$HF_REPO" | python -c 'import json,sys; print(json.load(sys.stdin)["sha"])')}
+          [[ "$rev" =~ ^[0-9a-f]{40}$ ]] || { echo "Revision must be a full commit sha"; exit 1; }
+          for dir in "" onnx; do
+            curl -fsSL --retry 3 "https://huggingface.co/api/models/$HF_REPO/tree/$rev/$dir" > "tree-${dir:-root}.json"
+          done
+          for file in onnx/model.onnx tokenizer.json; do
+            curl -fsSL --retry 3 --create-dirs -o "model/$file" "https://huggingface.co/$HF_REPO/resolve/$rev/$file"
+          done
+          REV=$rev python - <<'EOF'
+          import json, os
+          from hashlib import sha1, sha256
+          names = ("onnx/model.onnx", "tokenizer.json")
+          data = {name: open(f"model/{name}", "rb").read() for name in names}
+          files = {name: sha256(payload).hexdigest() for name, payload in data.items()}
+          entries = json.load(open("tree-root.json")) + json.load(open("tree-onnx.json"))
+          tree = {e["path"]: e for e in entries if e["path"] in names}
+
+          def hf_id_matches(name: str) -> bool:
+              """LFS files carry a sha256 oid; plain files only a git blob sha1."""
+              entry = tree[name]
+              if entry.get("lfs"):
+                  return entry["lfs"]["oid"] == files[name]
+              blob = b"blob %d\0" % len(data[name]) + data[name]
+              return entry["oid"] == sha1(blob).hexdigest()
+
+          checked = {name: hf_id_matches(name) for name in names}
+          print(json.dumps({"hf_id_checked": checked}))
+          if not all(checked.values()):
+              raise SystemExit("Downloaded bytes do not match the HF object ids")
+          json.dump({"revision": os.environ["REV"], "files": files}, open("out/onnx_pins.json", "w"), indent=2)
+          EOF
+      - name: Probe encode time and loaded RSS
+        if: inputs.stage == 'pins'
+        run: |
+          PYTHONPATH=scripts python - <<'EOF' | tee out/pins-probe.json
+          import json, resource, statistics
+          from pathlib import Path
+          from onnx_encoder import OnnxSentenceEncoder, load_pins, probe
+          encoder = OnnxSentenceEncoder(Path("model"), pins=load_pins(Path("out/onnx_pins.json")))
+          probe(encoder)
+          loaded = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+          for index in range(200):
+              encoder.encode(f"What is the orbital period of comet {index} around the sun?")
+          ms = sorted(ns / 1e6 for ns in encoder.encode_ns[1:])
+          p95 = ms[max(0, -(-95 * len(ms) // 100) - 1)]
+          print(json.dumps({"spec": str(encoder.spec), "encode_p95_ms": round(p95, 3),
+                            "encode_median_ms": round(statistics.median(ms), 3),
+                            "rss_after_load_kib": loaded}))
+          EOF
+      - name: Fetch the model and verify it against the committed pins
+        if: inputs.stage == 'full'
+        run: |
+          rev=$(python -c 'import json; print(json.load(open("scripts/onnx_pins.json"))["revision"])')
+          python -c 'import json; [print(h + "  model/" + f) for f, h in json.load(open("scripts/onnx_pins.json"))["files"].items()]' > model.sha256
+          for file in onnx/model.onnx tokenizer.json; do
+            curl -fsSL --retry 3 --create-dirs -o "model/$file" "https://huggingface.co/$HF_REPO/resolve/$rev/$file"
+          done
+          sha256sum -c model.sha256
+      - name: Fetch and verify datasets
+        if: inputs.stage == 'full'
+        run: |
+          curl -fsSL --retry 3 -o squad-dev.json "$SQUAD_BASE/dev-v1.1.json"
+          curl -fsSL --retry 3 -o squad-train.json "$SQUAD_BASE/train-v1.1.json"
+          curl -fsSL --retry 3 -o scifact.tar.gz "$SCIFACT_URL"
+          printf '%s  %s\n' "$SQUAD_DEV_SHA256" squad-dev.json "$SQUAD_TRAIN_SHA256" squad-train.json \
+            "$SCIFACT_SHA256" scifact.tar.gz | sha256sum -c
+      - name: Evaluate (an invalid run exits 3 and fails the job)
+        if: inputs.stage == 'full'
+        run: |
+          common=(--ranking bm25 --encoder-dir model --repetitions 5)  # D6: p95 over 5 repetitions
+          python scripts/evaluate_retrieval.py --squad squad-dev.json "${common[@]}" > out/squad-dev.json
+          python scripts/evaluate_retrieval.py --squad squad-train.json --expected-sha256 "$SQUAD_TRAIN_SHA256" \
+            --max-articles 48 "${common[@]}" > out/squad-train.json
+          python scripts/evaluate_scifact.py --scifact scifact.tar.gz --encoder-dir model --repetitions 5 \
+            > out/scifact.json
+          python scripts/offline_experiment.py --split all "${common[@]}" > out/v06.json
+      - name: Memory probe (fresh processes, build and serve peaks separated)
+        if: inputs.stage == 'full'
+        run: |
+          probe() {  # workload data extra-args...
+            local workload=$1 data=$2; shift 2
+            for arm in baseline bm25_guarded_onnx rrf_onnx; do
+              local encoder=(); [ "$arm" != baseline ] && encoder=(--encoder-dir model)
+              for phase in build serve; do
+                printf '{"workload":"%s","result":' "$workload"
+                python -I scripts/memory_probe.py --workload "$workload" --arm "$arm" --phase "$phase" \
+                  --db "mem-$workload-$arm.db" --data "$data" "${encoder[@]}" "$@"
+                echo "}"
+              done
+            done
+          }
+          { probe squad squad-dev.json; probe scifact scifact.tar.gz; } > out/memory.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: embedder-eval-${{ inputs.stage }}-${{ github.run_id }}
+          path: out/

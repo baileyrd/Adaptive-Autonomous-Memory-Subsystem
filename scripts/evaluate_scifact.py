@@ -13,7 +13,7 @@ import tarfile
 from hashlib import sha256
 from pathlib import Path
 
-from evaluate_retrieval import DAY, PREVIEW_BYTES, evaluate_groups
+from evaluate_retrieval import DAY, PREVIEW_BYTES, evaluate_groups, require_bm25, run_valid
 
 from aams.ranking import LexicalRanking
 
@@ -102,9 +102,11 @@ def main() -> None:
     parser.add_argument("--expected-sha256", default=SCIFACT_SHA256)
     parser.add_argument("--shards", type=int, default=16)
     parser.add_argument("--repetitions", type=int, default=1)
+    parser.add_argument("--encoder-dir", type=Path, help="Pinned ONNX encoder (adds ONNX arms)")
     args = parser.parse_args()
     if not 2 <= args.shards <= 256 or not 1 <= args.repetitions <= 20:
         parser.error("Use 2 to 256 shards and 1 to 20 repetitions")
+    require_bm25(parser, args.encoder_dir, (LexicalRanking.BM25,))
     digest = sha256(args.scifact.read_bytes()).hexdigest()
     if digest != args.expected_sha256:
         parser.error("Dataset checksum mismatch")
@@ -117,7 +119,13 @@ def main() -> None:
         "dataset_sha256": digest,
         "shards": args.shards,
         "excluded_cross_shard_claims": excluded,
-        **evaluate_groups(groups, details, args.repetitions, (LexicalRanking.BM25,)),
+        "repetitions": args.repetitions,
+        **run_valid(
+            lambda encoder: evaluate_groups(
+                groups, details, args.repetitions, (LexicalRanking.BM25,), encoder=encoder
+            ),
+            args.encoder_dir,
+        ),
         "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     }
     print(json.dumps(result, indent=2))

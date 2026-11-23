@@ -10,11 +10,14 @@ import argparse
 import json
 import resource
 import statistics
+import sys
 import tempfile
 from hashlib import sha256
+from math import ceil
 from pathlib import Path
 from random import Random
 
+from fusion import ONNX_ARMS, InvalidRun, check_validity, open_encoder
 from offline_experiment import replay, summarize
 from train_offline_candidate import fit
 
@@ -121,6 +124,56 @@ def oracle(rows: list[dict], keys: tuple[str, str] = ("lexical", "hybrid")) -> d
     }
 
 
+def versus_baseline(rows: list[dict], details: list[dict], key: str, profiles: dict) -> dict:
+    """The pre-registered gate block: paired task delta, nDCG delta and added p95 (D5)."""
+    base = profiles["bm25_guarded"]
+    return {
+        **paired(rows, details, key, "bm25_guarded"),
+        # Unrounded: the gate is ndcg_delta >= 0, and rounding can hide a small regression.
+        "ndcg_delta": statistics.fmean(
+            row["measurements"][key]["ndcg"] - row["measurements"]["bm25_guarded"]["ndcg"]
+            for row in rows
+        ),
+        "added_p95_ms": round(profiles[key]["p95_ms"] - base["p95_ms"], 3),
+    }
+
+
+def _p95(values: list[float]) -> float | None:
+    ordered = sorted(values)
+    return round(ordered[ceil(0.95 * len(ordered)) - 1], 3) if ordered else None
+
+
+def _quantiles(values: list[float]) -> list[float] | None:
+    if len(values) < 2:
+        return None
+    return [round(q, 4) for q in statistics.quantiles(values, n=4)]
+
+
+def onnx_diagnostics(rows: list[dict], details: list[dict], arm: str) -> dict:
+    """Status counts, encode cost, cosine separation and gold coverage. Never gated."""
+    measured = [row["measurements"][arm] for row in rows]
+    statuses: dict[str, int] = {}
+    for item in measured:
+        label = f"{item['mode']}/{item['status']}"
+        statuses[label] = statuses.get(label, 0) + 1
+    report = {
+        "mode_status": dict(sorted(statuses.items())),
+        "encode_p95_ms": _p95([ms for item in measured for ms in item["encode_ms"]]),
+    }
+    tops = [item["top_cosine"] for item in measured if "top_cosine" in item]
+    if tops:
+        report["top_cosine_quartiles"] = {
+            label: _quantiles([top[label] for top in tops if top[label] is not None])
+            for label in ("relevant", "other")
+        }
+    coverage = {}
+    for label in ("gold_vectorless", "gold_beyond_tokens"):
+        subset = [m for m, d in zip(measured, details, strict=True) if d.get(label)]
+        coverage[label] = {"tasks": len(subset), "satisfied": sum(m["satisfied"] for m in subset)}
+    report["gold_coverage"] = coverage
+    return report
+
+
 def split_report(rows: list[dict], details: list[dict]) -> dict:
     strategies = tuple(rows[0]["measurements"])
     report = {
@@ -140,6 +193,14 @@ def split_report(rows: list[dict], details: list[dict]) -> dict:
         / len(rows),
         4,
     )
+    if "bm25_guarded" in strategies:
+        report["versus_bm25_guarded"] = {
+            key: versus_baseline(rows, details, key, report["profiles"])
+            for key in strategies
+            if key != "bm25_guarded"
+        }
+    for arm in (key for key in ONNX_ARMS if key in strategies):
+        report.setdefault("onnx_diagnostics", {})[arm] = onnx_diagnostics(rows, details, arm)
     for ranking in (key for key in strategies if f"{key}_hybrid" in strategies):
         report[f"oracle_{ranking}_router"] = oracle(rows, (ranking, f"{ranking}_hybrid"))
     lexical = [row["measurements"]["lexical"] for row in rows]
@@ -169,10 +230,26 @@ def split_report(rows: list[dict], details: list[dict]) -> dict:
 
 
 def evaluate(
-    data: dict, per_paragraph: int, repetitions: int, rankings: tuple[LexicalRanking, ...] = ()
+    data: dict,
+    per_paragraph: int,
+    repetitions: int,
+    rankings: tuple[LexicalRanking, ...] = (),
+    *,
+    encoder=None,
 ) -> dict:
     groups, details = squad_groups(data, per_paragraph)
-    return evaluate_groups(groups, details, repetitions, rankings)
+    return evaluate_groups(groups, details, repetitions, rankings, encoder=encoder)
+
+
+def mark_gold_coverage(groups: list[dict], details: list[dict], encoder) -> None:
+    """Flag tasks whose required evidence has no vector (>4,096 bytes, empty, non-UTF-8)
+    or extends beyond the encoder's token window."""
+    texts = {row[0]: row[3] for group in groups for row in group["records"]}
+    tasks = [task for group in groups for task in group["tasks"]]
+    for task, detail in zip(tasks, details, strict=True):
+        gold = [texts[identifier] for identifier in task["required"]]
+        detail["gold_vectorless"] = any(not 1 <= len(text.encode()) <= 4096 for text in gold)
+        detail["gold_beyond_tokens"] = any(encoder.truncated(text) for text in gold)
 
 
 def evaluate_groups(
@@ -180,8 +257,17 @@ def evaluate_groups(
     details: list[dict],
     repetitions: int,
     rankings: tuple[LexicalRanking, ...] = (),
+    *,
+    encoder=None,
 ) -> dict:
-    """Replay prepared groups; `details` align with tasks (article, split, answer position)."""
+    """Replay prepared groups; `details` align with tasks (article, split, answer position).
+
+    With an ``encoder``, adds the ONNX arms and raises ``InvalidRun`` if any arm's status is
+    outside the route-aware allow-list.
+    """
+    build_ms: list[float] = []
+    if encoder is not None:
+        mark_gold_coverage(groups, details, encoder)
     staged = fit(1)
     records = [row for group in groups for row in group["records"] if row[1] == group["domain"]]
     with tempfile.TemporaryDirectory(prefix="aams-retrieval-") as directory:
@@ -191,7 +277,11 @@ def evaluate_groups(
             repetitions,
             staged.suggests_hybrid,
             rankings=rankings,
+            encoder=encoder,
+            build_ms=build_ms,
         )
+    if encoder is not None and (problems := check_validity(rows)):
+        raise InvalidRun(f"{len(problems)} invalid ONNX measurements, first: {problems[0]}")
     for row in rows:
         row["measurements"]["staged"] = row["measurements"].pop("candidate")
     result = {
@@ -200,11 +290,33 @@ def evaluate_groups(
         ),
         "staged_training_checksum": staged.training_checksum,
     }
+    if encoder is not None:
+        result["valid"] = True
+        result["onnx_spec"] = repr(encoder.spec)
+        result["onnx_index_build_ms"] = {
+            "total": round(sum(build_ms), 1),
+            "p95_per_scope": _p95(build_ms),
+        }
     for split in SPLITS:
         chosen = [i for i, detail in enumerate(details) if detail["split"] == split]
         if chosen:
             result[split] = split_report([rows[i] for i in chosen], [details[i] for i in chosen])
     return result
+
+
+def require_bm25(parser: argparse.ArgumentParser, directory: Path | None, rankings) -> None:
+    """ONNX arms are compared against bm25_guarded, so they need the BM25 ranking."""
+    if directory is not None and LexicalRanking.BM25 not in rankings:
+        parser.error("--encoder-dir requires --ranking bm25")
+
+
+def run_valid(evaluation, directory: Path | None) -> dict:
+    """Open the encoder (if any) and run; an invalid run prints its reason and exits 3."""
+    try:
+        return evaluation(open_encoder(directory) if directory is not None else None)
+    except InvalidRun as error:
+        print(json.dumps({"valid": False, "reason": str(error)}))
+        sys.exit(3)
 
 
 def main() -> None:
@@ -223,6 +335,7 @@ def main() -> None:
         ],
         help="Add a candidate lexical ranking arm and its hybrid variant",
     )
+    parser.add_argument("--encoder-dir", type=Path, help="Pinned ONNX encoder (adds ONNX arms)")
     args = parser.parse_args()
     if not 1 <= args.repetitions <= 20 or not 1 <= args.questions_per_paragraph <= 10:
         parser.error("Use 1 to 20 repetitions and 1 to 10 questions per paragraph")
@@ -232,6 +345,8 @@ def main() -> None:
     digest = sha256(raw).hexdigest()
     if digest != args.expected_sha256:
         parser.error("Dataset checksum mismatch")
+    rankings = tuple(LexicalRanking(value) for value in dict.fromkeys(args.ranking))
+    require_bm25(parser, args.encoder_dir, rankings)
     data = json.loads(raw)
     data["data"] = data["data"][: args.max_articles]
     result = {
@@ -240,11 +355,15 @@ def main() -> None:
         "articles": len(data["data"]),
         "questions_per_paragraph": args.questions_per_paragraph,
         "repetitions": args.repetitions,
-        **evaluate(
-            data,
-            args.questions_per_paragraph,
-            args.repetitions,
-            tuple(LexicalRanking(value) for value in dict.fromkeys(args.ranking)),
+        **run_valid(
+            lambda encoder: evaluate(
+                data,
+                args.questions_per_paragraph,
+                args.repetitions,
+                rankings,
+                encoder=encoder,
+            ),
+            args.encoder_dir,
         ),
         "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     }
