@@ -4,7 +4,7 @@ Repository: https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem
 Goal: https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1
 
 ## Start or resume
-- Read main, open issues #1–#7, PRs, CI, previous review feedback and `docs/MVP_SPEC.md`.
+- Read main, the active coordination issue and its work queue, linked PRs, CI, review feedback, and `docs/MVP_SPEC.md`.
 - Do not create overlapping implementations or duplicate PRs.
 - Work on the first dependency-unblocked issue from the active coordination hub.
 - Use the [AAMS v0.1.0 design dossier](docs/design/v0.1.0/README.md) and follow the scope reconciliation in the MVP specification.

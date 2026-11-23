@@ -90,4 +90,4 @@ To restore, stop the service and launch it against the verified backup path or a
 
 CI covers Ubuntu with Python 3.11 and 3.12. The MCP interoperability profile is local stdio, protocol 2026-07-28 and Python MCP SDK 2.3.0. The host must limit access to the process launch configuration and data directory, and treat returned evidence as untrusted content.
 
-AAMS uses lexical recall and does not perform automatic source verification, autonomous learning, model-internal inspection, or distributed replication. No guarantee is made about model behavior when a host supplies instruction-like evidence as context. See the [MVP acceptance matrix](docs/acceptance/MVP-v0.1.md) for measurements and verification limits.
+AAMS uses lexical recall and does not perform automatic source verification, autonomous learning, model-internal inspection, or distributed replication. No guarantee is made about model behavior when a host supplies instruction-like evidence as context. See the [v0.2 engineering baseline](docs/acceptance/MVP-v0.2.md) for current measurements and verification limits and the [v0.1 MVP matrix](docs/acceptance/MVP-v0.1.md) for the original release evidence.
