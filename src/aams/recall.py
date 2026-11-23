@@ -3,6 +3,7 @@
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
+from math import fsum, isfinite, sqrt
 from re import findall
 from typing import Literal
 
@@ -14,7 +15,9 @@ from .contracts import (
     require_text,
     utc_timestamp,
 )
+from .representations import RepresentationProvider, RepresentationSpec
 from .storage import AccessContext, SQLiteMemoryStore, StoreIntegrityError
+from .vector_index import RepresentationIndex
 
 Entity = Literal["formation", "belief", "evidence"]
 _PREVIEW_BYTES = 512
@@ -28,8 +31,10 @@ def _encoded_size(value: dict) -> int:
     return len(json.dumps(value, ensure_ascii=True, separators=(",", ":")).encode())
 
 
-def _response(items: list[dict], max_items: int, max_bytes: int) -> dict:
+def _response(items: list[dict], max_items: int, max_bytes: int, retrieval=None) -> dict:
     result = {"items": [], "truncated": len(items) > max_items}
+    if retrieval is not None:
+        result["retrieval"] = retrieval
     for item in items[:max_items]:
         result["items"].append(item)
         # False occupies one extra byte, so the check is conservative.
@@ -38,6 +43,17 @@ def _response(items: list[dict], max_items: int, max_bytes: int) -> dict:
             result["truncated"] = True
             break
     return result
+
+
+def _unit(values: tuple[float, ...], dimensions: int) -> tuple[float, ...]:
+    if len(values) != dimensions or any(type(v) is not float or not isfinite(v) for v in values):
+        raise ValueError("Invalid query vector")
+    peak = max(map(abs, values))
+    if peak == 0:
+        return ()
+    scaled = tuple(value / peak for value in values)
+    norm = sqrt(fsum(value * value for value in scaled))
+    return tuple(value / norm for value in scaled)
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,12 +98,59 @@ class CognitiveMemory:
     def __init__(self, store: SQLiteMemoryStore) -> None:
         self.store = store
 
-    def recall(self, access: AccessContext, need: CognitiveNeed) -> dict:
+    def recall(
+        self,
+        access: AccessContext,
+        need: CognitiveNeed,
+        *,
+        provider: RepresentationProvider | None = None,
+    ) -> dict:
         if need.identifier is not None:
             return self.explain(access, need)
         terms = _tokens(need.query)
         if not terms:
             return _response([], need.max_items, need.max_bytes)
+        scores, status = (
+            self._semantic_scores(access, need.query, provider)
+            if provider is not None
+            else ({}, None)
+        )
+        ranked = self._rank(access, need, terms, scores)
+        if scores and not any(item["relevance"]["semantic_score"] > 0 for item in ranked):
+            ranked = self._rank(access, need, terms, {})
+            status = "no_match"
+        retrieval = None
+        if status is not None:
+            retrieval = {"mode": "hybrid" if status == "fresh" else "lexical", "status": status}
+        return _response(ranked, need.max_items, need.max_bytes, retrieval)
+
+    def _semantic_scores(self, access, query, provider):
+        try:
+            spec = provider.spec
+            if not isinstance(spec, RepresentationSpec):
+                return {}, "provider_unavailable"
+        except Exception:
+            return {}, "provider_unavailable"
+        snapshot = RepresentationIndex(self.store).snapshot(access, spec)
+        if snapshot.status != "fresh":
+            return {}, snapshot.status
+        try:
+            query_values = _unit(provider.encode(query), spec.dimensions)
+            if provider.spec != spec:
+                return {}, "incompatible"
+        except Exception:
+            return {}, "provider_unavailable"
+        if not query_values:
+            return {}, "no_match"
+        scores = {}
+        for candidate in snapshot.vectors:
+            unit = _unit(candidate.values, spec.dimensions)
+            score = min(1.0, fsum(a * b for a, b in zip(query_values, unit)))
+            if score >= 0.35:
+                scores[candidate.source_id] = (candidate.source_digest, score)
+        return scores, "fresh" if scores else "no_match"
+
+    def _rank(self, access, need, terms, scores):
         candidates = self.store.scan_recall(
             access,
             recorded_as_of=need.recorded_as_of,
@@ -98,17 +161,31 @@ class CognitiveMemory:
         for record, evidence in candidates:
             item = self._with_citations(need, record, evidence.get)
             searchable = [item["id"], item.get("proposition", ""), item.get("kind", "")]
+            semantic_score, source = 0.0, None
             for citation in item["citations"]:
                 searchable.extend((citation["preview"], citation["source_locator"]))
+                source_id = citation["evidence_id"]
+                digest, score = scores.get(source_id, (None, 0.0))
+                if digest == citation["digest"] and score > semantic_score:
+                    semantic_score, source = score, source_id
             matched = sorted(terms.intersection(_tokens(" ".join(searchable))))
-            if matched:
-                item["relevance"] = {"score": len(matched), "matched_terms": matched}
-                ranked.append(item)
-        ranked.sort(key=lambda item: (-item["relevance"]["score"], item["entity"], item["id"]))
-        if need.max_depth == 0:
-            for item in ranked:
+            if not matched and not semantic_score:
+                continue
+            relevance = {"score": len(matched), "matched_terms": matched}
+            if scores:
+                relevance.update(
+                    score=round((len(matched) / len(terms) + semantic_score) / 2, 12),
+                    lexical_matches=len(matched),
+                    semantic_score=round(semantic_score, 12),
+                )
+                if need.max_depth and source is not None:
+                    relevance["semantic_source"] = source
+            item["relevance"] = relevance
+            if need.max_depth == 0:
                 item["citations"] = []
-        return _response(ranked, need.max_items, need.max_bytes)
+            ranked.append(item)
+        ranked.sort(key=lambda item: (-item["relevance"]["score"], item["entity"], item["id"]))
+        return ranked
 
     def explain(self, access: AccessContext, need: CognitiveNeed) -> dict:
         if need.identifier is None or need.entity is None:

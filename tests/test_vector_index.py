@@ -163,3 +163,59 @@ RepresentationIndex(PausedStore(sys.argv[1])).rebuild(
         self.assertEqual(
             RepresentationIndex(reopened).snapshot(self.author, self.provider.spec).status, "stale"
         )
+
+    def test_hybrid_scope_and_temporal_reauthorization(self):
+        from aams.recall import CognitiveMemory, CognitiveNeed
+
+        class AxisProvider(DeterministicFixtureProvider):
+            def encode(self, text):
+                return (1.0, 0.0) if text in ("one", "secret", "similar") else (-1.0, 0.0)
+
+        provider = AxisProvider(2)
+        self.ingest(self.author, "one")
+        self.ingest(self.other, "secret")
+        self.index.rebuild(self.author, provider)
+        self.index.rebuild(self.other, provider)
+        memory = CognitiveMemory(self.store)
+        need = CognitiveNeed(query="similar")
+        self.assertFalse(memory.recall(self.author, need)["items"])
+        hybrid = memory.recall(self.author, need, provider=provider)
+        self.assertEqual(hybrid["retrieval"], {"mode": "hybrid", "status": "fresh"})
+        self.assertEqual([item["id"] for item in hybrid["items"]], ["f-one"])
+        self.assertEqual(hybrid["items"][0]["relevance"]["semantic_source"], "one")
+        exact = CognitiveNeed(entity="formation", identifier="f-secret")
+        self.assertEqual(
+            memory.recall(self.author, exact, provider=provider), memory.recall(self.author, exact)
+        )
+        historical = CognitiveNeed(query="similar", recorded_as_of="2025-01-01T00:00:00Z")
+        self.assertEqual(
+            memory.recall(self.author, historical, provider=provider)["retrieval"]["status"],
+            "no_match",
+        )
+
+    def test_hybrid_fallback_on_missing_stale_corrupt_and_provider_failure(self):
+        from aams.recall import CognitiveMemory, CognitiveNeed
+
+        class FailsQuery(DeterministicFixtureProvider):
+            def encode(self, text):
+                raise RuntimeError("Private exception details")
+
+        self.ingest(self.author, "one")
+        memory = CognitiveMemory(self.store)
+        need = CognitiveNeed(query="one")
+
+        def assert_fallback(provider, status):
+            result = memory.recall(self.author, need, provider=provider)
+            self.assertEqual(result.pop("retrieval"), {"mode": "lexical", "status": status})
+            self.assertEqual(result, memory.recall(self.author, need))
+
+        assert_fallback(self.provider, "missing")
+        self.index.rebuild(self.author, self.provider)
+        assert_fallback(DeterministicFixtureProvider(8), "missing")
+        assert_fallback(FailsQuery(), "provider_unavailable")
+        with closing(sqlite3.connect(self.path)) as db, db:
+            db.execute("UPDATE representation_vector SET checksum='invalid'")
+        assert_fallback(self.provider, "corrupt")
+        self.index.rebuild(self.author, self.provider)
+        self.ingest(self.author, "new")
+        assert_fallback(self.provider, "stale")
