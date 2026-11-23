@@ -1,0 +1,55 @@
+name: Bounded ONNX CPU evaluation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/benchmark_onnx_cpu.py
+      - scripts/onnx_encoder.py
+      - .github/workflows/onnx-cpu-eval.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cost:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install . onnxruntime==1.32.0 tokenizers==0.23.3 numpy==2.5.3
+      - name: Fetch checksum-pinned inputs
+        run: |
+          set -euo pipefail
+          rev=$(python -c 'import json; print(json.load(open("scripts/onnx_pins.json"))["revision"])')
+          mkdir -p model/onnx out
+          for file in onnx/model.onnx tokenizer.json; do
+            curl -fsSL --retry 2 --max-time 90 "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/$rev/$file" -o "model/$file"
+          done
+          for split in dev train; do
+            curl -fsSL --retry 2 --max-time 90 "https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset/$split-v1.1.json" -o "$split.json"
+          done
+      - name: Measure same-model options on matched processes
+        run: |
+          set -euo pipefail
+          for split in dev train; do
+            python scripts/benchmark_onnx_cpu.py --model model --data "$split.json" --partition "$split" > "out/$split.json"
+            python - "$split" <<'PY'
+          import json
+          import sys
+          split = sys.argv[1]
+          result = json.load(open(f"out/{split}.json"))
+          print(f"::notice title=CPU {split} environment::{result['processor']} {result['python']}")
+          for arm, row in result["arms"].items():
+              print(f"::notice title=CPU {split} {arm}::{json.dumps(row, separators=(',', ':'))}")
+          PY
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-onnx-cpu
+          path: out/

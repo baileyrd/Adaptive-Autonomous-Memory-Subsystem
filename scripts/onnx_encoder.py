@@ -24,6 +24,7 @@ TOKENIZER_FILE = "tokenizer.json"
 POOLING = "cls"
 MAX_TOKENS = 512
 DIMENSIONS = 384
+CPU_PROFILES = ("baseline", "threads2", "threads4", "extended")
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,7 +115,10 @@ class OnnxSentenceEncoder:
         tokenizer: Any = None,
         as_array: Callable[[list[list[int]]], Any] | None = None,
         record_phases: bool = False,
+        cpu_profile: str = "baseline",
     ) -> None:
+        if cpu_profile not in CPU_PROFILES:
+            raise ValueError("Unknown bounded CPU profile")
         if type(record_phases) is not bool:
             raise ValueError("record_phases must be boolean")
         pins = pins or load_pins()
@@ -124,7 +128,11 @@ class OnnxSentenceEncoder:
             import onnxruntime
 
             options = onnxruntime.SessionOptions()
-            options.intra_op_num_threads = 1
+            options.intra_op_num_threads = {"threads2": 2, "threads4": 4}.get(cpu_profile, 1)
+            if cpu_profile == "extended":
+                options.graph_optimization_level = (
+                    onnxruntime.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+                )
             session = onnxruntime.InferenceSession(
                 str(directory / MODEL_FILE), options, providers=["CPUExecutionProvider"]
             )
