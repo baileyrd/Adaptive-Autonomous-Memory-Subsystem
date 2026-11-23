@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
 
+from .contracts import utc_timestamp
 from .representations import (
     DerivedVector,
     RepresentationProvider,
@@ -116,6 +117,7 @@ class RepresentationIndex:
                 ).fetchone()
                 if batch is None:
                     return RepresentationSnapshot("missing")
+                generated_at = utc_timestamp(batch["generated_at"])
                 if batch["evidence_count"] != _count(db, access.scope):
                     return RepresentationSnapshot("stale")
                 rows = db.execute(
@@ -137,14 +139,14 @@ class RepresentationIndex:
                             row["evidence_id"],
                             access.scope,
                             row["digest"],
-                            batch["generated_at"],
+                            generated_at,
                             spec,
                             struct.unpack(f"<{spec.dimensions}d", blob),
                         )
                     )
                 if len(vectors) != batch["vector_count"]:
                     return RepresentationSnapshot("corrupt")
-                return RepresentationSnapshot("fresh", tuple(vectors), batch["generated_at"])
+                return RepresentationSnapshot("fresh", tuple(vectors), generated_at)
         except (sqlite3.DatabaseError, struct.error, ValueError, TypeError):
             return RepresentationSnapshot("corrupt")
 

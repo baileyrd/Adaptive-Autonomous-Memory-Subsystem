@@ -93,3 +93,5 @@ CI covers Ubuntu with Python 3.11 and 3.12. The MCP interoperability profile is 
 AAMS uses lexical recall and does not perform automatic source verification, autonomous learning, model-internal inspection, or distributed replication. No guarantee is made about model behavior when a host supplies instruction-like evidence as context. See the [v0.2 engineering baseline](docs/acceptance/MVP-v0.2.md) for current measurements and verification limits and the [v0.1 MVP matrix](docs/acceptance/MVP-v0.1.md) for the original release evidence.
 
 The [v0.3 governed learning acceptance](docs/acceptance/MVP-v0.3.md) documents the native workflow, fixture results, and known limits.
+
+The [v0.4 acceptance matrix](docs/acceptance/MVP-v0.4.md) records optional hybrid recall, its measured encoder tradeoffs, and recovery procedures.

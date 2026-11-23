@@ -219,3 +219,10 @@ RepresentationIndex(PausedStore(sys.argv[1])).rebuild(
         self.index.rebuild(self.author, self.provider)
         self.ingest(self.author, "new")
         assert_fallback(self.provider, "stale")
+
+    def test_empty_batch_requires_valid_timestamp(self):
+        self.assertEqual(self.index.rebuild(self.author, self.provider).vectors, ())
+        with closing(sqlite3.connect(self.path)) as db, db:
+            db.execute("UPDATE representation_batch SET generated_at='invalid'")
+        self.assertEqual(self.index.snapshot(self.author, self.provider.spec).status, "corrupt")
+        self.assertEqual(self.index.rebuild(self.author, self.provider).status, "fresh")
