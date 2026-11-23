@@ -2,6 +2,15 @@
 
 **Status:** Proposed execution baseline for [goal #1](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1). **Scope:** runnable, local-first memory service for AI hosts, not autonomous neural learning.
 
+## Design sources and open decisions
+
+[Goal #1](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1) and its linked implementation issues govern this baseline until the original AAMS v0.1.0 dossier is available. Reconcile the dossier against these requirements when it is imported and record any conflicts in an ADR.
+
+- #3 selects the transactional storage engine and schema migration strategy.
+- #4 defines validity interval boundaries and how MCP principals will map to scoped access.
+- #5 defines the lexical ranking and evaluation fixture.
+- #6 verifies the MCP protocol version, transport, and client compatibility.
+
 ## Core demonstration
 1. Start AAMS in a documented local environment.
 2. An authorized caller stores an observation and original source provenance.
