@@ -15,7 +15,7 @@ from time import perf_counter_ns, process_time_ns
 from evaluate_retrieval import squad_groups
 from evaluate_semantic import timestamp
 from memory_probe import build
-from onnx_encoder import CPU_PROFILES, OnnxSentenceEncoder, file_sha256
+from onnx_encoder import CPU_PROFILES, OnnxSentenceEncoder, Variant, file_sha256
 
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.representations import DeterministicFixtureProvider
@@ -53,7 +53,12 @@ def measure(args):
     provider = (
         DeterministicFixtureProvider()
         if args.arm == "guarded"
-        else OnnxSentenceEncoder(args.model, cpu_profile=args.arm, record_phases=True)
+        else OnnxSentenceEncoder(
+            args.model,
+            cpu_profile=args.arm,
+            record_phases=True,
+            variant=Variant(**json.loads(args.variant.read_text())) if args.variant else None,
+        )
     )
     fields = {
         "load_ms": round((perf_counter_ns() - start) / 1e6, 3),
@@ -130,7 +135,7 @@ def run(args):
             check=True,
             timeout=90,
         )
-        for arm in ("guarded", *CPU_PROFILES):
+        for arm in ("guarded", *(("baseline", "threads2") if args.variant else CPU_PROFILES)):
             vectors = Path(directory) / f"{arm}.json"
             command = [
                 sys.executable,
@@ -150,6 +155,8 @@ def run(args):
                 "--repetitions",
                 str(args.repetitions),
             ]
+            if args.variant:
+                command += ["--variant", str(args.variant)]
             completed = subprocess.run(
                 command, check=True, stdout=subprocess.PIPE, text=True, timeout=180
             )
@@ -193,6 +200,7 @@ def main():
     parser.add_argument("--data", type=Path, required=True)
     parser.add_argument("--partition", choices=tuple(DATASET_PINS), required=True)
     parser.add_argument("--repetitions", type=int, default=10)
+    parser.add_argument("--variant", type=Path)
     parser.add_argument("--arm", choices=("guarded", *CPU_PROFILES), help=argparse.SUPPRESS)
     parser.add_argument("--prepare", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--groups", type=Path, help=argparse.SUPPRESS)

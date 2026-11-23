@@ -1,0 +1,62 @@
+name: Quantized ONNX feasibility
+
+on:
+  pull_request:
+    paths:
+      - scripts/prepare_onnx_variant.py
+      - scripts/onnx_variant_pins.json
+      - .github/workflows/onnx-variant-eval.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  variants:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [bge-q8, minilm-l3-q8]
+    env:
+      VARIANT: ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install . onnxruntime==1.32.0 tokenizers==0.23.3 numpy==2.5.3
+      - name: Verify model recipe and download pinned workloads
+        run: |
+          set -euo pipefail
+          mkdir out
+          python scripts/prepare_onnx_variant.py "$VARIANT" model
+          cp model/manifest.json out/
+          for split in dev train; do
+            curl -fsSL --retry 2 --max-time 90 "https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset/$split-v1.1.json" -o "$split.json"
+          done
+      - name: Measure matched costs in isolated processes
+        run: |
+          set -euo pipefail
+          for split in dev train; do
+            python scripts/benchmark_onnx_cpu.py --model model --variant model/manifest.json --data "$split.json" --partition "$split" > "out/$split.json"
+            python - "$split" <<'PY'
+          import json
+          import os
+          import sys
+          split = sys.argv[1]
+          result = json.load(open(f"out/{split}.json"))
+          keys = ("wall_ms", "cpu_ms", "load_ms", "load_rss_kib", "peak_rss_kib",
+                  "added_p95_ms", "rss_ratio", "ranking_parity", "qualifies")
+          summary = {arm: {name: row[name] for name in keys if name in row}
+                     for arm, row in result["arms"].items()}
+          print(f"::notice title=Variant {os.environ['VARIANT']} {split}::{json.dumps(summary, separators=(',', ':'))}")
+          print(f"::notice title=Variant {split} environment::{result['processor']} {result['python']}")
+          PY
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: onnx-variant-${{ matrix.variant }}
+          path: out/
