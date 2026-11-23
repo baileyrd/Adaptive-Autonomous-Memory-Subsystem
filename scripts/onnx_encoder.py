@@ -163,7 +163,9 @@ class OnnxSentenceEncoder:
             "attention_mask": encoding.attention_mask,
             "token_type_ids": encoding.type_ids,
         }
-        arrays = {name: self._as_array([row]) for name, row in feeds.items() if name in self._inputs}
+        arrays = {
+            name: self._as_array([row]) for name, row in feeds.items() if name in self._inputs
+        }
         prepared = perf_counter_ns() if self._record_phases else start
         hidden = self._session.run(None, arrays)[0]
         inferred = perf_counter_ns() if self._record_phases else start
