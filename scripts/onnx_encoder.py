@@ -27,6 +27,24 @@ DIMENSIONS = 384
 
 
 @dataclass(frozen=True, slots=True)
+class EncodePhaseTiming:
+    """Duration measurements only; deliberately contains no source text or identifiers."""
+
+    tokenize_ns: int
+    prepare_ns: int
+    inference_ns: int
+    normalize_ns: int
+    total_ns: int
+
+    def __post_init__(self) -> None:
+        phases = (self.tokenize_ns, self.prepare_ns, self.inference_ns, self.normalize_ns)
+        if any(type(value) is not int or value < 0 for value in phases):
+            raise ValueError("Phase timings must be nonnegative integer nanoseconds")
+        if type(self.total_ns) is not int or self.total_ns != sum(phases):
+            raise ValueError("Phase timings must sum to total nanoseconds")
+
+
+@dataclass(frozen=True, slots=True)
 class Pins:
     """A pinned model revision and the sha256 of every file the encoder loads."""
 
@@ -95,7 +113,10 @@ class OnnxSentenceEncoder:
         session: Any = None,
         tokenizer: Any = None,
         as_array: Callable[[list[list[int]]], Any] | None = None,
+        record_phases: bool = False,
     ) -> None:
+        if type(record_phases) is not bool:
+            raise ValueError("record_phases must be boolean")
         pins = pins or load_pins()
         version = verify(directory, pins)
         if session is None:
@@ -120,6 +141,8 @@ class OnnxSentenceEncoder:
         self._inputs = frozenset(item.name for item in session.get_inputs())
         self._spec = RepresentationSpec("onnx", f"{MODEL}@{pins.revision}", version, DIMENSIONS)
         self.encode_ns: list[int] = []
+        self._record_phases = record_phases
+        self.phase_timings_ns: list[EncodePhaseTiming] = []
 
     @property
     def spec(self) -> RepresentationSpec:
@@ -134,17 +157,29 @@ class OnnxSentenceEncoder:
             raise ValueError("Expected text input")
         start = perf_counter_ns()
         encoding = self._tokenizer.encode(text)
+        tokenized = perf_counter_ns() if self._record_phases else start
         feeds = {
             "input_ids": encoding.ids,
             "attention_mask": encoding.attention_mask,
             "token_type_ids": encoding.type_ids,
         }
-        hidden = self._session.run(
-            None,
-            {name: self._as_array([row]) for name, row in feeds.items() if name in self._inputs},
-        )[0]
+        arrays = {name: self._as_array([row]) for name, row in feeds.items() if name in self._inputs}
+        prepared = perf_counter_ns() if self._record_phases else start
+        hidden = self._session.run(None, arrays)[0]
+        inferred = perf_counter_ns() if self._record_phases else start
         values = l2_normalize(hidden[0][0])  # CLS: batch 0, token 0.
         if len(values) != DIMENSIONS:
             raise ValueError("Unexpected encoder dimensions")
-        self.encode_ns.append(perf_counter_ns() - start)
+        finished = perf_counter_ns()
+        self.encode_ns.append(finished - start)
+        if self._record_phases and len(self.phase_timings_ns) < 4096:
+            self.phase_timings_ns.append(
+                EncodePhaseTiming(
+                    tokenized - start,
+                    prepared - tokenized,
+                    inferred - prepared,
+                    finished - inferred,
+                    finished - start,
+                )
+            )
         return values
