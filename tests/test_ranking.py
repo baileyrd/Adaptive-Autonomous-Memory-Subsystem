@@ -3,6 +3,7 @@ import unittest
 from collections import Counter
 from hashlib import sha256
 from pathlib import Path
+from unittest.mock import patch
 
 from aams.contracts import EpistemicState, Evidence, EvidenceStatus, MemoryFormation, MemoryKind
 from aams.ranking import LexicalRanking, bm25_scores, tokens
@@ -141,6 +142,19 @@ class Bm25RecallTest(unittest.TestCase):
         for item in packet["items"]:
             self.assertLessEqual(item["relevance"]["score"], 1.0)
             self.assertEqual(item["relevance"]["ranker"], "bm25")
+
+    def test_cached_terms_match_fresh_scoring_and_stay_bounded(self):
+        store = self.store("cache.db", decoys=True)
+        need = CognitiveNeed(query="harbor turbine", recorded_as_of=stamp(2))
+        warm = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25)
+        first = warm.recall(self.access, need)
+        self.assertEqual(warm.recall(self.access, need), first)
+        fresh = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25)
+        self.assertEqual(fresh.recall(self.access, need), first)
+        with patch("aams.recall._TERM_CACHE_ENTRIES", 1):
+            bounded = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25)
+            self.assertEqual(bounded.recall(self.access, need), first)
+            self.assertEqual(len(bounded._term_cache), 1)
 
     def test_rejects_unsupported_ranking(self):
         store = self.store("bad.db", decoys=False)

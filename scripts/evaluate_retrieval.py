@@ -172,6 +172,16 @@ def evaluate(
     data: dict, per_paragraph: int, repetitions: int, rankings: tuple[LexicalRanking, ...] = ()
 ) -> dict:
     groups, details = squad_groups(data, per_paragraph)
+    return evaluate_groups(groups, details, repetitions, rankings)
+
+
+def evaluate_groups(
+    groups: list[dict],
+    details: list[dict],
+    repetitions: int,
+    rankings: tuple[LexicalRanking, ...] = (),
+) -> dict:
+    """Replay prepared groups; `details` align with tasks (article, split, answer position)."""
     staged = fit(1)
     records = [row for group in groups for row in group["records"] if row[1] == group["domain"]]
     with tempfile.TemporaryDirectory(prefix="aams-retrieval-") as directory:
