@@ -11,3 +11,9 @@ Approval requires a different reviewer, two eligible support groups and no recor
 Call `aams.consolidation.propose(store, access, since=..., through=..., limit=128)` for an opt-in preview of up to 256 small evidence records in the caller's scope and recorded-time window. The rule groups repeated UTF-8 text after Unicode normalization, case folding and whitespace folding. A record prefixed with `not:` is an explicit counterexample for the matching group. This is a textual rule with a fixed uncertainty label. Paraphrases, implicit negation and source credibility require review.
 
 Each preview carries the proposer, ordered evidence IDs, exceptions, rule version and whether the sample hit its record cap. Calling `create_candidate` explicitly stages a selected proposal. Even a repeated text group can consist of one source; the independent-support check still runs separately.
+
+## Recording utility feedback
+
+Schema 4 adds a native outcome log. Use `append_outcome(access, request_key, expected_version, feedback)` to append a measured outcome for a scoped decision episode and candidate. Record the conditions, predicted and measured scores on the same zero-to-one scale, measurement time and supporting evidence IDs. The host grant binds the producer. An episode retains its original producer and candidate association across revisions.
+
+Use `outcome_history` for scoped ordered revisions. Retries with the same key and input return the original revision. Count an episode once when aggregating measurements, using the appropriate revision for the analysis. Feedback is attributed input and does not authenticate a measurement. High scores, repeated feedback and corrective revisions leave candidate decisions, evidence and canonical beliefs unchanged.
