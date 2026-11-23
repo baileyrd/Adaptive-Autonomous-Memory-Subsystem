@@ -4,16 +4,21 @@ import json
 import sqlite3
 from contextlib import closing
 from dataclasses import asdict, dataclass
+from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from pathlib import Path
+from uuid import uuid4
 
 from .contracts import (
+    BeliefProposal,
+    BeliefRevision,
     EpistemicState,
     Evidence,
     EvidenceStatus,
     MemoryFormation,
     MemoryKind,
     require_text,
+    utc_timestamp,
 )
 
 _SCHEMA = (
@@ -48,8 +53,46 @@ _SCHEMA = (
 )
 
 
+_BELIEF_SCHEMA = (
+    """CREATE TABLE belief_revision (
+        scope TEXT NOT NULL, belief_id TEXT NOT NULL, revision_id TEXT NOT NULL,
+        parent_id TEXT, sequence INTEGER NOT NULL CHECK(sequence > 0),
+        actor TEXT NOT NULL, recorded_at TEXT NOT NULL, proposition TEXT NOT NULL,
+        state TEXT NOT NULL, rationale TEXT NOT NULL, valid_from TEXT NOT NULL,
+        valid_until TEXT, confidence_basis TEXT,
+        PRIMARY KEY(scope, belief_id, revision_id), UNIQUE(scope, belief_id, sequence),
+        FOREIGN KEY(scope, belief_id, parent_id)
+            REFERENCES belief_revision(scope, belief_id, revision_id)
+    )""",
+    """CREATE TABLE belief_evidence (
+        scope TEXT NOT NULL, belief_id TEXT NOT NULL, revision_id TEXT NOT NULL,
+        evidence_id TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('support', 'refute')),
+        position INTEGER NOT NULL,
+        PRIMARY KEY(scope, belief_id, revision_id, evidence_id),
+        UNIQUE(scope, belief_id, revision_id, role, position),
+        FOREIGN KEY(scope, belief_id, revision_id)
+            REFERENCES belief_revision(scope, belief_id, revision_id),
+        FOREIGN KEY(scope, evidence_id) REFERENCES evidence(scope, evidence_id)
+    )""",
+    """CREATE TRIGGER belief_no_update BEFORE UPDATE ON belief_revision
+       BEGIN SELECT RAISE(ABORT, 'immutable revision'); END""",
+    """CREATE TRIGGER belief_no_delete BEFORE DELETE ON belief_revision
+       BEGIN SELECT RAISE(ABORT, 'immutable revision'); END""",
+    """CREATE TRIGGER belief_evidence_no_update BEFORE UPDATE ON belief_evidence
+       BEGIN SELECT RAISE(ABORT, 'immutable revision provenance'); END""",
+    """CREATE TRIGGER belief_evidence_no_delete BEFORE DELETE ON belief_evidence
+       BEGIN SELECT RAISE(ABORT, 'immutable revision provenance'); END""",
+)
+
+
 class WriteConflict(ValueError):
     """A canonical identifier, evidence link or idempotency key conflicts."""
+
+
+class VersionConflict(WriteConflict):
+    """The expected belief revision is stale."""
+
+    code = "VERSION_CONFLICT"
 
 
 class StoreIntegrityError(RuntimeError):
@@ -79,12 +122,13 @@ class SQLiteMemoryStore:
             with closing(self._connect()) as db, db:
                 db.execute("BEGIN IMMEDIATE")
                 version = db.execute("PRAGMA user_version").fetchone()[0]
-                if version == 0:
-                    for statement in _SCHEMA:
-                        db.execute(statement)
-                    db.execute("PRAGMA user_version = 1")
-                elif version != 1:
+                migrations = (_SCHEMA, _BELIEF_SCHEMA)
+                if not 0 <= version <= len(migrations):
                     raise StoreIntegrityError(f"Unsupported database schema version {version}")
+                for target, statements in enumerate(migrations[version:], start=version + 1):
+                    for statement in statements:
+                        db.execute(statement)
+                    db.execute(f"PRAGMA user_version = {target}")
         except sqlite3.DatabaseError as error:
             raise StoreIntegrityError("Cannot initialize memory store") from error
 
@@ -219,3 +263,152 @@ class SQLiteMemoryStore:
                     self._decode_evidence(row)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify memory store") from error
+
+    def revise(
+        self,
+        access: AccessContext,
+        belief_id: str,
+        expected_revision: str | None,
+        proposal: BeliefProposal,
+    ) -> BeliefRevision:
+        """Append using the current revision ID, or pass None to create a belief."""
+        if not access.writable:
+            raise PermissionError("Write denied")
+        require_text(belief_id)
+        if expected_revision is not None:
+            require_text(expected_revision)
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN IMMEDIATE")
+                current = db.execute(
+                    """SELECT revision_id, sequence, recorded_at FROM belief_revision
+                       WHERE scope=? AND belief_id=? ORDER BY sequence DESC LIMIT 1""",
+                    (access.scope, belief_id),
+                ).fetchone()
+                if expected_revision != (current["revision_id"] if current else None):
+                    raise VersionConflict(
+                        "Expected revision does not match scoped current revision"
+                    )
+                now = datetime.now(UTC)
+                if current is not None:
+                    previous_time = datetime.fromisoformat(current["recorded_at"])
+                    now = max(now, previous_time + timedelta(microseconds=1))
+                revision = BeliefRevision(
+                    belief_id,
+                    uuid4().hex,
+                    expected_revision,
+                    current["sequence"] + 1 if current else 1,
+                    access.scope,
+                    access.principal,
+                    now.isoformat(timespec="microseconds"),
+                    proposal,
+                )
+                db.execute(
+                    """INSERT INTO belief_revision VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        revision.scope,
+                        belief_id,
+                        revision.revision_id,
+                        expected_revision,
+                        revision.sequence,
+                        revision.actor,
+                        revision.recorded_at,
+                        proposal.proposition,
+                        proposal.state,
+                        proposal.rationale,
+                        proposal.valid_from,
+                        proposal.valid_until,
+                        proposal.confidence_basis,
+                    ),
+                )
+                for role, ids in (
+                    ("support", proposal.support_ids),
+                    ("refute", proposal.refute_ids),
+                ):
+                    db.executemany(
+                        "INSERT INTO belief_evidence VALUES (?, ?, ?, ?, ?, ?)",
+                        (
+                            (
+                                access.scope,
+                                belief_id,
+                                revision.revision_id,
+                                identifier,
+                                role,
+                                position,
+                            )
+                            for position, identifier in enumerate(ids)
+                        ),
+                    )
+            return revision
+        except sqlite3.IntegrityError as error:
+            raise WriteConflict("Invalid or unavailable scoped revision reference") from error
+        except sqlite3.DatabaseError as error:
+            raise StoreIntegrityError("Cannot append belief revision") from error
+
+    def belief_history(self, access: AccessContext, belief_id: str) -> tuple[BeliefRevision, ...]:
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN")
+                rows = db.execute(
+                    """SELECT * FROM belief_revision WHERE scope=? AND belief_id=?
+                       ORDER BY sequence""",
+                    (access.scope, belief_id),
+                )
+                return tuple(self._decode_revision(db, row) for row in rows)
+        except (sqlite3.DatabaseError, ValueError, TypeError) as error:
+            raise StoreIntegrityError("Cannot verify belief history") from error
+
+    def get_belief(
+        self,
+        access: AccessContext,
+        belief_id: str,
+        *,
+        recorded_as_of: str | None = None,
+        effective_at: str | None = None,
+    ) -> BeliefRevision | None:
+        """Return the newest applicable revision in the caller's scope."""
+        recorded = utc_timestamp(recorded_as_of) if recorded_as_of is not None else None
+        effective = utc_timestamp(effective_at) if effective_at is not None else None
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN")
+                row = db.execute(
+                    """SELECT * FROM belief_revision WHERE scope=? AND belief_id=?
+                       AND (? IS NULL OR recorded_at<=?)
+                       AND (? IS NULL OR (valid_from<=? AND (valid_until IS NULL OR ?<valid_until)))
+                       ORDER BY sequence DESC LIMIT 1""",
+                    (access.scope, belief_id, recorded, recorded, effective, effective, effective),
+                ).fetchone()
+                return self._decode_revision(db, row) if row is not None else None
+        except (sqlite3.DatabaseError, ValueError, TypeError) as error:
+            raise StoreIntegrityError("Cannot verify belief revision") from error
+
+    @staticmethod
+    def _decode_revision(db: sqlite3.Connection, row: sqlite3.Row) -> BeliefRevision:
+        links = {"support": [], "refute": []}
+        for link in db.execute(
+            """SELECT role, evidence_id FROM belief_evidence
+               WHERE scope=? AND belief_id=? AND revision_id=? ORDER BY position""",
+            (row["scope"], row["belief_id"], row["revision_id"]),
+        ):
+            links[link["role"]].append(link["evidence_id"])
+        proposal = BeliefProposal(
+            row["proposition"],
+            EpistemicState(row["state"]),
+            row["rationale"],
+            row["valid_from"],
+            row["valid_until"],
+            tuple(links["support"]),
+            tuple(links["refute"]),
+            row["confidence_basis"],
+        )
+        return BeliefRevision(
+            row["belief_id"],
+            row["revision_id"],
+            row["parent_id"],
+            row["sequence"],
+            row["scope"],
+            row["actor"],
+            row["recorded_at"],
+            proposal,
+        )
