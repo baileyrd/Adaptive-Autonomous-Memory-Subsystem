@@ -22,6 +22,15 @@ from .contracts import (
     utc_timestamp,
 )
 
+from .learning import (
+    CandidateDecision,
+    CandidateRecord,
+    CandidateState,
+    CandidateTransitionRequest,
+    CandidateValidation,
+    LearningCandidate,
+)
+
 _SCHEMA = (
     """CREATE TABLE evidence (
         evidence_id TEXT PRIMARY KEY NOT NULL, scope TEXT NOT NULL,
@@ -86,6 +95,35 @@ _BELIEF_SCHEMA = (
 )
 
 
+_CANDIDATE_SCHEMA = (
+    """CREATE TABLE learning_candidate (
+        scope TEXT NOT NULL, candidate_id TEXT NOT NULL, proposer TEXT NOT NULL,
+        claim TEXT NOT NULL, created_at TEXT NOT NULL, request_key TEXT NOT NULL,
+        PRIMARY KEY(scope, candidate_id), UNIQUE(scope, proposer, request_key)
+    )""",
+    """CREATE TABLE candidate_evidence (
+        scope TEXT NOT NULL, candidate_id TEXT NOT NULL, evidence_id TEXT NOT NULL,
+        role TEXT NOT NULL CHECK(role IN ('support', 'refute')), position INTEGER NOT NULL,
+        PRIMARY KEY(scope, candidate_id, evidence_id), UNIQUE(scope, candidate_id, role, position),
+        FOREIGN KEY(scope, candidate_id) REFERENCES learning_candidate(scope, candidate_id),
+        FOREIGN KEY(scope, evidence_id) REFERENCES evidence(scope, evidence_id)
+    )""",
+    """CREATE TABLE candidate_decision (
+        scope TEXT NOT NULL, candidate_id TEXT NOT NULL, version INTEGER NOT NULL CHECK(version > 0),
+        from_state TEXT NOT NULL, to_state TEXT NOT NULL, actor TEXT NOT NULL,
+        rationale TEXT NOT NULL, requested_at TEXT NOT NULL, recorded_at TEXT NOT NULL,
+        request_key TEXT NOT NULL,
+        PRIMARY KEY(scope, candidate_id, version),
+        UNIQUE(scope, candidate_id, actor, request_key),
+        FOREIGN KEY(scope, candidate_id) REFERENCES learning_candidate(scope, candidate_id)
+    )""",
+    """CREATE TRIGGER candidate_decision_no_update BEFORE UPDATE ON candidate_decision
+       BEGIN SELECT RAISE(ABORT, 'immutable candidate decision'); END""",
+    """CREATE TRIGGER candidate_decision_no_delete BEFORE DELETE ON candidate_decision
+       BEGIN SELECT RAISE(ABORT, 'immutable candidate decision'); END""",
+)
+
+
 class WriteConflict(ValueError):
     """A canonical identifier, evidence link or idempotency key conflicts."""
 
@@ -107,11 +145,12 @@ class AccessContext:
     principal: str
     scope: str
     writable: bool = False
+    candidate_review: bool = False
 
     def __post_init__(self) -> None:
         require_text(self.principal, self.scope)
-        if type(self.writable) is not bool:
-            raise ValueError("Writable must be boolean")
+        if type(self.writable) is not bool or type(self.candidate_review) is not bool:
+            raise ValueError("Access grants must be boolean")
 
 
 class SQLiteMemoryStore:
@@ -123,7 +162,7 @@ class SQLiteMemoryStore:
             with closing(self._connect()) as db, db:
                 db.execute("BEGIN IMMEDIATE")
                 version = db.execute("PRAGMA user_version").fetchone()[0]
-                migrations = (_SCHEMA, _BELIEF_SCHEMA)
+                migrations = (_SCHEMA, _BELIEF_SCHEMA, _CANDIDATE_SCHEMA)
                 if not 0 <= version <= len(migrations):
                     raise StoreIntegrityError(f"Unsupported database schema version {version}")
                 for target, statements in enumerate(migrations[version:], start=version + 1):
@@ -274,6 +313,8 @@ class SQLiteMemoryStore:
                     self._decode_formation(db, row)
                 for row in db.execute("SELECT * FROM belief_revision"):
                     self._decode_revision(db, row)
+                for row in db.execute("SELECT scope, candidate_id FROM learning_candidate"):
+                    self._read_candidate(db, row["scope"], row["candidate_id"])
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify memory store") from error
 
@@ -488,3 +529,235 @@ class SQLiteMemoryStore:
                 raise StoreIntegrityError("Canonical evidence link cannot be resolved")
             evidence[identifier] = record
         return evidence
+
+    def create_candidate(
+        self, access: AccessContext, request_key: str, proposal: LearningCandidate
+    ) -> CandidateRecord:
+        if (
+            not access.writable
+            or access.scope != proposal.scope
+            or access.principal != proposal.proposer
+        ):
+            raise PermissionError("Candidate write denied")
+        require_text(request_key)
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN IMMEDIATE")
+                previous = db.execute(
+                    """SELECT candidate_id FROM learning_candidate
+                       WHERE scope=? AND proposer=? AND request_key=?""",
+                    (access.scope, access.principal, request_key),
+                ).fetchone()
+                if previous is not None:
+                    record = self._read_candidate(db, access.scope, previous["candidate_id"])
+                    if record.proposal != proposal:
+                        raise WriteConflict("Candidate request key already used")
+                    return record
+                db.execute(
+                    "INSERT INTO learning_candidate VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        proposal.scope,
+                        proposal.candidate_id,
+                        proposal.proposer,
+                        proposal.claim,
+                        proposal.created_at,
+                        request_key,
+                    ),
+                )
+                for role, identifiers in (
+                    ("support", proposal.support_ids),
+                    ("refute", proposal.refute_ids),
+                ):
+                    db.executemany(
+                        "INSERT INTO candidate_evidence VALUES (?, ?, ?, ?, ?)",
+                        (
+                            (access.scope, proposal.candidate_id, evidence_id, role, position)
+                            for position, evidence_id in enumerate(identifiers)
+                        ),
+                    )
+        except sqlite3.IntegrityError as error:
+            raise WriteConflict("Invalid or unavailable candidate reference") from error
+        except (sqlite3.DatabaseError, TypeError) as error:
+            raise StoreIntegrityError("Cannot store learning candidate") from error
+        return CandidateRecord(proposal)
+
+    def get_candidate(self, access: AccessContext, candidate_id: str) -> CandidateRecord | None:
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN")
+                return self._read_candidate(db, access.scope, candidate_id)
+        except (sqlite3.DatabaseError, ValueError, TypeError) as error:
+            raise StoreIntegrityError("Cannot read candidate") from error
+
+    @staticmethod
+    def _read_candidate(
+        db: sqlite3.Connection, scope: str, candidate_id: str
+    ) -> CandidateRecord | None:
+        key = (scope, candidate_id)
+        row = db.execute(
+            "SELECT * FROM learning_candidate WHERE scope=? AND candidate_id=?", key
+        ).fetchone()
+        if row is None:
+            return None
+        links = {"support": [], "refute": []}
+        for link in db.execute(
+            """SELECT role, evidence_id FROM candidate_evidence WHERE scope=? AND candidate_id=?
+               ORDER BY position""",
+            key,
+        ):
+            links[link["role"]].append(link["evidence_id"])
+        proposal = LearningCandidate(
+            candidate_id,
+            scope,
+            row["proposer"],
+            row["claim"],
+            row["created_at"],
+            tuple(links["support"]),
+            tuple(links["refute"]),
+        )
+        decisions = []
+        state = proposal.state
+        for entry in db.execute(
+            "SELECT * FROM candidate_decision WHERE scope=? AND candidate_id=? ORDER BY version",
+            key,
+        ):
+            request = CandidateTransitionRequest(
+                candidate_id,
+                scope,
+                CandidateState(entry["from_state"]),
+                CandidateState(entry["to_state"]),
+                entry["actor"],
+                entry["rationale"],
+                entry["requested_at"],
+            )
+            request.check_target(proposal, state)
+            if entry["version"] != len(decisions) + 1:
+                raise StoreIntegrityError("Candidate decision sequence is incomplete")
+            decisions.append(CandidateDecision(entry["version"], request, entry["recorded_at"]))
+            state = request.to_state
+        return CandidateRecord(proposal, tuple(decisions))
+
+    def validate_candidate(
+        self, access: AccessContext, candidate_id: str
+    ) -> CandidateValidation | None:
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN")
+                record = self._read_candidate(db, access.scope, candidate_id)
+                return (
+                    self._candidate_validation(db, record.proposal) if record is not None else None
+                )
+        except (sqlite3.DatabaseError, ValueError, TypeError) as error:
+            raise StoreIntegrityError("Cannot validate candidate") from error
+
+    def _candidate_validation(
+        self, db: sqlite3.Connection, proposal: LearningCandidate
+    ) -> CandidateValidation:
+        evidence = self._resolve_evidence(
+            db, proposal.scope, proposal.support_ids + proposal.refute_ids
+        )
+        unverified, eligible = [], []
+        groups: list[tuple[set[tuple[str, str]], set[str]]] = []
+        for identifier in proposal.support_ids:
+            record = evidence[identifier]
+            actor = record.source_actor.casefold().strip()
+            if (
+                record.status is not EvidenceStatus.RECORDED
+                or actor == proposal.proposer.casefold().strip()
+            ):
+                unverified.append(identifier)
+                continue
+            eligible.append(identifier)
+            keys = {
+                ("actor", actor),
+                ("locator", record.source_locator.casefold().strip()),
+                ("digest", record.digest),
+            }
+            members = {identifier}
+            remaining = []
+            for existing_keys, existing_members in groups:
+                if keys & existing_keys:
+                    keys.update(existing_keys)
+                    members.update(existing_members)
+                else:
+                    remaining.append((existing_keys, existing_members))
+            groups = [*remaining, (keys, members)]
+        order = {identifier: index for index, identifier in enumerate(eligible)}
+        representatives = {min(members, key=order.__getitem__) for _, members in groups}
+        independent = [identifier for identifier in eligible if identifier in representatives]
+        duplicate = [identifier for identifier in eligible if identifier not in representatives]
+        return CandidateValidation(
+            tuple(independent), tuple(duplicate), tuple(unverified), proposal.refute_ids
+        )
+
+    def decide_candidate(
+        self,
+        access: AccessContext,
+        request_key: str,
+        expected_version: int,
+        request: CandidateTransitionRequest,
+    ) -> CandidateRecord:
+        if (
+            not access.writable
+            or not access.candidate_review
+            or request.scope != access.scope
+            or request.actor != access.principal
+            or request.to_state is CandidateState.PROMOTED
+        ):
+            raise PermissionError("Candidate decision denied")
+        require_text(request_key)
+        if type(expected_version) is not int or expected_version < 0:
+            raise ValueError("Expected a nonnegative candidate version")
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN IMMEDIATE")
+                record = self._read_candidate(db, access.scope, request.candidate_id)
+                if record is None:
+                    raise WriteConflict("Candidate unavailable")
+                prior = db.execute(
+                    """SELECT version FROM candidate_decision
+                       WHERE scope=? AND candidate_id=? AND actor=? AND request_key=?""",
+                    (access.scope, request.candidate_id, access.principal, request_key),
+                ).fetchone()
+                if prior is not None:
+                    decision = record.history[prior["version"] - 1]
+                    if decision.request != request or decision.version != expected_version + 1:
+                        raise WriteConflict("Candidate decision request key already used")
+                    return record
+                if record.version != expected_version or request.from_state is not record.state:
+                    raise VersionConflict("Expected candidate version or state does not match")
+                if request.to_state is CandidateState.APPROVED:
+                    result = self._candidate_validation(db, record.proposal)
+                    if (
+                        access.principal == record.proposal.proposer
+                        or len(result.independent_support) < 2
+                        or result.refute_ids
+                    ):
+                        raise PermissionError("Candidate approval denied")
+                elif request.to_state is CandidateState.VALIDATED:
+                    self._candidate_validation(db, record.proposal)
+                decision = CandidateDecision(
+                    record.version + 1,
+                    request,
+                    datetime.now(UTC).isoformat(timespec="microseconds"),
+                )
+                db.execute(
+                    "INSERT INTO candidate_decision VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        access.scope,
+                        request.candidate_id,
+                        decision.version,
+                        request.from_state,
+                        request.to_state,
+                        access.principal,
+                        request.rationale,
+                        request.requested_at,
+                        decision.recorded_at,
+                        request_key,
+                    ),
+                )
+                return CandidateRecord(record.proposal, (*record.history, decision))
+        except sqlite3.IntegrityError as error:
+            raise WriteConflict("Candidate decision could not be committed") from error
+        except sqlite3.DatabaseError as error:
+            raise StoreIntegrityError("Cannot record candidate decision") from error
