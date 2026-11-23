@@ -1,34 +1,56 @@
 # Adaptive Autonomous Memory Subsystem (AAMS)
 
-AAMS is a greenfield, AI-native, model-independent memory service. It preserves **historical evidence** separately from **revisable beliefs**, with scoped recall, provenance, and an interoperable MCP adapter.
+AAMS is a local, model-independent memory service. It stores original evidence and append-only belief revisions in SQLite and exposes scoped recall and explanation through MCP.
 
-## Status
+## Run the demo
 
-**MVP bootstrap in progress. Not a working memory server.** See [goal #1](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1) and [bootstrap #2](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/2).
-
-## Documentation
-
-- [MVP acceptance contract](docs/MVP_SPEC.md)
-- [Initial architecture decision](docs/adr/0001-bootstrap.md)
-- [Development instructions](AGENTS.md)
-- [AAMS v0.1.0 design dossier](docs/design/v0.1.0/README.md)
-
-## Bootstrap development
-
-This repository starts with a dependency-light Python 3.11+ **contract/testing scaffold**. Python is a provisional MVP implementation choice, not an irreversible architecture decision.
+Use Python 3.11 or 3.12 from the repository root.
 
 ```sh
-PYTHONPATH=src python -m unittest discover -s tests -v
-python -m compileall -q src
+python -m venv .venv
+. .venv/bin/activate
+python -m pip install '.[mcp]'
+python -m aams.demo
 ```
 
-CI runs tests, compile checks, and pinned Ruff lint and format checks. Issue #3 provides [local SQLite evidence storage](docs/adr/0002-sqlite-evidence.md) through the Python API. The MCP server and executable demo are tracked in issue #6.
+The demo launches an MCP server process, stores a reported observation, exits, and starts a fresh process against the same database. It checks observation replay and recall, reconstructs a prior belief, and explains the current belief with supporting and refuting evidence. A third process confirms scope isolation and write denial. The demo uses a temporary database and emits a JSON result.
 
-## Non-negotiable boundaries
+## Connect an MCP client
 
-1. Evidence and generated interpretations must remain distinguishable.
-2. Memory is model-neutral; embeddings must remain disposable indexes.
-3. Revisions preserve history and provenance.
-4. Access policy applies to every interface, including MCP.
-5. No automatic promotion of model-generated claims to verified observations.
-6. No MVP success claim without demonstrated persistence, revision, recall, MCP, security, and recovery.
+Use the following command and arguments in a host that supports MCP 2026-07-28 stdio. Replace paths with absolute paths. The example grants writes. Omit `--write` for a read-only grant.
+
+```json
+{
+  "mcpServers": {
+    "aams": {
+      "command": "/absolute/path/to/.venv/bin/python",
+      "args": [
+        "-m", "aams.mcp_server",
+        "--db", "/absolute/path/to/memory.sqlite3",
+        "--principal", "my-agent",
+        "--scope", "project",
+        "--write"
+      ]
+    }
+  }
+}
+```
+
+The host controls these launch arguments and must restrict access to the database and its directory. Tool callers receive that process's scope and cannot change it through tool arguments. AAMS currently targets local stdio with the Python MCP SDK 2.3.0 client and server against protocol 2026-07-28. [MCP adapter and tool contracts](docs/mcp.md)
+
+## Develop and test
+
+```sh
+python -m pip install '.[mcp]' ruff==0.14.6
+ruff format --check src tests
+ruff check src tests
+python -m compileall -q src tests
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
+
+- [MVP acceptance contract](docs/MVP_SPEC.md)
+- [Original v0.1.0 design dossier](docs/design/v0.1.0/README.md)
+- [Storage and recovery design](docs/adr/0002-sqlite-evidence.md)
+- [Belief history and time semantics](docs/adr/0003-belief-history.md)
+- [Recall and evaluation](docs/recall.md)
+- [Development instructions](AGENTS.md)

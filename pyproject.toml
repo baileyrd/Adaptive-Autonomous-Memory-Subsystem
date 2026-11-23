@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Adaptive Autonomous Memory Subsystem (bootstrap contracts)"
 requires-python = ">=3.11"
 dependencies = []
+[project.optional-dependencies]
+mcp = ["mcp==2.3.0", "pydantic>=2.12,<3"]
 
 [build-system]
 requires = ["setuptools>=68,<81"]
