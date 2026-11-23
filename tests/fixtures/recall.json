@@ -1,0 +1,13 @@
+{
+  "query": "rain storm",
+  "expected_top": ["a", "b"],
+  "relevant": ["a", "b"],
+  "records": [
+    ["b", "public", "Rain storm is forecast"],
+    ["a", "public", "Rain storm warning"],
+    ["copy", "public", "Rain storm is forecast"],
+    ["noise", "public", "Rain is a song title"],
+    ["secret", "private", "Rain storm private"],
+    ["unrelated", "public", "A sunny day"]
+  ]
+}
