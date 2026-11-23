@@ -8,6 +8,9 @@ from dataclasses import dataclass
 from enum import Enum
 
 
+ROUTING_POLICY_VERSION = "1"
+
+
 class RetrievalMode(str, Enum):
     LEXICAL = "lexical"
     HYBRID = "hybrid"
@@ -44,12 +47,12 @@ class RetrievalRoutingRequest:
 class RetrievalRoutingDecision:
     mode: RetrievalMode
     reason: RoutingReason
-    policy_version: str = "1"
+    policy_version: str = ROUTING_POLICY_VERSION
 
     def __post_init__(self) -> None:
         if type(self.mode) is not RetrievalMode or type(self.reason) is not RoutingReason:
             raise ValueError("Routing decision requires supported mode and reason")
-        if self.policy_version != "1":
+        if self.policy_version != ROUTING_POLICY_VERSION:
             raise ValueError("Unsupported routing policy version")
 
 
