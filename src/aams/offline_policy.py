@@ -121,8 +121,12 @@ def compare_controlled(
     total = len(candidate)
     baseline_satisfied = sum(row.label is OutcomeLabel.SATISFIED for row in baseline)
     candidate_satisfied = sum(row.label is OutcomeLabel.SATISFIED for row in candidate)
-    baseline_unsatisfied = sum(row.label is OutcomeLabel.UNSATISFIED for row in baseline)
-    candidate_unsatisfied = sum(row.label is OutcomeLabel.UNSATISFIED for row in candidate)
+    baseline_unsatisfied = sum(
+        row.label is OutcomeLabel.UNSATISFIED for row in baseline
+    )
+    candidate_unsatisfied = sum(
+        row.label is OutcomeLabel.UNSATISFIED for row in candidate
+    )
     mean_latency = sum(row.latency_ms for row in candidate) / total
     meets_budget = (
         mean_latency <= budget.max_latency_ms
