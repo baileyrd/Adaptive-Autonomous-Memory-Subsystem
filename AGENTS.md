@@ -7,7 +7,7 @@ Goal: https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1
 - Read main, open issues #1–#7, PRs, CI, previous review feedback and `docs/MVP_SPEC.md`.
 - Do not create overlapping implementations or duplicate PRs.
 - Work on the first dependency-unblocked issue in order #2, #3, #4, #5, #6, #7.
-- Use the original AAMS v0.1.0 concept/design dossier when available. If it is missing from the repository, report this as a documentation import gap.
+- Use the [AAMS v0.1.0 design dossier](docs/design/v0.1.0/README.md) and follow the scope reconciliation in the MVP specification.
 - Keep canonical data semantics independent of MCP and optional neural indexes.
 
 ## Development loop

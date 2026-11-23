@@ -4,12 +4,12 @@
 
 ## Design sources and open decisions
 
-[Goal #1](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1) and its linked implementation issues govern this baseline until the original AAMS v0.1.0 dossier is available. Reconcile the dossier against these requirements when it is imported and record any conflicts in an ADR.
+The [AAMS v0.1.0 design dossier](design/v0.1.0/README.md) provides the architectural baseline. [Goal #1](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1) and its linked issues define the release acceptance criteria and dependency order. The original dossier is preserved as supplied. Record changes to its design proposals in ADRs.
 
-- #3 selects the transactional storage engine and schema migration strategy.
-- #4 defines validity interval boundaries and how MCP principals will map to scoped access.
-- #5 defines the lexical ranking and evaluation fixture.
-- #6 verifies the MCP protocol version, transport, and client compatibility.
+- The Python bootstrap follows the dossier's modular-monolith proposal. #3 will validate the transactional storage choice against atomic writes, durable evidence and schema evolution.
+- Issue #1 and issues #4–#5 bring temporal reconstruction and contradiction visibility into the MVP. The dossier's product requirements list those under Alpha. #4 defines temporal validity and scoped authority, and #5 defines ranking and the evaluation fixture.
+- #6 starts with the dossier's local stdio deployment proposal and verifies protocol and client compatibility, including support for the dossier's proposed 2026-07-28 version.
+- Checkpoints, autonomous consolidation, neural association and broader lifecycle features follow the dossier's later milestones.
 
 ## Core demonstration
 1. Start AAMS in a documented local environment.

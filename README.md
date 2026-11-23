@@ -11,7 +11,7 @@ AAMS is a greenfield, AI-native, model-independent memory service. It preserves 
 - [MVP acceptance contract](docs/MVP_SPEC.md)
 - [Initial architecture decision](docs/adr/0001-bootstrap.md)
 - [Development instructions](AGENTS.md)
-- The original AAMS v0.1.0 design dossier is pending import. The MVP acceptance contract records the issue-backed baseline and open decisions.
+- [AAMS v0.1.0 design dossier](docs/design/v0.1.0/README.md)
 
 ## Bootstrap development
 
