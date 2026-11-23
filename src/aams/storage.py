@@ -29,6 +29,8 @@ from .learning import (
     CandidateTransitionRequest,
     CandidateValidation,
     LearningCandidate,
+    OutcomeFeedback,
+    OutcomeRevision,
 )
 
 _SCHEMA = (
@@ -124,6 +126,35 @@ _CANDIDATE_SCHEMA = (
 )
 
 
+_OUTCOME_SCHEMA = (
+    """CREATE TABLE outcome_revision (
+        scope TEXT NOT NULL, episode_id TEXT NOT NULL, version INTEGER NOT NULL CHECK(version>0),
+        candidate_id TEXT NOT NULL, producer TEXT NOT NULL, conditions TEXT NOT NULL,
+        predicted REAL NOT NULL CHECK(predicted BETWEEN 0 AND 1),
+        measured REAL NOT NULL CHECK(measured BETWEEN 0 AND 1),
+        measured_at TEXT NOT NULL, recorded_at TEXT NOT NULL, request_key TEXT NOT NULL,
+        PRIMARY KEY(scope, episode_id, version), UNIQUE(scope, episode_id, producer, request_key),
+        FOREIGN KEY(scope, candidate_id) REFERENCES learning_candidate(scope, candidate_id)
+    )""",
+    """CREATE TABLE outcome_evidence (
+        scope TEXT NOT NULL, episode_id TEXT NOT NULL, version INTEGER NOT NULL,
+        evidence_id TEXT NOT NULL, position INTEGER NOT NULL,
+        PRIMARY KEY(scope, episode_id, version, evidence_id),
+        UNIQUE(scope, episode_id, version, position),
+        FOREIGN KEY(scope, episode_id, version) REFERENCES outcome_revision(scope, episode_id, version),
+        FOREIGN KEY(scope, evidence_id) REFERENCES evidence(scope, evidence_id)
+    )""",
+    """CREATE TRIGGER outcome_revision_no_update BEFORE UPDATE ON outcome_revision
+       BEGIN SELECT RAISE(ABORT, 'immutable outcome revision'); END""",
+    """CREATE TRIGGER outcome_revision_no_delete BEFORE DELETE ON outcome_revision
+       BEGIN SELECT RAISE(ABORT, 'immutable outcome revision'); END""",
+    """CREATE TRIGGER outcome_evidence_no_update BEFORE UPDATE ON outcome_evidence
+       BEGIN SELECT RAISE(ABORT, 'immutable outcome evidence'); END""",
+    """CREATE TRIGGER outcome_evidence_no_delete BEFORE DELETE ON outcome_evidence
+       BEGIN SELECT RAISE(ABORT, 'immutable outcome evidence'); END""",
+)
+
+
 class WriteConflict(ValueError):
     """A canonical identifier, evidence link or idempotency key conflicts."""
 
@@ -162,7 +193,7 @@ class SQLiteMemoryStore:
             with closing(self._connect()) as db, db:
                 db.execute("BEGIN IMMEDIATE")
                 version = db.execute("PRAGMA user_version").fetchone()[0]
-                migrations = (_SCHEMA, _BELIEF_SCHEMA, _CANDIDATE_SCHEMA)
+                migrations = (_SCHEMA, _BELIEF_SCHEMA, _CANDIDATE_SCHEMA, _OUTCOME_SCHEMA)
                 if not 0 <= version <= len(migrations):
                     raise StoreIntegrityError(f"Unsupported database schema version {version}")
                 for target, statements in enumerate(migrations[version:], start=version + 1):
@@ -315,6 +346,8 @@ class SQLiteMemoryStore:
                     self._decode_revision(db, row)
                 for row in db.execute("SELECT scope, candidate_id FROM learning_candidate"):
                     self._read_candidate(db, row["scope"], row["candidate_id"])
+                for row in db.execute("SELECT * FROM outcome_revision"):
+                    self._read_outcome(db, row)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify memory store") from error
 
@@ -780,3 +813,114 @@ class SQLiteMemoryStore:
                 return tuple(self._decode_evidence(row) for row in rows[:limit]), len(rows) > limit
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot read learning evidence sample") from error
+
+    def append_outcome(
+        self,
+        access: AccessContext,
+        request_key: str,
+        expected_version: int,
+        feedback: OutcomeFeedback,
+    ) -> OutcomeRevision:
+        if not access.writable or (access.scope, access.principal) != (
+            feedback.scope,
+            feedback.producer,
+        ):
+            raise PermissionError("Outcome write denied")
+        require_text(request_key)
+        if type(expected_version) is not int or expected_version < 0:
+            raise ValueError("Expected a nonnegative outcome version")
+        key = (access.scope, feedback.episode_id)
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN IMMEDIATE")
+                current = db.execute(
+                    """SELECT version, candidate_id, producer FROM outcome_revision
+                       WHERE scope=? AND episode_id=? ORDER BY version DESC LIMIT 1""",
+                    key,
+                ).fetchone()
+                if current is not None and current["producer"] != access.principal:
+                    raise PermissionError("Outcome write denied")
+                previous = db.execute(
+                    """SELECT * FROM outcome_revision
+                       WHERE scope=? AND episode_id=? AND producer=? AND request_key=?""",
+                    (*key, access.principal, request_key),
+                ).fetchone()
+                if previous is not None:
+                    result = self._read_outcome(db, previous)
+                    if result.feedback != feedback or result.version != expected_version + 1:
+                        raise WriteConflict("Outcome request key already used")
+                    return result
+                if (current["version"] if current else 0) != expected_version:
+                    raise VersionConflict("Expected outcome version does not match")
+                if current is not None and current["candidate_id"] != feedback.candidate_id:
+                    raise WriteConflict("Outcome candidate association is immutable")
+                outcome = OutcomeRevision(
+                    expected_version + 1,
+                    feedback,
+                    datetime.now(UTC).isoformat(timespec="microseconds"),
+                )
+                db.execute(
+                    "INSERT INTO outcome_revision VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        *key,
+                        outcome.version,
+                        feedback.candidate_id,
+                        access.principal,
+                        feedback.conditions,
+                        feedback.predicted,
+                        feedback.measured,
+                        feedback.measured_at,
+                        outcome.recorded_at,
+                        request_key,
+                    ),
+                )
+                db.executemany(
+                    "INSERT INTO outcome_evidence VALUES (?, ?, ?, ?, ?)",
+                    (
+                        (*key, outcome.version, evidence_id, index)
+                        for index, evidence_id in enumerate(feedback.evidence_ids)
+                    ),
+                )
+                return outcome
+        except sqlite3.IntegrityError as error:
+            raise WriteConflict("Invalid or unavailable outcome reference") from error
+        except (sqlite3.DatabaseError, TypeError) as error:
+            raise StoreIntegrityError("Cannot append outcome feedback") from error
+
+    def outcome_history(
+        self, access: AccessContext, episode_id: str
+    ) -> tuple[OutcomeRevision, ...]:
+        try:
+            with closing(self._connect()) as db, db:
+                db.execute("BEGIN")
+                rows = db.execute(
+                    "SELECT * FROM outcome_revision WHERE scope=? AND episode_id=? ORDER BY version",
+                    (access.scope, episode_id),
+                )
+                return tuple(self._read_outcome(db, row) for row in rows)
+        except (sqlite3.DatabaseError, ValueError, TypeError) as error:
+            raise StoreIntegrityError("Cannot verify outcome history") from error
+
+    @staticmethod
+    def _read_outcome(db: sqlite3.Connection, row: sqlite3.Row) -> OutcomeRevision:
+        key = (row["scope"], row["episode_id"], row["version"])
+        identifiers = tuple(
+            link["evidence_id"]
+            for link in db.execute(
+                """SELECT evidence_id FROM outcome_evidence
+                   WHERE scope=? AND episode_id=? AND version=? ORDER BY position""",
+                key,
+            )
+        )
+        feedback = OutcomeFeedback(
+            row["episode_id"],
+            row["scope"],
+            row["candidate_id"],
+            row["producer"],
+            row["conditions"],
+            row["predicted"],
+            row["measured"],
+            row["measured_at"],
+            identifiers,
+        )
+        return OutcomeRevision(row["version"], feedback, row["recorded_at"])

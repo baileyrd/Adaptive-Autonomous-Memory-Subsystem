@@ -117,3 +117,37 @@ class CandidateValidation:
     duplicate_support: tuple[str, ...]
     unverified_support: tuple[str, ...]
     refute_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class OutcomeFeedback:
+    episode_id: str
+    scope: str
+    candidate_id: str
+    producer: str
+    conditions: str
+    predicted: float
+    measured: float
+    measured_at: str
+    evidence_ids: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        require_text(self.episode_id, self.scope, self.candidate_id, self.producer, self.conditions)
+        for field in ("predicted", "measured"):
+            value = getattr(self, field)
+            if type(value) not in (int, float) or not 0 <= value <= 1:
+                raise ValueError("Outcome scores must be finite numbers from zero to one")
+            object.__setattr__(self, field, float(value))
+        object.__setattr__(self, "measured_at", utc_timestamp(self.measured_at))
+        if type(self.evidence_ids) is not tuple or not self.evidence_ids:
+            raise ValueError("Outcome requires immutable evidence references")
+        require_text(*self.evidence_ids)
+        if len(set(self.evidence_ids)) != len(self.evidence_ids):
+            raise ValueError("Outcome links must be unique")
+
+
+@dataclass(frozen=True, slots=True)
+class OutcomeRevision:
+    version: int
+    feedback: OutcomeFeedback
+    recorded_at: str
