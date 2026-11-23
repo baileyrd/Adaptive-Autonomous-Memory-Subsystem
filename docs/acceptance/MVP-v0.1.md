@@ -16,7 +16,7 @@ From a fresh checkout, use the [README setup](../../README.md), then run `PYTHON
 | Verify four MCP tools and protocol behavior | `test_mcp.py` uses the SDK client and raw stdio against running children. It checks discovery, tool listing, all four calls, schemas, malformed frames, argument bounds, missing metadata, unsupported versions and an error stream without the malformed input marker. | PASS |
 | Demonstrate crash durability and recovery | `test_recovery.py` stops children at explicit SQLite barriers before ingestion and revision commit and after ingestion commit. Reopening shows no partial state and retains committed data. Backup and restore recover an intact copy after corrupting a link. `test_storage.py` detects altered payloads and unsupported schemas. | PASS |
 | Verify documented local setup and automated checks | The README documents installation, host config and backup/restore. Local Ruff formatting, lint, compilation and all 25 tests passed. The release PR records head-specific CI evidence. | PASS locally |
-| Verify independent release review | Issue #7 requests a distinct eligible reviewer and an approval link. See the release PR for the current decision. | PENDING |
+| Verify independent release review | Independent review was requested on the release PR. Goal #1 and AGENTS.md set the current merge policy. | NOT OBTAINED |
 
 ## Fault harness and limits
 
