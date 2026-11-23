@@ -22,7 +22,7 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 python -m compileall -q src
 ```
 
-CI runs tests, compile checks, and pinned Ruff lint/format checks. No database, neural index, or MCP server exists yet. Those are work packages #3–#6.
+CI runs tests, compile checks, and pinned Ruff lint and format checks. Issue #3 provides [local SQLite evidence storage](docs/adr/0002-sqlite-evidence.md) through the Python API. The MCP server and executable demo are tracked in issue #6.
 
 ## Non-negotiable boundaries
 
