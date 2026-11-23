@@ -1,0 +1,11 @@
+{
+  "evidence": [
+    ["one", "work", "station-a", "site:a", "Rain Expected"],
+    ["two", "work", "station-b", "site:b", "rain expected"],
+    ["copy", "work", "station-a", "site:a-copy", "rain  expected"],
+    ["exception", "work", "station-c", "site:c", "not: rain expected"],
+    ["unrelated", "work", "station-x", "site:x", "clear skies"],
+    ["decoy", "private", "station-z", "site:z", "clear skies"]
+  ],
+  "expected": {"rain expected": {"support": ["copy", "one", "two"], "refute": ["exception"]}}
+}
