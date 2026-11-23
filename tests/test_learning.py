@@ -140,7 +140,12 @@ class LearningContractTests(unittest.TestCase):
             {"to_state": "validated"},
         ):
             with self.subTest(overrides=overrides), self.assertRaises(ValueError):
-                transition(**({"from_state": CandidateState.PROPOSED, "to_state": CandidateState.VALIDATED} | overrides))
+                values = {
+                    "from_state": CandidateState.PROPOSED,
+                    "to_state": CandidateState.VALIDATED,
+                    **overrides,
+                }
+                transition(**values)
 
 
 if __name__ == "__main__":
