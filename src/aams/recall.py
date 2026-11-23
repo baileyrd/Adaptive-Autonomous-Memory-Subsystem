@@ -16,6 +16,11 @@ from .contracts import (
     utc_timestamp,
 )
 from .representations import RepresentationProvider, RepresentationSpec
+from .retrieval_routing import (
+    RetrievalMode,
+    RetrievalRoutingRequest,
+    choose_retrieval_mode,
+)
 from .storage import AccessContext, SQLiteMemoryStore, StoreIntegrityError
 from .vector_index import RepresentationIndex
 
@@ -104,36 +109,69 @@ class CognitiveMemory:
         need: CognitiveNeed,
         *,
         provider: RepresentationProvider | None = None,
+        requested_mode: RetrievalMode | None = None,
     ) -> dict:
-        if need.identifier is not None:
-            return self.explain(access, need)
+        mode = requested_mode
+        if mode is None:
+            mode = RetrievalMode.HYBRID if provider is not None else RetrievalMode.LEXICAL
+        exact = need.identifier is not None
+        request = RetrievalRoutingRequest(mode, exact_lookup=exact)
+        decision = choose_retrieval_mode(request)
+        if exact:
+            exact_result = self.explain(access, need)
+            if requested_mode is None:
+                return exact_result
+            exact_result["retrieval"] = self._routing_metadata(decision, decision.reason.value)
+            if _encoded_size(exact_result) > need.max_bytes:
+                exact_result["items"] = []
+                exact_result["truncated"] = True
+            return exact_result
+
         terms = _tokens(need.query)
-        if not terms:
-            return _response([], need.max_items, need.max_bytes)
-        scores, status = (
-            self._semantic_scores(access, need.query, provider)
-            if provider is not None
-            else ({}, None)
-        )
-        ranked = self._rank(access, need, terms, scores)
+        scores, status = {}, decision.reason.value
+        if terms and mode is RetrievalMode.HYBRID:
+            spec, snapshot = self._semantic_snapshot(access, provider)
+            decision = choose_retrieval_mode(
+                RetrievalRoutingRequest(
+                    mode,
+                    provider_ready=spec is not None,
+                    index_fresh=snapshot is not None and snapshot.status == "fresh",
+                )
+            )
+            status = snapshot.status if snapshot is not None else decision.reason.value
+            if decision.mode is RetrievalMode.HYBRID:
+                scores, status = self._semantic_scores(need.query, provider, spec, snapshot)
+        ranked = self._rank(access, need, terms, scores) if terms else []
         if scores and not any(item["relevance"]["semantic_score"] > 0 for item in ranked):
             ranked = self._rank(access, need, terms, {})
             status = "no_match"
         retrieval = None
-        if status is not None:
+        if requested_mode is not None:
+            retrieval = self._routing_metadata(decision, status)
+        elif terms and provider is not None:
             retrieval = {"mode": "hybrid" if status == "fresh" else "lexical", "status": status}
         return _response(ranked, need.max_items, need.max_bytes, retrieval)
 
-    def _semantic_scores(self, access, query, provider):
+    @staticmethod
+    def _routing_metadata(decision, status):
+        return {
+            "mode": "hybrid"
+            if decision.mode is RetrievalMode.HYBRID and status == "fresh"
+            else "lexical",
+            "status": status,
+            "policy": decision.policy_version,
+        }
+
+    def _semantic_snapshot(self, access, provider):
         try:
-            spec = provider.spec
-            if not isinstance(spec, RepresentationSpec):
-                return {}, "provider_unavailable"
+            spec = provider.spec if provider is not None else None
         except Exception:
-            return {}, "provider_unavailable"
-        snapshot = RepresentationIndex(self.store).snapshot(access, spec)
-        if snapshot.status != "fresh":
-            return {}, snapshot.status
+            return None, None
+        if not isinstance(spec, RepresentationSpec):
+            return None, None
+        return spec, RepresentationIndex(self.store).snapshot(access, spec)
+
+    def _semantic_scores(self, query, provider, spec, snapshot):
         try:
             query_values = _unit(provider.encode(query), spec.dimensions)
             if provider.spec != spec:
