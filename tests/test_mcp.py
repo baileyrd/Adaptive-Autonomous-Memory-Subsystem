@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from aams.demo import OBSERVATION, local_client, run_demo
-from aams.mcp_server import PROTOCOL_VERSION
+from aams.mcp_server import MAX_FRAME_BYTES, PROTOCOL_VERSION
 
 
 class MCPTest(unittest.IsolatedAsyncioTestCase):
@@ -142,3 +142,31 @@ class MCPTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(
                 [edge["evidence_id"] for edge in edges], [own.structured_content["evidence_id"]]
             )
+
+    async def test_receive_limit_closes_connection_before_frame_dispatch(self):
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-m",
+            "aams.mcp_server",
+            "--db",
+            os.fspath(self.path),
+            "--principal",
+            "test",
+            "--scope",
+            "weather",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            # Delimited test input just past the documented maximum receives no tool result.
+            frame = b"private-frame-marker" + b" " * MAX_FRAME_BYTES + b"\n"
+            stdout, stderr = await asyncio.wait_for(process.communicate(frame), 10)
+        finally:
+            if process.returncode is None:
+                process.kill()
+                await process.wait()
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(stdout, b"")
+        self.assertIn(b"oversized or incomplete frame", stderr)
+        self.assertNotIn(b"private-frame-marker", stderr)

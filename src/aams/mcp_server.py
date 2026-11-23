@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import json
+import sys
 from dataclasses import asdict
 from hashlib import sha256
 from typing import Annotated, Literal
@@ -19,6 +20,7 @@ from .storage import AccessContext, SQLiteMemoryStore, StoreIntegrityError, Vers
 from .storage import WriteConflict
 
 PROTOCOL_VERSION = "2026-07-28"
+MAX_FRAME_BYTES = 256 * 1024
 Identifier = Annotated[str, Field(min_length=1, max_length=128)]
 Timestamp = Annotated[str, Field(min_length=20, max_length=40)]
 Text = Annotated[str, Field(min_length=1, max_length=4096)]
@@ -183,8 +185,22 @@ def build_server(store: SQLiteMemoryStore, access: AccessContext) -> Server:
     return Server("aams", version="0.1.0", on_list_tools=list_tools, on_call_tool=call_tool)
 
 
+class _BoundedInput:
+    """Provide the SDK with complete newline-delimited frames of bounded size."""
+
+    async def __aiter__(self):
+        while True:
+            frame = await asyncio.to_thread(sys.stdin.buffer.readline, MAX_FRAME_BYTES + 1)
+            if not frame:
+                return
+            if len(frame) > MAX_FRAME_BYTES or not frame.endswith(b"\n"):
+                print("AAMS closed stdio after an oversized or incomplete frame.", file=sys.stderr)
+                return
+            yield frame
+
+
 async def _serve(server: Server) -> None:
-    async with stdio_server() as (read_stream, write_stream):
+    async with stdio_server(stdin=_BoundedInput()) as (read_stream, write_stream):
         await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
