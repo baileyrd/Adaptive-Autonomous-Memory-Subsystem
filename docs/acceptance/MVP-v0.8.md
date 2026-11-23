@@ -7,7 +7,7 @@ The [v0.8 goal](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem
 | Status level | Result |
 | --- | --- |
 | Engineering complete | **Yes.** The benchmark (#80) and the scoped BM25 ranker (#81) are merged with unit, security and benchmark tests. |
-| Experiment complete | **Yes.** Lexical, hybrid, guarded, staged, the oracle router and BM25 arms were measured on identical inputs over two independent public workloads and the existing synthetic fixtures. |
+| Experiment complete | **Yes.** Lexical, hybrid, guarded, staged, the oracle router and BM25 arms were measured on identical inputs over two independent public workloads and the existing synthetic fixtures. The ONNX embedder (#84) and fusion (#83) arms stopped at the cost gates, before a quality run. |
 | Performance improvement validated | **Yes, offline, for BM25 ranking under guarded routing**, within the measured scope. It passed every pre-registered #79 criterion on held-out development articles and on separate SQuAD training articles. No learned routing policy qualified. |
 | Deployment ready | **Partially.** With owner approval, BM25 is now the default lexical ranker, with a migration note and overlap rollback. Production traffic, sustained concurrency and very large scopes remain untested, and no learned or neural policy is active. |
 
@@ -35,8 +35,8 @@ On independent SQuAD training articles (hash-held-out half, 4,712 tasks), BM25 w
 ## Rejected or deferred
 
 - **Confidence router (#82): rejected.** The oracle over BM25 and BM25-hybrid adds only +0.05 pp, so no router was built.
-- **Rank fusion (#83): deferred.** It has no measurable headroom with the byte-bucket provider.
-- **Real sentence embedder (#84): blocked.** It needs a new optional dependency and a model download, and this environment could not reach model or BEIR hosts. This is the only path to gains on vocabulary-mismatch queries, where BM25 does nothing: 6/12 versus guarded's 11/12 on the paraphrase fixture, which is why guarded routing is retained.
+- **Real sentence embedder (#84): not validated (cost); quality not measured.** An eval-only, sha256-pinned `BAAI/bge-small-en-v1.5` ONNX encoder (CLS pooling, onnxruntime + tokenizers, no torch) and its measurement arms are in `scripts/` (#91), with a manual Actions workflow, `embedder-eval.yml` (#92). On GitHub's `ubuntu-24.04` runner, encoding alone took 8.67 ms p95 per query (median 8.45, one thread), against a budget of 5 ms for *all* added latency. Process RSS after loading the model was about 283 MiB, against the 2× memory budget. A local probe also put the pure-Python 384-d scan at +13.2 ms p95. The one workload that finished before the stop, the v0.6 fixture (12 tasks, all splits), confirmed this inside a real evaluation. Every ONNX arm added +6.9 to +8.0 ms p95, peak RSS was about 284 MiB, and there were zero scope or time leaks and zero contradiction regressions. On that fixture `bm25_guarded_onnx` satisfied 11/12, the same as `bm25_guarded`, while the dense and RRF arms satisfied 12/12. That fixture is a safety check, not a gate. Both cost gates therefore fail whatever quality shows, so the owner stopped the multi-hour SQuAD and SciFact quality runs. Vocabulary-mismatch queries, where BM25 does nothing (6/12 versus guarded's 11/12 on the paraphrase fixture), remain the open gap, which is why guarded routing is retained.
+- **Rank fusion (#83): not validated (cost).** The eval-only k=60 RRF arm, built over recall's own time-visible citations, needs the same encoder on every query, so it inherits #84's cost failure. Following the plan's decision D7, a fusion scorer is only built together with an approved encoder promotion.
 
 ## Remaining limitations
 
@@ -44,7 +44,7 @@ SQuAD questions overlap lexically with their passages. SciFact supplies a second
 
 ## Recommendation
 
-Keep guarded routing. The owner kept BM25 opt-in until the low-overlap, cross-domain SciFact check passed, then approved it as the default on #79. It is now the default, with `LexicalRanking.OVERLAP` as rollback. Prioritize a real local sentence-embedding evaluation (#84) over further policy learning, because routing headroom only returns once the semantic arm is actually semantic.
+Keep guarded routing. The owner kept BM25 opt-in until the low-overlap, cross-domain SciFact check passed, then approved it as the default on #79. It is now the default, with `LexicalRanking.OVERLAP` as rollback. A small local embedder, as measured, does not fit the latency or memory budget. Revisit #84 only with a materially cheaper path, such as a quantized or smaller encoder, cached query embeddings, or an ANN index instead of a linear scan. `embedder-eval.yml` with `stage=full` then gives the pre-registered quality answer without further code. Until then, routing headroom will not return, because the semantic arm is not actually semantic.
 
 ## Reproduce
 
