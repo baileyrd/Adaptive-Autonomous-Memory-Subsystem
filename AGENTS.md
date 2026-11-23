@@ -17,7 +17,7 @@ Goal: https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1
 - At each handoff, update issue #1 with the implementation issue and PR, current state, verification, any blockers, and one next action. Record code-specific findings and their resolution on the associated PR so the next session can pick up directly from GitHub.
 
 ## Development loop
-Plan -> implement one bounded vertical slice -> validate locally -> open linked PR -> independent review -> fix findings -> merge **only if authorized** and CI/review requirements pass -> advance. Never fabricate checks, invent Codex task IDs, or claim CI passed without run evidence. Prefer direct, reproducible tests and one clear next action. Preserve all GitHub issue/PR links for resumption.
+Plan -> implement one bounded vertical slice -> validate locally -> open linked PR -> address material findings -> merge **only if authorized** and required CI/repository protections pass -> advance. Independent review is encouraged when available, but it is not an AAMS-imposed prerequisite. Never fabricate checks, invent Codex task IDs, or claim CI passed without run evidence. Prefer direct, reproducible tests and one clear next action. Preserve all GitHub issue/PR links for resumption.
 
 ## Code contract
 - Evidence is immutable; beliefs are explicitly revised rather than overwritten.
@@ -28,4 +28,4 @@ Plan -> implement one bounded vertical slice -> validate locally -> open linked 
 - Keep dependencies minimal and record architecture decisions as ADRs.
 
 ## Review gate
-No merge until actual head-specific checks are green, all relevant threads addressed, and independent approval is present according to repository policy. A draft PR is appropriate when acceptance is incomplete.
+No merge until actual head-specific required checks are green, material findings are resolved or explicitly documented with rationale, and GitHub branch protections and repository policy permit merging. An independent approving review is **not required by the AAMS project workflow** unless GitHub itself enforces one. Authorized agents may merge routine changes without owner approval. A draft PR is appropriate when acceptance is incomplete.
