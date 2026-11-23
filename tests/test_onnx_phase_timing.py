@@ -79,7 +79,9 @@ class OnnxPhaseTimingTests(unittest.TestCase):
     def test_opt_in_measurement_does_not_change_output(self):
         default = self.make_encoder()
         tracked = self.make_encoder(record_phases=True)
-        self.assertEqual(default.encode("sensitive query text"), tracked.encode("sensitive query text"))
+        self.assertEqual(
+            default.encode("sensitive query text"), tracked.encode("sensitive query text")
+        )
         self.assertEqual(len(default.encode_ns), 1)
         self.assertEqual(default.phase_timings_ns, [])
         self.assertEqual(len(tracked.phase_timings_ns), 1)
@@ -89,7 +91,9 @@ class OnnxPhaseTimingTests(unittest.TestCase):
             sample.tokenize_ns + sample.prepare_ns + sample.inference_ns + sample.normalize_ns,
         )
         self.assertGreaterEqual(sample.total_ns, 0)
-        self.assertEqual(tracked._session.feeds, {"input_ids": [[101, 102]], "attention_mask": [[1, 1]]})
+        self.assertEqual(
+            tracked._session.feeds, {"input_ids": [[101, 102]], "attention_mask": [[1, 1]]}
+        )
         self.assertNotIn("sensitive query text", str(sample))
         self.assertEqual(tracked.encode_ns[0] >= sample.total_ns, True)
 
