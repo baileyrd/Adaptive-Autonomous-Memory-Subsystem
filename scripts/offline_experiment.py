@@ -4,15 +4,18 @@ import argparse
 import json
 import resource
 import statistics
+import sys
 import tempfile
 import unicodedata
 from dataclasses import asdict
+from functools import partial
 from hashlib import sha256
 from math import ceil, log2
 from pathlib import Path
 from time import perf_counter_ns, sleep
 
 from evaluate_semantic import seed, timestamp
+from fusion import ONNX_ARMS, InvalidRun, check_validity, dense_arm, rrf_arm
 
 from aams.offline_policy import EvidenceBasis, OfflineOutcome, OfflineRiskBudget, OutcomeLabel
 from aams.offline_policy import compare_controlled
@@ -80,8 +83,17 @@ def replay(
     candidate_outage=False,
     shadow_artifact=None,
     rankings=(),
+    encoder=None,
+    build_ms=None,
 ):
-    """Replay every strategy per task. Each ranking adds lexical, hybrid and guarded arms."""
+    """Replay every strategy per task. Each ranking adds lexical, hybrid and guarded arms.
+
+    An ``encoder`` adds the eval-only ``bm25_guarded_onnx``, ``onnx`` and ``rrf_onnx`` arms
+    beside the unchanged fixture-provider arms. Its per-scope index build times are appended
+    to ``build_ms`` when given.
+    """
+    if encoder is not None and LexicalRanking.BM25 not in rankings:
+        raise ValueError("ONNX arms compare against bm25_guarded; add the BM25 ranking")
     store = SQLiteMemoryStore(path)
     provider = DeterministicFixtureProvider()
     index = RepresentationIndex(store)
@@ -92,6 +104,13 @@ def replay(
         for identifier, scope, day, text, origin in group["records"]:
             seed(store, identifier, scope, day, text, origin=origin)
         index.rebuild(AccessContext("fixture", group["domain"], True), provider)
+        if encoder is not None:
+            start = perf_counter_ns()
+            built = index.rebuild(AccessContext("fixture", group["domain"], True), encoder)
+            if built.status != "fresh":
+                raise InvalidRun(f"ONNX index rebuild returned {built.status}")
+            if build_ms is not None:
+                build_ms.append((perf_counter_ns() - start) / 1e6)
 
     measurements = []
     for group in groups:
@@ -131,16 +150,33 @@ def replay(
                 for suffix, hybrid in arms.items():
                     modes[ranking.value + suffix] = hybrid
                     engines[ranking.value + suffix] = ranked[ranking]
+            calls = {}
             for strategy, hybrid in modes.items():
                 mode = RetrievalMode.HYBRID if hybrid else RetrievalMode.LEXICAL
                 available = hybrid and not (strategy == "candidate" and candidate_outage)
                 kwargs = {"provider": provider if available else None, "requested_mode": mode}
                 engine = engines.get(strategy) or memory
-                expected = engine.recall(access, need, **kwargs)
+                calls[strategy] = partial(engine.recall, access, need, **kwargs)
+            if encoder is not None:
+                bm25 = ranked[LexicalRanking.BM25]
+                mode = RetrievalMode.HYBRID if task["opt_in"] else RetrievalMode.LEXICAL
+                calls["bm25_guarded_onnx"] = partial(
+                    bm25.recall,
+                    access,
+                    need,
+                    provider=encoder if task["opt_in"] else None,
+                    requested_mode=mode,
+                )
+                calls["onnx"] = partial(dense_arm, bm25, encoder, access, need, TOP_K)
+                calls["rrf_onnx"] = partial(rrf_arm, bm25, encoder, access, need, TOP_K)
+            for strategy, call in calls.items():
+                first_call = len(encoder.encode_ns) if encoder is not None else 0
+                expected = call()
+                timed_from = len(encoder.encode_ns) if encoder is not None else 0
                 latency = []
                 for _ in range(repetitions):
                     start = perf_counter_ns()
-                    packet = engine.recall(access, need, **kwargs)
+                    packet = call()
                     latency.append((perf_counter_ns() - start) / 1e6)
                     if packet != expected:
                         raise RuntimeError("Controlled replay changed result")
@@ -164,6 +200,16 @@ def replay(
                     "time_leaks": sum(visible.get(name, 0) > task["day"] for name in found),
                     "latency_ms": latency,
                 }
+                if strategy in ONNX_ARMS:
+                    measured = row["measurements"][strategy]
+                    measured["encoder_calls"] = timed_from - first_call
+                    measured["encode_ms"] = [ns / 1e6 for ns in encoder.encode_ns[timed_from:]]
+                    if "cosines" in expected:
+                        tops = {True: None, False: None}
+                        for source, score in expected["cosines"]:
+                            key = source in relevant
+                            tops[key] = score if tops[key] is None else tops[key]
+                        measured["top_cosine"] = {"relevant": tops[True], "other": tops[False]}
             measurements.append(row)
         if observer is not None:
             sleep(0.03)  # Offline accounting, outside serving timing.
@@ -211,22 +257,85 @@ def measured_comparison(rows, strategy):
     return compare_controlled(tuple(before), tuple(after), RISK_BUDGET) if before else None
 
 
+def contradictions(rows, baseline="bm25_guarded"):
+    """Contradiction tasks each arm satisfies, and regressions against ``baseline``."""
+    tasks = [row for row in rows if row["contradiction"]]
+    report = {
+        strategy: {"retained": sum(row["measurements"][strategy]["satisfied"] for row in tasks)}
+        for strategy in rows[0]["measurements"]
+    }
+    if baseline in report:
+        for strategy, counts in report.items():
+            counts["regressions"] = sum(
+                row["measurements"][baseline]["satisfied"]
+                and not row["measurements"][strategy]["satisfied"]
+                for row in tasks
+            )
+    return {"tasks": len(tasks), "arms": report}
+
+
+def split_result(groups, repetitions, rankings, encoder):
+    with tempfile.TemporaryDirectory(prefix="aams-offline-") as directory:
+        rows = replay(
+            Path(directory) / "fixture.sqlite3",
+            groups,
+            repetitions,
+            rankings=rankings,
+            encoder=encoder,
+        )
+    strategies = BASELINES + tuple(s for s in rows[0]["measurements"] if s not in BASELINES)
+    result = {strategy: summarize(rows, strategy) for strategy in strategies}
+    comparison = measured_comparison(rows, "guarded")
+    result["guarded_distinct_mode_pairs"] = asdict(comparison) if comparison else None
+    if rankings:
+        result["contradictions"] = contradictions(rows)
+    if encoder is not None:
+        result["invalid"] = check_validity(rows)
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--split", choices=SPLITS, default="test_a")
+    parser.add_argument("--split", choices=(*SPLITS, "all"), default="test_a")
     parser.add_argument("--repetitions", type=int, default=20)
+    parser.add_argument("--ranking", action="append", default=[], choices=["bm25"])
+    parser.add_argument("--encoder-dir", type=Path, help="Pinned ONNX encoder (adds ONNX arms)")
     args = parser.parse_args()
     if not 1 <= args.repetitions <= 100:
         parser.error("Use 1 to 100 repetitions")
-    groups = [group for group in load_groups() if group["split"] == args.split]
-    with tempfile.TemporaryDirectory(prefix="aams-offline-") as directory:
-        rows = replay(Path(directory) / "fixture.sqlite3", groups, args.repetitions)
-    result = {strategy: summarize(rows, strategy) for strategy in BASELINES}
-    comparison = measured_comparison(rows, "guarded")
-    result["guarded_distinct_mode_pairs"] = asdict(comparison) if comparison else None
+    rankings = tuple(LexicalRanking(value) for value in dict.fromkeys(args.ranking))
+    encoder = None
+    if args.encoder_dir is not None:
+        if LexicalRanking.BM25 not in rankings:
+            parser.error("--encoder-dir requires --ranking bm25")
+        from onnx_encoder import OnnxSentenceEncoder, probe
+
+        encoder = OnnxSentenceEncoder(args.encoder_dir)
+        probe(encoder)
+    splits = SPLITS if args.split == "all" else (args.split,)
+    groups = load_groups()
+    try:
+        results = {
+            split: split_result(
+                [group for group in groups if group["split"] == split],
+                args.repetitions,
+                rankings,
+                encoder,
+            )
+            for split in splits
+        }
+    except InvalidRun as error:
+        print(json.dumps({"valid": False, "reason": str(error)}))
+        sys.exit(3)
+    result = results[args.split] if args.split != "all" else {"splits": results}
     result["peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     result["observational_counterfactual"] = "NOT ESTABLISHED"
+    if encoder is not None:
+        problems = [p for split in results.values() for p in split["invalid"]]
+        result["valid"] = not problems
     print(json.dumps(result, indent=2))
+    if encoder is not None and not result["valid"]:
+        sys.exit(3)
 
 
 if __name__ == "__main__":

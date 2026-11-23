@@ -1,0 +1,791 @@
+{
+ "generated_at_commit": "fe9b849",
+ "splits": {
+  "test_a": [
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "a40120dfa438440e1419b12813c7d53a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "a40120dfa438440e1419b12813c7d53a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "b3e1a95d3d6a7ac9081083a2dc41e635",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "b3e1a95d3d6a7ac9081083a2dc41e635",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "e25daa4688603e7446bb7f3ef262640f"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "ba2bf2faf2c0db4d7f37d3dbc6b4adb5",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "ba2bf2faf2c0db4d7f37d3dbc6b4adb5",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "d41b4e82099e315655d0ad14c7f0dbe6",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "665d38ba5977f6ddf387ed174a4641e9",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "2b0ebca48363af8da1b37b68b2c263e4",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "665d38ba5977f6ddf387ed174a4641e9",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "65c2100e7681127f70e327ac2387e4f7"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "076a8729e6f8af2c554f27b707b43dd5",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "076a8729e6f8af2c554f27b707b43dd5",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "8bc720aef4a0bbf53b5586d697d572e7",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "8bc720aef4a0bbf53b5586d697d572e7",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "bdf5bd4820919e36a4148baae107f0c8"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "fc84e9690980914bd6243e22cf77efe3",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "fc84e9690980914bd6243e22cf77efe3",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "61afb89cdbbfd481192a0a2e0f1fcb0a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "26750ad098bd281a06b929eaa9f10b18",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "8ca95a305e2fa902363b6041b29358ba",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "26750ad098bd281a06b929eaa9f10b18",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "beb2e84443c154c236f2fe20d9ee21f4"
+   }
+  ],
+  "test_b": [
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "7b65e8331f7f804794452ac5fe34a166",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "7b65e8331f7f804794452ac5fe34a166",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "0b6d0ac0f2b09704ba61bbfde21bba9a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "0b6d0ac0f2b09704ba61bbfde21bba9a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "85e7f9d4d305555005f57e9644e3a358"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "2852aa3a5580b85711d5b0d671044a98",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "2852aa3a5580b85711d5b0d671044a98",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "a912460d8ac6e35134309970cc75ebf8",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "4d403b786ffe934876283b8aa6e1d863",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "0375b5d45847775e6fc5a78418cbb133",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "4d403b786ffe934876283b8aa6e1d863",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "a9bc7a59cc50e5fab61cc099af1312d3"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.6131471927654584,
+      "packet_digest": "742c79818da63643cb9ee08b110383f8",
+      "recall": 0.5,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "1b295e66e9876a9a354c2392f4a08178",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "1b295e66e9876a9a354c2392f4a08178",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "38ae71bfa1da5de21d48322031f49df4",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "38ae71bfa1da5de21d48322031f49df4",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.6131471927654584,
+      "packet_digest": "f4242c8ec81d29b39ac5174aab3117b7",
+      "recall": 0.5,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "075df03502959120096305631bcbfaf1"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.6131471927654584,
+      "packet_digest": "b1a00207a499d2d0c08495413b04a788",
+      "recall": 0.5,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "lexical",
+      "ndcg": 0.6131471927654584,
+      "packet_digest": "b1a00207a499d2d0c08495413b04a788",
+      "recall": 0.5,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "fd733c69e450b3a8d8958af5d5097512",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "lexical",
+      "ndcg": 0.6131471927654584,
+      "packet_digest": "82996d8997671d2604db0de90d07c5cc",
+      "recall": 0.5,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "0b53b8482572a6b5a11a8565120ab981",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.6131471927654584,
+      "packet_digest": "82996d8997671d2604db0de90d07c5cc",
+      "recall": 0.5,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "dc76fe57ed5b3882bcc9cc5b72f3e2d0"
+   }
+  ],
+  "train": [
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "00b0774ca960c3ea79863ecaf1264098",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "00b0774ca960c3ea79863ecaf1264098",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "f984b62a51d4cfa1195bff28a377239a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 1.0,
+      "packet_digest": "f984b62a51d4cfa1195bff28a377239a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "856a97978b3605d74e223dda86508059"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "d082ae1f33c36ca6c39490b89243a07b",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "d082ae1f33c36ca6c39490b89243a07b",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "f85e7ee5a2cadc6551f90a5da246ce54",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "4d93784253ac367f80728719a32d765f",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "ca2649ad7cacf046d7861d403c717cb8",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "4d93784253ac367f80728719a32d765f",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "65428d27827cfb93b1509b32c7d8fe39"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "a457e4117c69916c2e89bba4b19b9649",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "a457e4117c69916c2e89bba4b19b9649",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "b7aeee17cd5c5480d9a882154fc3f1f4",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "b7aeee17cd5c5480d9a882154fc3f1f4",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.0,
+      "packet_digest": "ecf367fbbc220dd0522cc0344b87e02d",
+      "recall": 0.0,
+      "satisfied": false,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "e3d45719c6caedaf2b06e89f04b780b2"
+   },
+   {
+    "arms": {
+     "bm25": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "ba7a4837b8b9774e74604bd42ce78e4a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "ba7a4837b8b9774e74604bd42ce78e4a",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "bm25_hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "d943440165a4887d5c33f941733a2461",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "guarded": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "67e4471592978b70223ecdf0b3c7863f",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     },
+     "hybrid": {
+      "mode": "hybrid",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "350067dbcf3ac61883b5d2ff7d6a4cdf",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "fresh",
+      "time_leaks": 0
+     },
+     "lexical": {
+      "mode": "lexical",
+      "ndcg": 0.9197207891481876,
+      "packet_digest": "67e4471592978b70223ecdf0b3c7863f",
+      "recall": 1.0,
+      "satisfied": true,
+      "scope_leaks": 0,
+      "status": "default_lexical",
+      "time_leaks": 0
+     }
+    },
+    "task": "fc19c42b5d0666b34cb3cc881f7a2f0c"
+   }
+  ]
+ }
+}
