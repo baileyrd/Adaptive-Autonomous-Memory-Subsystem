@@ -1,0 +1,448 @@
+{
+  "groups": [
+    {
+      "domain": "shipping",
+      "split": "train",
+      "days": [
+        1,
+        2
+      ],
+      "records": [
+        [
+          "shi1",
+          "shipping",
+          1,
+          "parcel arrived late",
+          "shi-origin"
+        ],
+        [
+          "shi2",
+          "shipping",
+          1,
+          "delivery arrived after deadline",
+          "shi-counter"
+        ],
+        [
+          "shi3",
+          "shipping",
+          1,
+          "parcel arrived late",
+          "shi-origin"
+        ],
+        [
+          "shi4",
+          "shipping",
+          2,
+          "future record: parcel arrived late",
+          "shi-future"
+        ],
+        [
+          "shi5",
+          "private-shipping",
+          1,
+          "shipment delayed",
+          "shi-private"
+        ]
+      ],
+      "tasks": [
+        {
+          "query": "shipment delayed",
+          "day": 1,
+          "opt_in": true,
+          "relevant": [
+            "shi1",
+            "shi2"
+          ],
+          "required": [
+            "shi1"
+          ],
+          "contradiction": false
+        },
+        {
+          "query": "parcel arrived late",
+          "day": 1,
+          "opt_in": false,
+          "relevant": [
+            "shi1",
+            "shi2"
+          ],
+          "required": [
+            "shi1",
+            "shi2"
+          ],
+          "contradiction": false
+        }
+      ]
+    },
+    {
+      "domain": "facilities",
+      "split": "train",
+      "days": [
+        3,
+        4
+      ],
+      "records": [
+        [
+          "fac1",
+          "facilities",
+          3,
+          "the fan has seized",
+          "fac-origin"
+        ],
+        [
+          "fac2",
+          "facilities",
+          3,
+          "fan remains operational",
+          "fac-counter"
+        ],
+        [
+          "fac3",
+          "facilities",
+          3,
+          "the fan has seized",
+          "fac-origin"
+        ],
+        [
+          "fac4",
+          "facilities",
+          4,
+          "future record: the fan has seized",
+          "fac-future"
+        ],
+        [
+          "fac5",
+          "private-facilities",
+          3,
+          "ventilation stopped",
+          "fac-private"
+        ]
+      ],
+      "tasks": [
+        {
+          "query": "ventilation stopped",
+          "day": 3,
+          "opt_in": true,
+          "relevant": [
+            "fac1",
+            "fac2"
+          ],
+          "required": [
+            "fac1"
+          ],
+          "contradiction": false
+        },
+        {
+          "query": "the fan has seized",
+          "day": 3,
+          "opt_in": false,
+          "relevant": [
+            "fac1",
+            "fac2"
+          ],
+          "required": [
+            "fac1",
+            "fac2"
+          ],
+          "contradiction": true
+        }
+      ]
+    },
+    {
+      "domain": "botany",
+      "split": "test_a",
+      "days": [
+        5,
+        6
+      ],
+      "records": [
+        [
+          "bot1",
+          "botany",
+          5,
+          "orchard trees are flowering",
+          "bot-origin"
+        ],
+        [
+          "bot2",
+          "botany",
+          5,
+          "fruit trees entered bloom",
+          "bot-counter"
+        ],
+        [
+          "bot3",
+          "botany",
+          5,
+          "orchard trees are flowering",
+          "bot-origin"
+        ],
+        [
+          "bot4",
+          "botany",
+          6,
+          "future record: orchard trees are flowering",
+          "bot-future"
+        ],
+        [
+          "bot5",
+          "private-botany",
+          5,
+          "spring blossom",
+          "bot-private"
+        ]
+      ],
+      "tasks": [
+        {
+          "query": "spring blossom",
+          "day": 5,
+          "opt_in": true,
+          "relevant": [
+            "bot1",
+            "bot2"
+          ],
+          "required": [
+            "bot1"
+          ],
+          "contradiction": false
+        },
+        {
+          "query": "orchard trees are flowering",
+          "day": 5,
+          "opt_in": false,
+          "relevant": [
+            "bot1",
+            "bot2"
+          ],
+          "required": [
+            "bot1",
+            "bot2"
+          ],
+          "contradiction": false
+        }
+      ]
+    },
+    {
+      "domain": "weather",
+      "split": "test_a",
+      "days": [
+        7,
+        8
+      ],
+      "records": [
+        [
+          "wea1",
+          "weather",
+          7,
+          "rain forecast for the harbor",
+          "wea-origin"
+        ],
+        [
+          "wea2",
+          "weather",
+          7,
+          "showers expected near the docks",
+          "wea-counter"
+        ],
+        [
+          "wea3",
+          "weather",
+          7,
+          "rain forecast for the harbor",
+          "wea-origin"
+        ],
+        [
+          "wea4",
+          "weather",
+          8,
+          "future record: rain forecast for the harbor",
+          "wea-future"
+        ],
+        [
+          "wea5",
+          "private-weather",
+          7,
+          "port precipitation",
+          "wea-private"
+        ]
+      ],
+      "tasks": [
+        {
+          "query": "port precipitation",
+          "day": 7,
+          "opt_in": true,
+          "relevant": [
+            "wea1",
+            "wea2"
+          ],
+          "required": [
+            "wea1"
+          ],
+          "contradiction": false
+        },
+        {
+          "query": "rain forecast for the harbor",
+          "day": 7,
+          "opt_in": false,
+          "relevant": [
+            "wea1",
+            "wea2"
+          ],
+          "required": [
+            "wea1",
+            "wea2"
+          ],
+          "contradiction": false
+        }
+      ]
+    },
+    {
+      "domain": "transport",
+      "split": "test_b",
+      "days": [
+        9,
+        10
+      ],
+      "records": [
+        [
+          "tra1",
+          "transport",
+          9,
+          "rear wheel pressure is low",
+          "tra-origin"
+        ],
+        [
+          "tra2",
+          "transport",
+          9,
+          "wheel pressure checked and normal",
+          "tra-counter"
+        ],
+        [
+          "tra3",
+          "transport",
+          9,
+          "rear wheel pressure is low",
+          "tra-origin"
+        ],
+        [
+          "tra4",
+          "transport",
+          10,
+          "future record: rear wheel pressure is low",
+          "tra-future"
+        ],
+        [
+          "tra5",
+          "private-transport",
+          9,
+          "underinflated tyre",
+          "tra-private"
+        ]
+      ],
+      "tasks": [
+        {
+          "query": "underinflated tyre",
+          "day": 9,
+          "opt_in": true,
+          "relevant": [
+            "tra1",
+            "tra2"
+          ],
+          "required": [
+            "tra1"
+          ],
+          "contradiction": false
+        },
+        {
+          "query": "rear wheel pressure is low",
+          "day": 9,
+          "opt_in": false,
+          "relevant": [
+            "tra1",
+            "tra2"
+          ],
+          "required": [
+            "tra1",
+            "tra2"
+          ],
+          "contradiction": true
+        }
+      ]
+    },
+    {
+      "domain": "archives",
+      "split": "test_b",
+      "days": [
+        11,
+        12
+      ],
+      "records": [
+        [
+          "arc1",
+          "archives",
+          11,
+          "a verified snapshot was restored",
+          "arc-origin"
+        ],
+        [
+          "arc2",
+          "archives",
+          11,
+          "database recovery used the saved copy",
+          "arc-counter"
+        ],
+        [
+          "arc3",
+          "archives",
+          11,
+          "a verified snapshot was restored",
+          "arc-origin"
+        ],
+        [
+          "arc4",
+          "archives",
+          12,
+          "future record: a verified snapshot was restored",
+          "arc-future"
+        ],
+        [
+          "arc5",
+          "private-archives",
+          11,
+          "recover a backup",
+          "arc-private"
+        ]
+      ],
+      "tasks": [
+        {
+          "query": "recover a backup",
+          "day": 11,
+          "opt_in": true,
+          "relevant": [
+            "arc1",
+            "arc2"
+          ],
+          "required": [
+            "arc1"
+          ],
+          "contradiction": false
+        },
+        {
+          "query": "a verified snapshot was restored",
+          "day": 11,
+          "opt_in": false,
+          "relevant": [
+            "arc1",
+            "arc2"
+          ],
+          "required": [
+            "arc1",
+            "arc2"
+          ],
+          "contradiction": false
+        }
+      ]
+    }
+  ]
+}
