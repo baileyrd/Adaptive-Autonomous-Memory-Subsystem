@@ -128,13 +128,24 @@ def build_server(store: SQLiteMemoryStore, access: AccessContext) -> Server:
             if winner_time is None or winner_time == recorded_at:
                 raise
             retry_record = Evidence(
-                record.evidence_id, record.scope, record.source_actor,
-                record.source_locator, record.producer, record.observed_at,
-                winner_time, record.status, record.payload, record.digest,
+                record.evidence_id,
+                record.scope,
+                record.source_actor,
+                record.source_locator,
+                record.producer,
+                record.observed_at,
+                winner_time,
+                record.status,
+                record.payload,
+                record.digest,
             )
             retry_formation = MemoryFormation(
-                formation.formation_id, formation.scope, formation.kind,
-                formation.evidence_ids, formation.producer, winner_time,
+                formation.formation_id,
+                formation.scope,
+                formation.kind,
+                formation.evidence_ids,
+                formation.producer,
+                winner_time,
                 formation.epistemic_state,
             )
             store.ingest(access, args.request_key, retry_formation, (retry_record,))
