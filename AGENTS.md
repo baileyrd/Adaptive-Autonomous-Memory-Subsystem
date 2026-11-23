@@ -6,15 +6,15 @@ Goal: https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1
 ## Start or resume
 - Read main, open issues #1–#7, PRs, CI, previous review feedback and `docs/MVP_SPEC.md`.
 - Do not create overlapping implementations or duplicate PRs.
-- Work on the first dependency-unblocked issue in order #2, #3, #4, #5, #6, #7.
+- Work on the first dependency-unblocked issue from the active coordination hub.
 - Use the [AAMS v0.1.0 design dossier](docs/design/v0.1.0/README.md) and follow the scope reconciliation in the MVP specification.
 - Keep canonical data semantics independent of MCP and optional neural indexes.
 
 ## GitHub coordination
 
-- Use [issue #1](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1) as the coordination hub. Read its latest comments when starting, resuming, and before moving to another implementation slice.
+- For v0.2 work, use [issue #14](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/14) as the coordination hub. Issue #1 retains the v0.1 release history. Read its latest comments when starting, resuming, and before moving to another implementation slice.
 - Follow the links to the active implementation issue and PR. Read the PR conversation, review submissions, and inline review threads. Check CI on the current head and address or explicitly route outstanding findings before advancing.
-- At each handoff, update issue #1 with the implementation issue and PR, current state, verification, any blockers, and one next action. Record code-specific findings and their resolution on the associated PR so the next session can pick up directly from GitHub.
+- At each handoff, update the active coordination issue with the implementation issue and PR, current state, verification, any blockers, and one next action. Record code-specific findings and their resolution on the associated PR so the next session can pick up directly from GitHub.
 
 ## Development loop
 Plan -> implement one bounded vertical slice -> validate locally -> open linked PR -> address material findings -> merge **only if authorized** and required CI/repository protections pass -> advance. Independent review is encouraged when available, but it is not an AAMS-imposed prerequisite. Never fabricate checks, invent Codex task IDs, or claim CI passed without run evidence. Prefer direct, reproducible tests and one clear next action. Preserve all GitHub issue/PR links for resumption.

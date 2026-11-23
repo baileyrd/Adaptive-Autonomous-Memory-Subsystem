@@ -235,23 +235,27 @@ class SQLiteMemoryStore:
                 ).fetchone()
                 if row is None:
                     return None
-                values = dict(row)
-                values["kind"] = MemoryKind(values["kind"])
-                values["epistemic_state"] = EpistemicState(values["epistemic_state"])
-                values["evidence_ids"] = tuple(
-                    link["evidence_id"]
-                    for link in db.execute(
-                        """SELECT evidence_id FROM formation_evidence
-                           WHERE scope=? AND formation_id=? ORDER BY position""",
-                        (access.scope, formation_id),
-                    )
-                )
-                return MemoryFormation(**values)
+                return self._decode_formation(db, row)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify formation") from error
 
+    @staticmethod
+    def _decode_formation(db: sqlite3.Connection, row: sqlite3.Row) -> MemoryFormation:
+        values = dict(row)
+        values["kind"] = MemoryKind(values["kind"])
+        values["epistemic_state"] = EpistemicState(values["epistemic_state"])
+        values["evidence_ids"] = tuple(
+            link["evidence_id"]
+            for link in db.execute(
+                """SELECT evidence_id FROM formation_evidence
+                   WHERE scope=? AND formation_id=? ORDER BY position""",
+                (row["scope"], row["formation_id"]),
+            )
+        )
+        return MemoryFormation(**values)
+
     def verify_integrity(self) -> None:
-        """Check physical integrity, scoped references and all stored evidence digests."""
+        """Check SQLite structure, scoped references and canonical record invariants."""
         try:
             with closing(self._connect()) as db, db:
                 db.execute("BEGIN")
@@ -261,6 +265,10 @@ class SQLiteMemoryStore:
                     raise StoreIntegrityError("A canonical reference is broken")
                 for row in db.execute("SELECT * FROM evidence"):
                     self._decode_evidence(row)
+                for row in db.execute("SELECT * FROM formation"):
+                    self._decode_formation(db, row)
+                for row in db.execute("SELECT * FROM belief_revision"):
+                    self._decode_revision(db, row)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify memory store") from error
 
