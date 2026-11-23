@@ -72,10 +72,7 @@ class CandidateTransitionRequest:
     def __post_init__(self) -> None:
         require_text(self.candidate_id, self.scope, self.actor, self.rationale)
         object.__setattr__(self, "requested_at", utc_timestamp(self.requested_at))
-        if (
-            type(self.from_state) is not CandidateState
-            or type(self.to_state) is not CandidateState
-        ):
+        if type(self.from_state) is not CandidateState or type(self.to_state) is not CandidateState:
             raise ValueError("Candidate transitions require valid states")
         if self.to_state not in _ALLOWED[self.from_state]:
             raise ValueError("Illegal candidate transition")
