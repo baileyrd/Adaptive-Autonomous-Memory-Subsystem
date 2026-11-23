@@ -21,7 +21,6 @@ OBSERVATION = {
     "source_actor": "station-1",
     "source_locator": "station:1/gauge/1",
     "observed_at": OBSERVED_AT,
-    "recorded_at": OBSERVED_AT,
 }
 
 
