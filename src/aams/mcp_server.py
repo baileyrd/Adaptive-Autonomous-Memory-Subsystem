@@ -5,6 +5,7 @@ import asyncio
 import json
 import sys
 from dataclasses import asdict
+from datetime import UTC, datetime
 from hashlib import sha256
 from typing import Annotated, Literal
 
@@ -36,7 +37,6 @@ class FormInput(ToolInput):
     source_actor: Identifier
     source_locator: Annotated[str, Field(min_length=1, max_length=512)]
     observed_at: Timestamp
-    recorded_at: Timestamp
     kind: MemoryKind = MemoryKind.EXPERIENCE
 
 
@@ -73,6 +73,10 @@ class ReviseInput(ToolInput):
     confidence_basis: Text | None = None
 
 
+def _now() -> str:
+    return datetime.now(UTC).isoformat(timespec="microseconds")
+
+
 def _success(value: dict) -> types.CallToolResult:
     return types.CallToolResult(
         structuredContent=value, content=[types.TextContent(type="text", text=json.dumps(value))]
@@ -94,6 +98,7 @@ def build_server(store: SQLiteMemoryStore, access: AccessContext) -> Server:
         key = json.dumps([access.scope, access.principal, args.request_key])
         token = sha256(key.encode()).hexdigest()
         payload = args.text.encode()
+        recorded_at = store.ingestion_time(access, args.request_key) or _now()
         record = Evidence(
             "ev-" + token,
             access.scope,
@@ -101,7 +106,7 @@ def build_server(store: SQLiteMemoryStore, access: AccessContext) -> Server:
             args.source_locator,
             access.principal,
             args.observed_at,
-            args.recorded_at,
+            recorded_at,
             EvidenceStatus.UNVERIFIED,
             payload,
             "sha256:" + sha256(payload).hexdigest(),
@@ -115,7 +120,24 @@ def build_server(store: SQLiteMemoryStore, access: AccessContext) -> Server:
             record.recorded_at,
             EpistemicState.OBSERVED,
         )
-        store.ingest(access, args.request_key, formation, (record,))
+        try:
+            store.ingest(access, args.request_key, formation, (record,))
+        except WriteConflict:
+            # A concurrent process may have committed this key after the first read.
+            winner_time = store.ingestion_time(access, args.request_key)
+            if winner_time is None or winner_time == recorded_at:
+                raise
+            retry_record = Evidence(
+                record.evidence_id, record.scope, record.source_actor,
+                record.source_locator, record.producer, record.observed_at,
+                winner_time, record.status, record.payload, record.digest,
+            )
+            retry_formation = MemoryFormation(
+                formation.formation_id, formation.scope, formation.kind,
+                formation.evidence_ids, formation.producer, winner_time,
+                formation.epistemic_state,
+            )
+            store.ingest(access, args.request_key, retry_formation, (retry_record,))
         return {"formation_id": formation.formation_id, "evidence_id": record.evidence_id}
 
     def recall(args: RecallInput) -> dict:
