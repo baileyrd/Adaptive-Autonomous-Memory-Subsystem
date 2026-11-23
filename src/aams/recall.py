@@ -1,10 +1,10 @@
 """Deterministic, model-neutral retrieval and provenance packaging."""
 
 import json
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
 from math import fsum, isfinite, sqrt
-from re import findall
 from typing import Literal
 
 from .contracts import (
@@ -15,6 +15,7 @@ from .contracts import (
     require_text,
     utc_timestamp,
 )
+from .ranking import LexicalRanking, bm25_scores, tokens
 from .representations import RepresentationProvider, RepresentationSpec
 from .retrieval_routing import (
     RetrievalMode,
@@ -29,8 +30,8 @@ Entity = Literal["formation", "belief", "evidence"]
 _PREVIEW_BYTES = 512
 
 
-def _tokens(text: str) -> set[str]:
-    return set(findall(r"[^\W_]+", text.casefold()))
+def _tokens(text: str) -> frozenset[str]:
+    return frozenset(tokens(text))
 
 
 def _encoded_size(value: dict) -> int:
@@ -101,11 +102,21 @@ class CognitiveNeed:
 
 
 class CognitiveMemory:
-    def __init__(self, store: SQLiteMemoryStore, *, shadow: ShadowObserver | None = None) -> None:
+    def __init__(
+        self,
+        store: SQLiteMemoryStore,
+        *,
+        shadow: ShadowObserver | None = None,
+        lexical_ranking: LexicalRanking = LexicalRanking.OVERLAP,
+    ) -> None:
+        """``lexical_ranking`` is host configuration, never a per-request caller input."""
         if shadow is not None and type(shadow) is not ShadowObserver:
             raise ValueError("Expected a native ShadowObserver")
+        if type(lexical_ranking) is not LexicalRanking:
+            raise ValueError("Expected a supported lexical ranking")
         self.store = store
         self._shadow = shadow
+        self._lexical_ranking = lexical_ranking
 
     def recall(
         self,
@@ -214,24 +225,39 @@ class CognitiveMemory:
             effective_at=need.effective_at,
             kinds=need.kinds,
         )
-        ranked = []
+        full_text = self._lexical_ranking is LexicalRanking.BM25
+        entries = []
         for record, evidence in candidates:
             item = self._with_citations(need, record, evidence.get)
             searchable = [item["id"], item.get("proposition", ""), item.get("kind", "")]
             semantic_score, source = 0.0, None
             for citation in item["citations"]:
-                searchable.extend((citation["preview"], citation["source_locator"]))
                 source_id = citation["evidence_id"]
+                text = citation["preview"]
+                if full_text:
+                    text = evidence[source_id].payload.decode("utf-8", errors="replace")
+                searchable.extend((text, citation["source_locator"]))
                 digest, score = scores.get(source_id, (None, 0.0))
                 if digest == citation["digest"] and score > semantic_score:
                     semantic_score, source = score, source_id
-            matched = sorted(terms.intersection(_tokens(" ".join(searchable))))
+            entries.append((item, Counter(tokens(" ".join(searchable))), semantic_score, source))
+        weights = bm25_scores(terms, [words for _, words, _, _ in entries]) if full_text else ()
+        peak = max(weights, default=0.0) or 1.0
+        ranked = []
+        for position, (item, words, semantic_score, source) in enumerate(entries):
+            matched = sorted(terms.intersection(words))
             if not matched and not semantic_score:
                 continue
-            relevance = {"score": len(matched), "matched_terms": matched}
+            lexical = weights[position] / peak if full_text else len(matched) / len(terms)
+            relevance = {
+                "score": round(weights[position], 12) if full_text else len(matched),
+                "matched_terms": matched,
+            }
+            if full_text:
+                relevance["ranker"] = LexicalRanking.BM25.value
             if scores:
                 relevance.update(
-                    score=round((len(matched) / len(terms) + semantic_score) / 2, 12),
+                    score=round((lexical + semantic_score) / 2, 12),
                     lexical_matches=len(matched),
                     semantic_score=round(semantic_score, 12),
                 )

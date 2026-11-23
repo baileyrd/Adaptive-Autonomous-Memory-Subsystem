@@ -39,7 +39,9 @@ FIXTURE = {
 
 
 class RetrievalBenchmarkTest(unittest.TestCase):
-    def run_benchmark(self, payload: bytes, digest: str) -> subprocess.CompletedProcess:
+    def run_benchmark(
+        self, payload: bytes, digest: str, *extra: str
+    ) -> subprocess.CompletedProcess:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "squad.json"
             path.write_bytes(payload)
@@ -53,8 +55,10 @@ class RetrievalBenchmarkTest(unittest.TestCase):
                     digest,
                     "--questions-per-paragraph",
                     "1",
+                    *extra,
                 ],
                 capture_output=True,
+                check=False,
                 text=True,
                 timeout=60,
             )
@@ -81,6 +85,19 @@ class RetrievalBenchmarkTest(unittest.TestCase):
                 self.assertLessEqual(comparison["mean_delta"], high)
                 total = comparison["wins"] + comparison["losses"] + comparison["ties"]
                 self.assertEqual(total, split["tasks"])
+
+    def test_ranking_arms_are_compared_against_guarded_without_leaks(self):
+        payload = json.dumps(FIXTURE).encode()
+        completed = self.run_benchmark(payload, sha256(payload).hexdigest(), "--ranking", "bm25")
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        result = json.loads(completed.stdout)
+        for split in (result[name] for name in ("design", "heldout") if name in result):
+            for arm in ("bm25", "bm25_hybrid"):
+                profile = split["profiles"][arm]
+                self.assertEqual(profile["scope_leaks"] + profile["time_leaks"], 0)
+                self.assertIn(arm, split["versus_guarded"])
+            best = max(split["profiles"][arm]["satisfied"] for arm in ("bm25", "bm25_hybrid"))
+            self.assertGreaterEqual(split["oracle_bm25_router"]["satisfied"], best)
 
     def test_checksum_mismatch_is_rejected_before_processing(self):
         completed = self.run_benchmark(json.dumps(FIXTURE).encode(), "0" * 64)

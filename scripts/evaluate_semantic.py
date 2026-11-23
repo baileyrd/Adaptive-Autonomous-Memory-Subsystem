@@ -12,6 +12,7 @@ from pathlib import Path
 from time import perf_counter_ns, process_time_ns
 
 from aams.contracts import EpistemicState, Evidence, EvidenceStatus, MemoryFormation, MemoryKind
+from aams.ranking import LexicalRanking
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.representations import DeterministicFixtureProvider, RepresentationSpec
 from aams.storage import AccessContext, SQLiteMemoryStore
@@ -116,7 +117,7 @@ def assess(queries, packets):
     }
 
 
-def evaluate(path, mode, repetitions):
+def evaluate(path, mode, repetitions, ranking=LexicalRanking.OVERLAP):
     fixture = json.loads(FIXTURE.read_text())
     store = SQLiteMemoryStore(path)
     for row in fixture["evidence"]:
@@ -133,7 +134,7 @@ def evaluate(path, mode, repetitions):
             raise RuntimeError("Expected a fresh batch")
         vectors = len(snapshot.vectors)
     index_bytes = path.stat().st_size - db_size
-    engine = CognitiveMemory(store)
+    engine = CognitiveMemory(store, lexical_ranking=ranking)
     needs = [
         CognitiveNeed(
             query=item["text"],
@@ -162,6 +163,7 @@ def evaluate(path, mode, repetitions):
         stale_fallback = recall(needs[0])["retrieval"]["status"]
     return {
         "mode": mode,
+        "lexical_ranking": ranking.value,
         "environment": platform.platform(),
         "python": platform.python_version(),
         "provider": repr(provider.spec) if provider else None,
@@ -183,11 +185,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=("lexical", "fixture", "neural"))
     parser.add_argument("--repetitions", type=int, default=20)
+    parser.add_argument(
+        "--ranking", choices=[item.value for item in LexicalRanking], default="overlap"
+    )
     args = parser.parse_args()
     if args.repetitions < 1:
         parser.error("Use at least one repetition")
     with tempfile.TemporaryDirectory(prefix="aams-semantic-") as directory:
-        result = evaluate(Path(directory) / "memory.db", args.mode, args.repetitions)
+        result = evaluate(
+            Path(directory) / "memory.db",
+            args.mode,
+            args.repetitions,
+            LexicalRanking(args.ranking),
+        )
     print(json.dumps(result, indent=2))
 
 

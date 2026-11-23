@@ -18,9 +18,10 @@ from random import Random
 from offline_experiment import replay, summarize
 from train_offline_candidate import fit
 
+from aams.ranking import LexicalRanking
+
 SQUAD_SHA256 = "95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9"
 PREVIEW_BYTES = 512  # Mirrors aams.recall._PREVIEW_BYTES, the lexically matched window.
-STRATEGIES = ("lexical", "hybrid", "guarded", "staged")
 SPLITS = ("design", "heldout")
 DAY = 15
 
@@ -111,9 +112,9 @@ def paired(rows: list[dict], details: list[dict], strategy: str, baseline: str) 
     }
 
 
-def oracle(rows: list[dict]) -> dict:
-    """Best of lexical and hybrid per task: the ceiling for any two-arm router."""
-    arms = [[row["measurements"][key] for key in ("lexical", "hybrid")] for row in rows]
+def oracle(rows: list[dict], keys: tuple[str, str] = ("lexical", "hybrid")) -> dict:
+    """Best of two arms per task: the ceiling for any router choosing between them."""
+    arms = [[row["measurements"][key] for key in keys] for row in rows]
     return {
         "satisfied": sum(any(arm["satisfied"] for arm in pair) for pair in arms),
         "ndcg_at_3": round(statistics.mean(max(arm["ndcg"] for arm in pair) for pair in arms), 4),
@@ -121,13 +122,14 @@ def oracle(rows: list[dict]) -> dict:
 
 
 def split_report(rows: list[dict], details: list[dict]) -> dict:
+    strategies = tuple(rows[0]["measurements"])
     report = {
         "tasks": len(rows),
         "articles": len({detail["article"] for detail in details}),
-        "profiles": {key: summarize(rows, key) for key in STRATEGIES},
+        "profiles": {key: summarize(rows, key) for key in strategies},
         "oracle_router": oracle(rows),
         "versus_guarded": {
-            key: paired(rows, details, key, "guarded") for key in ("lexical", "hybrid", "staged")
+            key: paired(rows, details, key, "guarded") for key in strategies if key != "guarded"
         },
         "short_query_fraction": round(
             statistics.mean(row["features"]["short_query"] for row in rows), 4
@@ -138,6 +140,8 @@ def split_report(rows: list[dict], details: list[dict]) -> dict:
         / len(rows),
         4,
     )
+    for ranking in (key for key in strategies if f"{key}_hybrid" in strategies):
+        report[f"oracle_{ranking}_router"] = oracle(rows, (ranking, f"{ranking}_hybrid"))
     lexical = [row["measurements"]["lexical"] for row in rows]
     hybrid = [row["measurements"]["hybrid"] for row in rows]
     report["hybrid_vs_lexical_ndcg"] = {
@@ -164,12 +168,20 @@ def split_report(rows: list[dict], details: list[dict]) -> dict:
     return report
 
 
-def evaluate(data: dict, per_paragraph: int, repetitions: int) -> dict:
+def evaluate(
+    data: dict, per_paragraph: int, repetitions: int, rankings: tuple[LexicalRanking, ...] = ()
+) -> dict:
     groups, details = squad_groups(data, per_paragraph)
     staged = fit(1)
     records = [row for group in groups for row in group["records"] if row[1] == group["domain"]]
     with tempfile.TemporaryDirectory(prefix="aams-retrieval-") as directory:
-        rows = replay(Path(directory) / "bench.db", groups, repetitions, staged.suggests_hybrid)
+        rows = replay(
+            Path(directory) / "bench.db",
+            groups,
+            repetitions,
+            staged.suggests_hybrid,
+            rankings=rankings,
+        )
     for row in rows:
         row["measurements"]["staged"] = row["measurements"].pop("candidate")
     result = {
@@ -192,6 +204,15 @@ def main() -> None:
     parser.add_argument("--questions-per-paragraph", type=int, default=5)
     parser.add_argument("--repetitions", type=int, default=1)
     parser.add_argument("--max-articles", type=int, help="Use only the first N articles")
+    parser.add_argument(
+        "--ranking",
+        action="append",
+        default=[],
+        choices=[
+            ranking.value for ranking in LexicalRanking if ranking is not LexicalRanking.OVERLAP
+        ],
+        help="Add a candidate lexical ranking arm and its hybrid variant",
+    )
     args = parser.parse_args()
     if not 1 <= args.repetitions <= 20 or not 1 <= args.questions_per_paragraph <= 10:
         parser.error("Use 1 to 20 repetitions and 1 to 10 questions per paragraph")
@@ -209,7 +230,12 @@ def main() -> None:
         "articles": len(data["data"]),
         "questions_per_paragraph": args.questions_per_paragraph,
         "repetitions": args.repetitions,
-        **evaluate(data, args.questions_per_paragraph, args.repetitions),
+        **evaluate(
+            data,
+            args.questions_per_paragraph,
+            args.repetitions,
+            tuple(LexicalRanking(value) for value in dict.fromkeys(args.ranking)),
+        ),
         "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     }
     print(json.dumps(result, indent=2))
