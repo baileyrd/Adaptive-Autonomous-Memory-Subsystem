@@ -1,6 +1,6 @@
 # ADR-0009: Scoped BM25 lexical ranking as host configuration
 
-Status: Proposed
+Status: Accepted (BM25 default since the owner decision on #79, 2026-11-23)
 Date: 2026-11-23
 Tracking: v0.8 goal #79 / #81
 
@@ -23,5 +23,5 @@ With `BM25`:
 
 - No new dependency, schema, persisted state or network use. Representation providers stay optional.
 - Cost is linear in the visible candidates, as before. Full-payload tokenization is memoized in a per-instance LRU of 4,096 entries, keyed by `(scope, evidence_id, digest)`. This is safe because evidence is immutable, and the cache is filled only from records an authorized scan returned. Without the cache, p95 rose by 30 ms at about 324 records per scope; with it, by about 1 ms. A persisted inverted index is deferred until a measured scale need exists.
-- Changing the default is a separate decision. It needs the #79 gate on independent workloads, a migration note for consumers that read `relevance.score`, and explicit authorization. This ADR does not change the default.
+- **Default.** After held-out SQuAD, independent SQuAD-train and low-overlap SciFact validation, the owner approved BM25 as the default on #79. `OVERLAP` remains selectable for compatibility and rollback. The migration note is in [recall](../recall.md#migrating-from-v07-and-earlier). Historical evaluation scripts pin `OVERLAP` so published v0.3–v0.7 audits stay reproducible.
 - No learned or live routing policy is activated, and no memory authority changes.

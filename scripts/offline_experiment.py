@@ -16,6 +16,7 @@ from evaluate_semantic import seed, timestamp
 
 from aams.offline_policy import EvidenceBasis, OfflineOutcome, OfflineRiskBudget, OutcomeLabel
 from aams.offline_policy import compare_controlled
+from aams.ranking import LexicalRanking
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.representations import DeterministicFixtureProvider
 from aams.retrieval_routing import ROUTING_POLICY_VERSION, RetrievalMode
@@ -84,7 +85,8 @@ def replay(
     store = SQLiteMemoryStore(path)
     provider = DeterministicFixtureProvider()
     index = RepresentationIndex(store)
-    memory = CognitiveMemory(store)
+    # Historical baselines keep the legacy ranker so published audits stay reproducible.
+    memory = CognitiveMemory(store, lexical_ranking=LexicalRanking.OVERLAP)
     ranked = {ranking: CognitiveMemory(store, lexical_ranking=ranking) for ranking in rankings}
     for group in groups:
         for identifier, scope, day, text, origin in group["records"]:
@@ -101,7 +103,9 @@ def replay(
             observer = ShadowObserver(
                 access, ShadowConfig(ShadowMode.OBSERVE_ONLY, cap), shadow_artifact
             )
-            observed_memory = CognitiveMemory(store, shadow=observer)
+            observed_memory = CognitiveMemory(
+                store, shadow=observer, lexical_ranking=LexicalRanking.OVERLAP
+            )
         visible = {row[0]: row[2] for row in group["records"] if row[1] == scope}
         for ordinal, task in enumerate(group["tasks"]):
             need = CognitiveNeed(

@@ -59,6 +59,7 @@ class MCPTest(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(historical.structured_content["items"], [])
             current = await client.call_tool("memory_recall", {"query": "backdate"})
             [item] = current.structured_content["items"]
+            self.assertEqual(item["relevance"]["ranker"], "bm25")
             self.assertGreater(item["recorded_at"], "2026-01-01")
             self.assertEqual(
                 item["citations"][0]["observed_at"], "2019-06-01T00:00:00.000000+00:00"

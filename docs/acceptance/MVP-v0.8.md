@@ -9,7 +9,7 @@ The [v0.8 goal](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem
 | Engineering complete | **Yes.** The benchmark (#80) and the scoped BM25 ranker (#81) are merged with unit, security and benchmark tests. |
 | Experiment complete | **Yes.** Lexical, hybrid, guarded, staged, the oracle router and BM25 arms were measured on identical inputs over two independent public workloads and the existing synthetic fixtures. |
 | Performance improvement validated | **Yes, offline, for BM25 ranking under guarded routing**, within the measured scope. It passed every pre-registered #79 criterion on held-out development articles and on separate SQuAD training articles. No learned routing policy qualified. |
-| Deployment ready | **No.** Overlap is still the default. Changing it requires explicit authorization and a consumer migration note for `relevance.score`. Production traffic and concurrency remain untested. |
+| Deployment ready | **Partially.** With owner approval, BM25 is now the default lexical ranker, with a migration note and overlap rollback. Production traffic, sustained concurrency and very large scopes remain untested, and no learned or neural policy is active. |
 
 ## Root causes (measured, [audit](../audit/retrieval-root-cause.md))
 
@@ -44,7 +44,7 @@ SQuAD questions overlap lexically with their passages. SciFact supplies a second
 
 ## Recommendation
 
-Keep guarded routing. The owner chose to keep BM25 opt-in pending this check. The low-overlap, cross-domain SciFact check found no regression and a larger gain, so making BM25 the default is now supported by the evidence. It remains a separate, explicitly authorized change, because it alters `relevance.score` semantics. Prioritize a real local sentence-embedding evaluation (#84) over further policy learning, because routing headroom only returns once the semantic arm is actually semantic.
+Keep guarded routing. The owner kept BM25 opt-in until the low-overlap, cross-domain SciFact check passed, then approved it as the default on #79. It is now the default, with `LexicalRanking.OVERLAP` as rollback. Prioritize a real local sentence-embedding evaluation (#84) over further policy learning, because routing headroom only returns once the semantic arm is actually semantic.
 
 ## Reproduce
 

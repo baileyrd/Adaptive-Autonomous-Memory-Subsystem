@@ -108,9 +108,13 @@ class CognitiveMemory:
         store: SQLiteMemoryStore,
         *,
         shadow: ShadowObserver | None = None,
-        lexical_ranking: LexicalRanking = LexicalRanking.OVERLAP,
+        lexical_ranking: LexicalRanking = LexicalRanking.BM25,
     ) -> None:
-        """``lexical_ranking`` is host configuration, never a per-request caller input."""
+        """``lexical_ranking`` is host configuration, never a per-request caller input.
+
+        BM25 is the default since v0.8. ``LexicalRanking.OVERLAP`` keeps the legacy ranker for
+        compatibility and rollback.
+        """
         if shadow is not None and type(shadow) is not ShadowObserver:
             raise ValueError("Expected a native ShadowObserver")
         if type(lexical_ranking) is not LexicalRanking:
