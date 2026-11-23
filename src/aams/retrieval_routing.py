@@ -62,9 +62,7 @@ def choose_retrieval_mode(request: RetrievalRoutingRequest) -> RetrievalRoutingD
     if request.requested_mode is RetrievalMode.LEXICAL:
         return RetrievalRoutingDecision(RetrievalMode.LEXICAL, RoutingReason.DEFAULT_LEXICAL)
     if not request.provider_ready:
-        return RetrievalRoutingDecision(
-            RetrievalMode.LEXICAL, RoutingReason.PROVIDER_UNAVAILABLE
-        )
+        return RetrievalRoutingDecision(RetrievalMode.LEXICAL, RoutingReason.PROVIDER_UNAVAILABLE)
     if not request.index_fresh:
         return RetrievalRoutingDecision(RetrievalMode.LEXICAL, RoutingReason.INDEX_NOT_FRESH)
     return RetrievalRoutingDecision(RetrievalMode.HYBRID, RoutingReason.HYBRID_ELIGIBLE)
