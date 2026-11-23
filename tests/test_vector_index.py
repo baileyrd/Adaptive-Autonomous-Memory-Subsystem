@@ -226,3 +226,44 @@ RepresentationIndex(PausedStore(sys.argv[1])).rebuild(
             db.execute("UPDATE representation_batch SET generated_at='invalid'")
         self.assertEqual(self.index.snapshot(self.author, self.provider.spec).status, "corrupt")
         self.assertEqual(self.index.rebuild(self.author, self.provider).status, "fresh")
+
+    def test_explicit_router_reports_actual_mode_and_skips_lexical_provider(self):
+        from aams.recall import CognitiveMemory, CognitiveNeed
+        from aams.retrieval_routing import RetrievalMode
+
+        class ProviderMustNotRun:
+            @property
+            def spec(self):
+                raise AssertionError("Lexical and exact routes skip the provider")
+
+        self.ingest(self.author, "one")
+        self.index.rebuild(self.author, self.provider)
+        memory = CognitiveMemory(self.store)
+        need = CognitiveNeed(query="one")
+        lexical = memory.recall(
+            self.author, need, provider=ProviderMustNotRun(), requested_mode=RetrievalMode.LEXICAL
+        )
+        self.assertEqual(
+            lexical.pop("retrieval"),
+            {"mode": "lexical", "status": "default_lexical", "policy": "1"},
+        )
+        self.assertEqual(lexical, memory.recall(self.author, need))
+        hybrid = memory.recall(
+            self.author, need, provider=self.provider, requested_mode=RetrievalMode.HYBRID
+        )
+        self.assertEqual(hybrid["retrieval"]["mode"], "hybrid")
+        self.ingest(self.author, "new")
+        stale = memory.recall(
+            self.author, need, provider=self.provider, requested_mode=RetrievalMode.HYBRID
+        )
+        self.assertEqual(stale["retrieval"]["status"], "stale")
+        self.assertEqual(stale["retrieval"]["mode"], "lexical")
+        exact = memory.recall(
+            self.author,
+            CognitiveNeed(entity="formation", identifier="f-one"),
+            provider=ProviderMustNotRun(),
+            requested_mode=RetrievalMode.HYBRID,
+        )
+        self.assertEqual(exact["retrieval"]["status"], "exact_canonical")
+        self.assertIsNone(self.store.get_belief(self.author, "one"))
+        self.assertIsNone(self.store.get_candidate(self.author, "one"))
