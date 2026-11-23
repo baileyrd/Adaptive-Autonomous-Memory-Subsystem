@@ -6,7 +6,7 @@ The tested profile is MCP 2026-07-28 over local stdio, including `server/discove
 
 | Tool | Arguments and behavior |
 | --- | --- |
-| `memory_form` | Requires `request_key`, `text`, `source_actor`, `source_locator`, `observed_at` and `recorded_at`. Optional `kind` defaults to `experiential`. Returns evidence and formation IDs. The host-bound producer and scope are recorded and the reported source metadata and timestamps are caller assertions. The exact UTF-8 text is stored as unverified evidence. Retrying an identical request returns the same IDs. |
+| `memory_form` | Requires `request_key`, `text`, `source_actor`, `source_locator`, `observed_at`. Optional `kind` defaults to `experiential`. Returns evidence and formation IDs. The host-bound producer and scope are recorded and the reported source metadata and `observed_at` are caller assertions; the server assigns recorded time. The exact UTF-8 text is stored as unverified evidence. Retrying an identical request returns the same IDs. |
 | `memory_recall` | Accepts `query` or `entity` and `identifier`. Optional filters are `kinds`, `recorded_as_of`, `effective_at` plus item, depth and byte budgets. Returns a provenance-bearing result packet. |
 | `memory_explain` | Requires `entity` and `identifier`. Accepts the recall time, depth and byte limits. Returns supporting and refuting evidence where applicable. |
 | `memory_revise` | Requires `belief_id`, `expected_revision` (null creates a belief), `proposition`, `state`, `rationale` and `valid_from`. Accepts `valid_until`, `confidence_basis`, `support_ids` and `refute_ids`. At least one evidence link is required. Returns the committed revision. |
