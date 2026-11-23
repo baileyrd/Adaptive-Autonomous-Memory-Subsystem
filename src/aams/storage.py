@@ -33,6 +33,8 @@ from .learning import (
     OutcomeRevision,
 )
 
+from .vector_index import _SCHEMA as _REPRESENTATION_SCHEMA
+
 _SCHEMA = (
     """CREATE TABLE evidence (
         evidence_id TEXT PRIMARY KEY NOT NULL, scope TEXT NOT NULL,
@@ -193,7 +195,13 @@ class SQLiteMemoryStore:
             with closing(self._connect()) as db, db:
                 db.execute("BEGIN IMMEDIATE")
                 version = db.execute("PRAGMA user_version").fetchone()[0]
-                migrations = (_SCHEMA, _BELIEF_SCHEMA, _CANDIDATE_SCHEMA, _OUTCOME_SCHEMA)
+                migrations = (
+                    _SCHEMA,
+                    _BELIEF_SCHEMA,
+                    _CANDIDATE_SCHEMA,
+                    _OUTCOME_SCHEMA,
+                    _REPRESENTATION_SCHEMA,
+                )
                 if not 0 <= version <= len(migrations):
                     raise StoreIntegrityError(f"Unsupported database schema version {version}")
                 for target, statements in enumerate(migrations[version:], start=version + 1):
