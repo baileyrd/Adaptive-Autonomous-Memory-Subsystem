@@ -1,11 +1,19 @@
 """Deterministic, model-neutral retrieval and provenance packaging."""
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 from re import findall
 from typing import Literal
 
-from .contracts import MemoryKind, require_text, utc_timestamp
+from .contracts import (
+    BeliefRevision,
+    Evidence,
+    MemoryFormation,
+    MemoryKind,
+    require_text,
+    utc_timestamp,
+)
 from .storage import AccessContext, SQLiteMemoryStore, StoreIntegrityError
 
 Entity = Literal["formation", "belief", "evidence"]
@@ -80,15 +88,16 @@ class CognitiveMemory:
         terms = _tokens(need.query)
         if not terms:
             return _response([], need.max_items, need.max_bytes)
-        candidates = self.store.recall_candidates(
-            access, recorded_as_of=need.recorded_as_of, effective_at=need.effective_at
+        candidates = self.store.scan_recall(
+            access,
+            recorded_as_of=need.recorded_as_of,
+            effective_at=need.effective_at,
+            kinds=need.kinds,
         )
         ranked = []
-        for entity, identifier in candidates:
-            item = self._item(access, need, entity, identifier)
-            if item is None:
-                continue
-            searchable = [identifier, item.get("proposition", ""), item.get("kind", "")]
+        for record, evidence in candidates:
+            item = self._with_citations(need, record, evidence.get)
+            searchable = [item["id"], item.get("proposition", ""), item.get("kind", "")]
             for citation in item["citations"]:
                 searchable.extend((citation["preview"], citation["source_locator"]))
             matched = sorted(terms.intersection(_tokens(" ".join(searchable))))
@@ -115,7 +124,8 @@ class CognitiveMemory:
         if entity == "evidence":
             if need.kinds:
                 return None
-            citation = self._citation(access, need, identifier, "original")
+            evidence = self.store.get_evidence(access, identifier)
+            citation = self._citation(need, evidence, "original")
             return {"entity": entity, "id": identifier, **citation} if citation else None
         if entity == "formation":
             formation = self.store.get_formation(access, identifier)
@@ -126,42 +136,57 @@ class CognitiveMemory:
                 or (need.effective_at and formation.created_at > need.effective_at)
             ):
                 return None
-            item = {
-                "kind": formation.kind.value,
-                "state": formation.epistemic_state.value,
-                "producer": formation.producer,
-                "recorded_at": formation.created_at,
-            }
-            links = [("source", formation.evidence_ids)]
+            record = formation
         else:
             if need.kinds:
                 return None
-            revision = self.store.get_belief(
+            record = self.store.get_belief(
                 access,
                 identifier,
                 recorded_as_of=need.recorded_as_of,
                 effective_at=need.effective_at,
             )
-            if revision is None:
+            if record is None:
                 return None
-            proposal = revision.proposal
+        return self._with_citations(
+            need, record, lambda evidence_id: self.store.get_evidence(access, evidence_id)
+        )
+
+    def _with_citations(
+        self,
+        need: CognitiveNeed,
+        record: MemoryFormation | BeliefRevision,
+        load_evidence: Callable[[str], Evidence | None],
+    ) -> dict:
+        if isinstance(record, MemoryFormation):
+            entity, identifier = "formation", record.formation_id
             item = {
-                "revision_id": revision.revision_id,
-                "parent_id": revision.parent_id,
-                "recorded_at": revision.recorded_at,
+                "kind": record.kind.value,
+                "state": record.epistemic_state.value,
+                "producer": record.producer,
+                "recorded_at": record.created_at,
+            }
+            links = [("source", record.evidence_ids)]
+        else:
+            entity, identifier = "belief", record.belief_id
+            proposal = record.proposal
+            item = {
+                "revision_id": record.revision_id,
+                "parent_id": record.parent_id,
+                "recorded_at": record.recorded_at,
                 "valid_from": proposal.valid_from,
                 "valid_until": proposal.valid_until,
                 "state": proposal.state.value,
                 "proposition": proposal.proposition,
                 "rationale": proposal.rationale,
-                "actor": revision.actor,
+                "actor": record.actor,
             }
             links = [("support", proposal.support_ids), ("refute", proposal.refute_ids)]
         citations = [
             citation
             for role, ids in links
             for evidence_id in ids
-            if (citation := self._citation(access, need, evidence_id, role)) is not None
+            if (citation := self._citation(need, load_evidence(evidence_id), role)) is not None
         ]
         return {
             "entity": entity,
@@ -172,10 +197,8 @@ class CognitiveMemory:
             "citations_truncated": need.max_depth == 0 and bool(citations),
         }
 
-    def _citation(
-        self, access: AccessContext, need: CognitiveNeed, evidence_id: str, role: str
-    ) -> dict | None:
-        record = self.store.get_evidence(access, evidence_id)
+    @staticmethod
+    def _citation(need: CognitiveNeed, record: Evidence | None, role: str) -> dict | None:
         if record is None:
             if role != "original":
                 raise StoreIntegrityError("Canonical evidence link cannot be resolved")
@@ -185,7 +208,7 @@ class CognitiveMemory:
         ):
             return None
         return {
-            "evidence_id": evidence_id,
+            "evidence_id": record.evidence_id,
             "role": role,
             "source_actor": record.source_actor,
             "source_locator": record.source_locator,
