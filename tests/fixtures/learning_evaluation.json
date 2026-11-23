@@ -1,0 +1,22 @@
+{
+  "evidence": [
+    ["rain-a", "eval", "collector", "station-a", "site:a", "rain likely"],
+    ["rain-b", "eval", "collector", "station-b", "site:b", "Rain likely"],
+    ["gauge-a", "eval", "collector", "station-c", "site:c", "gauge clear"],
+    ["gauge-b", "eval", "collector", "station-d", "site:d", "Gauge clear"],
+    ["gauge-z", "eval", "collector", "station-e", "site:e", "not: gauge clear"],
+    ["wind-a", "eval", "collector", "station-f", "site:f", "wind rising"],
+    ["wind-b", "eval", "collector", "station-f", "site:f-copy", "wind rising"],
+    ["river-a", "eval", "proposer", "reported-a", "site:g", "river rising"],
+    ["river-b", "eval", "proposer", "reported-b", "site:h", "River rising"],
+    ["fog-a", "eval", "collector", "station-i", "site:i", "fog present"],
+    ["fog-b", "private", "collector", "station-j", "site:j", "Fog present"]
+  ],
+  "useful_proposals": ["rain likely", "gauge clear", "fog present"],
+  "approvable": ["rain likely"],
+  "tasks": {
+    "rain likely": ["rain-a", "rain-b"],
+    "gauge clear": ["gauge-a", "gauge-b", "gauge-z"],
+    "fog present": ["fog-a"]
+  }
+}

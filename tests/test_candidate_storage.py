@@ -39,7 +39,8 @@ class CandidateStorageTest(unittest.TestCase):
             ("b", "station-c", b"separate"),
             ("self", "proposer", b"self"),
         ):
-            self.ingest(self.author, identity, actor, payload)
+            collector = AccessContext("collector", "weather", True)
+            self.ingest(self.author if identity == "self" else collector, identity, actor, payload)
         self.proposal = LearningCandidate(
             "c", "weather", "proposer", "Rain", TIME, ("a", "copy", "b", "self")
         )

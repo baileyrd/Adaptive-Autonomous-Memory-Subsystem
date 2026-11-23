@@ -691,12 +691,13 @@ class SQLiteMemoryStore:
         )
         unverified, eligible = [], []
         groups: list[tuple[set[tuple[str, str]], set[str]]] = []
+        proposer = proposal.proposer.casefold().strip()
         for identifier in proposal.support_ids:
             record = evidence[identifier]
             actor = record.source_actor.casefold().strip()
-            if (
-                record.status is not EvidenceStatus.RECORDED
-                or actor == proposal.proposer.casefold().strip()
+            if record.status is not EvidenceStatus.RECORDED or proposer in (
+                actor,
+                record.producer.casefold().strip(),
             ):
                 unverified.append(identifier)
                 continue
