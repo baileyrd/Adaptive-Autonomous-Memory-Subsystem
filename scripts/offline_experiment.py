@@ -68,7 +68,7 @@ def load_groups(path=FIXTURE):
     return groups
 
 
-def replay(path, groups, repetitions, candidate=None):
+def replay(path, groups, repetitions, candidate=None, *, candidate_outage=False):
     store = SQLiteMemoryStore(path)
     provider = DeterministicFixtureProvider()
     index = RepresentationIndex(store)
@@ -98,10 +98,11 @@ def replay(path, groups, repetitions, candidate=None):
             }
             modes = {"lexical": False, "hybrid": True, "guarded": task["opt_in"]}
             if candidate is not None:
-                modes["candidate"] = candidate(features)
+                modes["candidate"] = candidate(**features)
             for strategy, hybrid in modes.items():
                 mode = RetrievalMode.HYBRID if hybrid else RetrievalMode.LEXICAL
-                kwargs = {"provider": provider if hybrid else None, "requested_mode": mode}
+                available = hybrid and not (strategy == "candidate" and candidate_outage)
+                kwargs = {"provider": provider if available else None, "requested_mode": mode}
                 expected = memory.recall(access, need, **kwargs)
                 latency = []
                 for _ in range(repetitions):
@@ -120,6 +121,7 @@ def replay(path, groups, repetitions, candidate=None):
                 )
                 row["measurements"][strategy] = {
                     "mode": expected["retrieval"]["mode"],
+                    "status": expected["retrieval"]["status"],
                     "satisfied": set(task["required"]) <= set(found),
                     "recall": len(set(found) & relevant) / len(relevant),
                     "ndcg": gain / ideal,
