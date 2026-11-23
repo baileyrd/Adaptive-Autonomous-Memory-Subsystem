@@ -64,8 +64,33 @@ Run outside the store on all 48 development articles at five questions per parag
 
 **Decision: rejected without building a router.** With the byte-bucket provider, no router can qualify. Routing work only becomes worthwhile again if a real semantic provider (#84) raises the two-arm ceiling. Rank fusion (#83) is deferred for the same reason.
 
+## E3: Low-overlap, cross-domain check on SciFact (follow-up to #79)
+
+**Why.** Both SQuAD workloads favor lexical matching. Before any default change, the owner asked for validation on queries that were not written while reading their evidence.
+
+**Workload.** SciFact (Wadden et al., 2020; [data](https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz), SHA-256 `11c62128…76be`, CC BY-NC 2.0) consists of expert-written biomedical claims and 5,183 abstracts. The labeled train and dev claims are used. Every evidence abstract is relevant and required. A SHA-256 hash of `doc_id` splits the corpus into 16 shards, each one scope with about 324 abstracts, plus a private twin and a future decoy. Of the claims, 647 have evidence inside one shard; 46 whose evidence spans shards are excluded and counted. Nothing in v0.8 was designed on this data. 98.9% of abstracts are longer than the preview.
+
+```sh
+PYTHONPATH=src python scripts/evaluate_scifact.py --scifact data.tar.gz
+```
+
+| Arm (647 claims, 16 scopes) | Satisfied | nDCG@3 | Δ tasks vs guarded [95% CI] | Wins / losses | Median / p95 ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| lexical | 478 | 0.6875 | −1.85 pp [−3.95, 0.49] | 15 / 27 | 24.0 / 37.3 |
+| guarded (= hybrid) | 490 | 0.7062 | — | — | 38.5 / 61.8 |
+| staged v0.6 | 480 | 0.6890 | −1.55 pp [−3.35, 0.70] | 15 / 25 | 23.9 / 37.6 |
+| oracle lexical/hybrid router | 505 | 0.7321 | +2.32 pp | — | — |
+| bm25 | 621 | 0.9402 | +20.25 pp [16.29, 24.11] | 136 / 5 | 25.2 / 42.1 |
+| **bm25_guarded** | **620** | **0.9378** | **+20.09 pp [16.22, 23.95]** | 135 / 5 | 39.2 / 62.8 |
+
+There were zero scope or time disclosures. The gain is larger than on SQuAD, so the SQuAD result was not an artifact of lexical overlap between questions and passages. As on SQuAD, a router on top of BM25 has no headroom: the oracle reached 622 tasks against 620.
+
+**Latency finding and fix.** The first SciFact run, before caching, met the quality gate but **failed the latency budget**: bm25_guarded p95 was 84.8 ms against guarded's 54.2 ms (+30.6 ms). Profiling showed that per-request tokenization of full payloads dominated. Evidence is immutable, so `CognitiveMemory` now keeps a bounded LRU (4,096 entries) of payload term counts. It is keyed by `(scope, evidence_id, digest)` and filled only from records an authorized scan already returned. The results above are with the cache. Added p95 is +1.0 ms on SciFact, and on SQuAD dev held-out it is −1.4 ms (12.14 against 13.56 ms). A test checks that cached, fresh and size-1-bounded caches produce identical packets.
+
+**Memory.** In separate processes loading all of SciFact and running hybrid recall without per-query warmup, peak RSS was 50,948 KiB with overlap and 80,852 KiB with BM25 (1.59×, under the 2× budget). p95 was 61.6 against 64.1 ms, and the slowest cold call was 83.4 against 107.6 ms. The cache is per `CognitiveMemory` instance. Its worst-case size grows with payload vocabulary, up to 4,096 records.
+
 ## Limitations
 
-- SQuAD questions were written while looking at the passage, which favors lexical methods. Both workloads come from the same Wikipedia/SQuAD distribution, so this is generalization across articles, not across domains. The only measurement of vocabulary mismatch comes from the small synthetic fixtures, where BM25 neither helps nor hurts.
-- The environment had no access to non-GitHub dataset hosts (BEIR/Hugging Face), so no low-overlap public benchmark or real sentence embedder could be evaluated (#84).
+- SQuAD questions were written while looking at the passage, which favors lexical methods. SciFact (E3) covers a second domain with expert-written claims, but it is still English-only. The only vocabulary-mismatch measurement comes from the small synthetic fixtures, where BM25 neither helps nor hurts.
+- The environment could not reach Hugging Face or BEIR mirrors, so no real sentence embedder could be evaluated (#84).
 - Latency comes from a shared container. Production traffic, concurrency and large stores (the scan is linear) were not tested.

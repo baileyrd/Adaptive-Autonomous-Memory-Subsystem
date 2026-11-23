@@ -1,7 +1,7 @@
 """Deterministic, model-neutral retrieval and provenance packaging."""
 
 import json
-from collections import Counter
+from collections import Counter, OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass
 from math import fsum, isfinite, sqrt
@@ -28,6 +28,7 @@ from .vector_index import RepresentationIndex
 
 Entity = Literal["formation", "belief", "evidence"]
 _PREVIEW_BYTES = 512
+_TERM_CACHE_ENTRIES = 4096
 
 
 def _tokens(text: str) -> frozenset[str]:
@@ -117,6 +118,7 @@ class CognitiveMemory:
         self.store = store
         self._shadow = shadow
         self._lexical_ranking = lexical_ranking
+        self._term_cache: OrderedDict[tuple[str, str, str], Counter[str]] = OrderedDict()
 
     def recall(
         self,
@@ -230,17 +232,22 @@ class CognitiveMemory:
         for record, evidence in candidates:
             item = self._with_citations(need, record, evidence.get)
             searchable = [item["id"], item.get("proposition", ""), item.get("kind", "")]
+            payloads = []
             semantic_score, source = 0.0, None
             for citation in item["citations"]:
                 source_id = citation["evidence_id"]
-                text = citation["preview"]
+                searchable.append(citation["source_locator"])
                 if full_text:
-                    text = evidence[source_id].payload.decode("utf-8", errors="replace")
-                searchable.extend((text, citation["source_locator"]))
+                    payloads.append(self._payload_terms(evidence[source_id]))
+                else:
+                    searchable.append(citation["preview"])
                 digest, score = scores.get(source_id, (None, 0.0))
                 if digest == citation["digest"] and score > semantic_score:
                     semantic_score, source = score, source_id
-            entries.append((item, Counter(tokens(" ".join(searchable))), semantic_score, source))
+            words = Counter(tokens(" ".join(searchable)))
+            for terms_of_payload in payloads:
+                words.update(terms_of_payload)
+            entries.append((item, words, semantic_score, source))
         weights = bm25_scores(terms, [words for _, words, _, _ in entries]) if full_text else ()
         peak = max(weights, default=0.0) or 1.0
         ranked = []
@@ -269,6 +276,23 @@ class CognitiveMemory:
             ranked.append(item)
         ranked.sort(key=lambda item: (-item["relevance"]["score"], item["entity"], item["id"]))
         return ranked
+
+    def _payload_terms(self, record: Evidence) -> Counter[str]:
+        """Token counts of immutable evidence, cached by identity and content digest.
+
+        Only records already returned by an authorized scan reach this cache, so it never
+        widens what a request can read. The bound keeps memory use fixed.
+        """
+        key = (record.scope, record.evidence_id, record.digest)
+        cached = self._term_cache.get(key)
+        if cached is not None:
+            self._term_cache.move_to_end(key)
+            return cached
+        cached = Counter(tokens(record.payload.decode("utf-8", errors="replace")))
+        self._term_cache[key] = cached
+        if len(self._term_cache) > _TERM_CACHE_ENTRIES:
+            self._term_cache.popitem(last=False)
+        return cached
 
     def explain(self, access: AccessContext, need: CognitiveNeed) -> dict:
         if need.identifier is None or need.entity is None:

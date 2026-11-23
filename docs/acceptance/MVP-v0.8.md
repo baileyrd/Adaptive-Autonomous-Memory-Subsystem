@@ -9,7 +9,7 @@ The [v0.8 goal](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem
 | Engineering complete | **Yes.** The benchmark (#80) and the scoped BM25 ranker (#81) are merged with unit, security and benchmark tests. |
 | Experiment complete | **Yes.** Lexical, hybrid, guarded, staged, the oracle router and BM25 arms were measured on identical inputs over two independent public workloads and the existing synthetic fixtures. |
 | Performance improvement validated | **Yes, offline, for BM25 ranking under guarded routing**, within the measured scope. It passed every pre-registered #79 criterion on held-out development articles and on separate SQuAD training articles. No learned routing policy qualified. |
-| Deployment ready | **No.** Overlap is still the default. Changing it requires explicit authorization, a consumer migration note for `relevance.score`, and evaluation beyond SQuAD-style queries (see below). |
+| Deployment ready | **No.** Overlap is still the default. Changing it requires explicit authorization and a consumer migration note for `relevance.score`. Production traffic and concurrency remain untested. |
 
 ## Root causes (measured, [audit](../audit/retrieval-root-cause.md))
 
@@ -30,7 +30,7 @@ The [v0.8 goal](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem
 | oracle lexical/hybrid router | 2,871 | 0.7357 | +2.14 pp | — |
 | BM25 + guarded routing | **3,354** | **0.8726** | **+15.39 pp [12.77, 17.75]** | 14.51 |
 
-On independent SQuAD training articles (hash-held-out half, 4,712 tasks), BM25 with guarded routing gained +13.99 pp [12.24, 15.64], and nDCG rose from 0.6642 to 0.8112. There were zero scope or time disclosures across all 19,482 SQuAD tasks. On the v0.4 and v0.6 synthetic fixtures (paraphrase, contradiction, history), the results matched the current default exactly. The added p95 was at most +2.19 ms and peak RSS rose 0.7%.
+On independent SQuAD training articles (hash-held-out half, 4,712 tasks), BM25 with guarded routing gained +13.99 pp [12.24, 15.64], and nDCG rose from 0.6642 to 0.8112. On the low-overlap, cross-domain **SciFact** check (647 expert-written biomedical claims, 16 scopes of about 324 abstracts), it gained **+20.09 pp [16.22, 23.95]**, with nDCG rising from 0.7062 to 0.9378 and 5 losses against 135 wins. There were zero scope or time disclosures across all 20,129 SQuAD and SciFact tasks. On the v0.4 and v0.6 synthetic fixtures (paraphrase, contradiction, history), the results matched the current default exactly. Before caching, SciFact's larger scopes broke the latency budget (+30.6 ms p95). A bounded LRU of evidence term counts, keyed by digest, brought the added p95 down to +1.0 ms on SciFact and −1.4 ms on SQuAD. Peak RSS was 1.59× overlap on SciFact, within the 2× budget.
 
 ## Rejected or deferred
 
@@ -40,11 +40,11 @@ On independent SQuAD training articles (hash-held-out half, 4,712 tasks), BM25 w
 
 ## Remaining limitations
 
-SQuAD questions overlap lexically with their passages, which favors lexical ranking. Both public workloads are English Wikipedia, so cross-domain and multilingual generalization were not tested. Latency comes from a shared container with linear scans, and large stores and concurrency were not tested. No production traffic was used.
+SQuAD questions overlap lexically with their passages. SciFact supplies a second, lower-overlap domain, but all workloads are English, so multilingual generalization was not tested. Latency comes from a shared container with linear scans, and large stores and concurrency were not tested. No production traffic was used.
 
 ## Recommendation
 
-Keep guarded routing. Consider making BM25 the default lexical ranker as a separate authorized change, after one low-overlap or cross-domain benchmark confirms no regression. Prioritize a real local sentence-embedding evaluation (#84) over further policy learning, because routing headroom only returns once the semantic arm is actually semantic.
+Keep guarded routing. The owner chose to keep BM25 opt-in pending this check. The low-overlap, cross-domain SciFact check found no regression and a larger gain, so making BM25 the default is now supported by the evidence. It remains a separate, explicitly authorized change, because it alters `relevance.score` semantics. Prioritize a real local sentence-embedding evaluation (#84) over further policy learning, because routing headroom only returns once the semantic arm is actually semantic.
 
 ## Reproduce
 
