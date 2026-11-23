@@ -107,17 +107,32 @@ class Bm25RecallTest(unittest.TestCase):
         self.assertEqual(results[0], results[1])
         self.assertEqual({item["id"] for item in results[0]["items"]}, {"f-e1", "f-e2", "f-e3"})
 
-    def test_bm25_matches_full_payload_while_overlap_default_is_unchanged(self):
+    def test_bm25_is_default_and_matches_full_payload(self):
         store = self.store("full.db", decoys=False)
         need = CognitiveNeed(query="turbine vibration")
-        overlap = CognitiveMemory(store).recall(self.access, need)
-        bm25 = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25).recall(self.access, need)
-        self.assertEqual(overlap["items"], [])
-        self.assertEqual([item["id"] for item in bm25["items"]], ["f-e3"])
-        relevance = bm25["items"][0]["relevance"]
+        default = CognitiveMemory(store).recall(self.access, need)
+        explicit = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25).recall(
+            self.access, need
+        )
+        self.assertEqual(default, explicit)
+        self.assertEqual([item["id"] for item in default["items"]], ["f-e3"])
+        relevance = default["items"][0]["relevance"]
         self.assertEqual(relevance["ranker"], "bm25")
         self.assertEqual(relevance["matched_terms"], ["turbine", "vibration"])
-        self.assertTrue(bm25["items"][0]["citations"][0]["preview_truncated"])
+        self.assertTrue(default["items"][0]["citations"][0]["preview_truncated"])
+
+    def test_legacy_overlap_remains_selectable_for_rollback(self):
+        store = self.store("legacy.db", decoys=False)
+        legacy = CognitiveMemory(store, lexical_ranking=LexicalRanking.OVERLAP)
+        self.assertEqual(
+            legacy.recall(self.access, CognitiveNeed(query="turbine vibration"))["items"], []
+        )
+        packet = legacy.recall(self.access, CognitiveNeed(query="harbor pump"))
+        self.assertEqual([item["id"] for item in packet["items"]], ["f-e1", "f-e2"])
+        self.assertEqual(
+            packet["items"][0]["relevance"],
+            {"score": 2, "matched_terms": ["harbor", "pump"]},
+        )
 
     def test_bm25_prefers_specific_evidence_over_repeated_common_terms(self):
         store = self.store("rank.db", decoys=False)

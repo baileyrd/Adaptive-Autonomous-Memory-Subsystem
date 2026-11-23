@@ -11,6 +11,7 @@ from time import perf_counter_ns
 
 from evaluate_semantic import K, SpacyTok2Vec, seed, timestamp
 
+from aams.ranking import LexicalRanking
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.representations import DeterministicFixtureProvider
 from aams.retrieval_routing import RetrievalMode
@@ -44,7 +45,8 @@ def evaluate(path, strategy, encoder, repetitions):
             RepresentationIndex(store).rebuild(AccessContext("host", scope, True), provider)
     seed(store, *data["after_index"])
     scopes = {row[0]: row[1] for row in [*data["records"], data["after_index"]]}
-    memory = CognitiveMemory(store)
+    # Historical baselines keep the legacy ranker so published audits stay reproducible.
+    memory = CognitiveMemory(store, lexical_ranking=LexicalRanking.OVERLAP)
 
     def request(case, selected):
         access = AccessContext("host", case["scope"])

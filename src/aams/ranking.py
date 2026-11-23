@@ -13,7 +13,7 @@ from re import findall
 
 
 class LexicalRanking(str, Enum):
-    """Host-configured lexical ranker. ``OVERLAP`` is the v0.1–v0.7 default."""
+    """Host-configured lexical ranker. ``BM25`` is the default; ``OVERLAP`` is legacy (v0.1–v0.7)."""
 
     OVERLAP = "overlap"
     BM25 = "bm25"

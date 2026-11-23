@@ -13,6 +13,7 @@ from time import perf_counter_ns
 from aams.consolidation import propose
 from aams.contracts import EpistemicState, Evidence, EvidenceStatus, MemoryFormation, MemoryKind
 from aams.learning import CandidateState, CandidateTransitionRequest
+from aams.ranking import LexicalRanking
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.storage import AccessContext, SQLiteMemoryStore
 
@@ -120,7 +121,8 @@ def evaluate(path, repetitions):
     seed(store, fixture)
     author = AccessContext("proposer", "eval", True)
     reviewer = AccessContext("reviewer", "eval", True, True)
-    memory = CognitiveMemory(store)
+    # Historical baselines keep the legacy ranker so published audits stay reproducible.
+    memory = CognitiveMemory(store, lexical_ranking=LexicalRanking.OVERLAP)
 
     def baseline():
         return {
