@@ -158,6 +158,52 @@ _OUTCOME_SCHEMA = (
 )
 
 
+_EVIDENCE_COLUMNS = (
+    "evidence_id, scope, source_actor, source_locator, producer, "
+    "observed_at, recorded_at, status, payload, digest"
+)
+_FORMATION_COLUMNS = (
+    "formation_id, scope, kind, producer, created_at, epistemic_state, schema_version"
+)
+
+# Schema 7 replaces the global evidence/formation ID keys with scope-qualified keys.
+_SCOPED_ID_SCHEMA = (
+    """CREATE TABLE evidence_v7 (
+        evidence_id TEXT NOT NULL, scope TEXT NOT NULL,
+        source_actor TEXT NOT NULL, source_locator TEXT NOT NULL, producer TEXT NOT NULL,
+        observed_at TEXT NOT NULL, recorded_at TEXT NOT NULL, status TEXT NOT NULL,
+        payload BLOB NOT NULL, digest TEXT NOT NULL, PRIMARY KEY (scope, evidence_id)
+    )""",
+    f"INSERT INTO evidence_v7 ({_EVIDENCE_COLUMNS}) SELECT {_EVIDENCE_COLUMNS} FROM evidence",
+    "DROP TABLE evidence",
+    "ALTER TABLE evidence_v7 RENAME TO evidence",
+    """CREATE TRIGGER evidence_no_update BEFORE UPDATE ON evidence
+       BEGIN SELECT RAISE(ABORT, 'immutable evidence'); END""",
+    """CREATE TRIGGER evidence_no_delete BEFORE DELETE ON evidence
+       BEGIN SELECT RAISE(ABORT, 'immutable evidence'); END""",
+    """CREATE TABLE formation_v7 (
+        formation_id TEXT NOT NULL, scope TEXT NOT NULL, kind TEXT NOT NULL,
+        producer TEXT NOT NULL, created_at TEXT NOT NULL, epistemic_state TEXT NOT NULL,
+        schema_version TEXT NOT NULL, PRIMARY KEY (scope, formation_id)
+    )""",
+    f"INSERT INTO formation_v7 ({_FORMATION_COLUMNS}) SELECT {_FORMATION_COLUMNS} FROM formation",
+    "DROP TABLE formation",
+    "ALTER TABLE formation_v7 RENAME TO formation",
+    """CREATE TABLE formation_evidence_v7 (
+        scope TEXT NOT NULL, formation_id TEXT NOT NULL, evidence_id TEXT NOT NULL,
+        position INTEGER NOT NULL, PRIMARY KEY (scope, formation_id, position),
+        UNIQUE (scope, formation_id, evidence_id),
+        FOREIGN KEY (scope, formation_id) REFERENCES formation(scope, formation_id),
+        FOREIGN KEY (scope, evidence_id) REFERENCES evidence(scope, evidence_id)
+    )""",
+    """INSERT INTO formation_evidence_v7 (scope, formation_id, evidence_id, position)
+       SELECT scope, formation_id, evidence_id, position FROM formation_evidence""",
+    "DROP TABLE formation_evidence",
+    "ALTER TABLE formation_evidence_v7 RENAME TO formation_evidence",
+)
+
+
+
 class WriteConflict(ValueError):
     """A canonical identifier, evidence link or idempotency key conflicts."""
 
@@ -198,6 +244,8 @@ class SQLiteMemoryStore:
         self.path = path
         try:
             with closing(self._connect()) as db, db:
+                # SQLite requires foreign keys disabled outside the table-rebuild transaction.
+                db.execute("PRAGMA foreign_keys = OFF")
                 db.execute("BEGIN IMMEDIATE")
                 version = db.execute("PRAGMA user_version").fetchone()[0]
                 migrations = (
@@ -207,6 +255,7 @@ class SQLiteMemoryStore:
                     _OUTCOME_SCHEMA,
                     _REPRESENTATION_SCHEMA,
                     _TELEMETRY_SCHEMA,
+                    _SCOPED_ID_SCHEMA,
                 )
                 if not 0 <= version <= len(migrations):
                     raise StoreIntegrityError(f"Unsupported database schema version {version}")
@@ -214,6 +263,8 @@ class SQLiteMemoryStore:
                     for statement in statements:
                         db.execute(statement)
                     db.execute(f"PRAGMA user_version = {target}")
+                if db.execute("PRAGMA foreign_key_check").fetchone() is not None:
+                    raise StoreIntegrityError("Migration left a broken canonical reference")
         except sqlite3.DatabaseError as error:
             raise StoreIntegrityError("Cannot initialize memory store") from error
 
@@ -292,6 +343,24 @@ class SQLiteMemoryStore:
         except sqlite3.DatabaseError as error:
             raise StoreIntegrityError("Cannot write memory store") from error
         return formation
+
+
+    def ingestion_time(self, access: AccessContext, request_key: str) -> str | None:
+        """Return the trusted, previously committed ingestion time for an idempotency key."""
+        require_text(request_key)
+        try:
+            with closing(self._connect()) as db:
+                row = db.execute(
+                    """SELECT formation.created_at FROM ingestion JOIN formation
+                       ON formation.scope=ingestion.scope
+                       AND formation.formation_id=ingestion.formation_id
+                       WHERE ingestion.scope=? AND ingestion.principal=?
+                       AND ingestion.request_key=?""",
+                    (access.scope, access.principal, request_key),
+                ).fetchone()
+                return row["created_at"] if row is not None else None
+        except sqlite3.DatabaseError as error:
+            raise StoreIntegrityError("Cannot read ingestion record") from error
 
     def get_evidence(self, access: AccessContext, evidence_id: str) -> Evidence | None:
         try:
