@@ -1,0 +1,40 @@
+{
+  "evidence": [
+    ["a01", "lab", 1, "Car needs petrol before departure."],
+    ["a02", "lab", 1, "The automobile has an empty fuel tank."],
+    ["a03", "lab", 1, "The office furnace consumes natural gas."],
+    ["a04", "lab", 1, "The parcel arrived three days late."],
+    ["a05", "lab", 1, "Package delivery was postponed until Friday."],
+    ["a06", "lab", 1, "Delivery containers are recyclable."],
+    ["a07", "lab", 1, "The pressure gauge display is clear."],
+    ["a08", "lab", 1, "The gauge display is obscured by condensation."],
+    ["a09", "lab", 1, "The pressure gauge display is clear."],
+    ["a10", "lab", 1, "Clear the hallway for the safety inspection."],
+    ["a11", "lab", 1, "Lluvia prevista para mañana en el puerto."],
+    ["a12", "lab", 1, "Rain expected tomorrow at the harbor."],
+    ["a13", "lab", 1, "El puerto estará cerrado el viernes."],
+    ["a14", "lab", 1, "Pump pressure was stable at 42 psi."],
+    ["a15", "lab", 2, "Pump pressure was low at 19 psi."],
+    ["a16", "lab", 1, "The air purifier is overdue for a new filter."],
+    ["a17", "lab", 1, "The ventilation filter is clogged."],
+    ["a18", "lab", 1, "The refrigeration unit leaked coolant."],
+    ["a19", "lab", 1, "The cooling system lost refrigerant."],
+    ["a20", "lab", 1, "New coolant was purchased for routine maintenance."],
+    ["a21", "lab", 1, "A backup snapshot completed overnight."],
+    ["a22", "lab", 1, "The database was restored from a verified copy."],
+    ["p01", "private", 1, "The treasury balance is confidential."],
+    ["p02", "private", 1, "The delayed package delivery was postponed."],
+    ["p03", "private", 1, "The gauge display is clear and the pump pressure is stable."]
+  ],
+  "queries": [
+    {"text": "automobile requires gasoline", "relevant": {"a01": 2, "a02": 1}, "task": ["a01"]},
+    {"text": "delayed package delivery", "relevant": {"a04": 2, "a05": 2}, "task": ["a04", "a05"]},
+    {"text": "gauge display clear", "relevant": {"a07": 2, "a08": 2}, "task": ["a07", "a08"], "contradiction": true},
+    {"text": "lluvia mañana", "relevant": {"a11": 2, "a12": 1}, "task": ["a11"]},
+    {"text": "pump pressure", "relevant": {"a14": 2}, "task": ["a14"], "day": 1, "forbidden": ["a15"]},
+    {"text": "ventilation needs cleaning", "relevant": {"a16": 1, "a17": 2}, "task": ["a17"]},
+    {"text": "cooling leak", "relevant": {"a18": 2, "a19": 2}, "task": ["a18", "a19"]},
+    {"text": "treasury balance confidential", "relevant": {}, "task": []},
+    {"text": "recover database from snapshot", "relevant": {"a21": 1, "a22": 2}, "task": ["a22"]}
+  ]
+}
