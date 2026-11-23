@@ -11,3 +11,9 @@ The watermark is the scoped count of immutable evidence in the append-only appli
 Pass an explicit `provider` to `CognitiveMemory.recall(access, need, provider=provider)` after building a batch. Without a provider, lexical behavior is unchanged. Exact lookup bypasses vectors. Missing, stale, corrupt, incompatible or unavailable vectors and zero eligible semantic matches fall back to the deterministic lexical ranking. The response identifies its mode and status without exposing provider errors.
 
 Hybrid scoring averages the fraction of lexical query terms matched and the highest authorized cosine similarity of at least 0.35. Ties use entity and stable ID. Scope, time, kind and canonical citation checks precede output. Derived evidence IDs and digests must match canonical citations. The packet records lexical and semantic components and, when depth permits, the semantic source. The existing response budgets still apply.
+
+## Recovery and backup replay
+
+The existing SQLite backup procedure captures canonical and derived rows together. After restore, verify canonical integrity before serving requests. If the index is stale or corrupt, leave lexical recall enabled, then invalidate and rebuild the relevant scope and provider space with a trusted writable grant. Provider installation, loading and rebuild are explicit host actions. Retry a completed rebuild with the same version to reuse the fresh batch. Change the model or provider version when encoder behavior changes.
+
+The current implementation materializes a scoped batch and performs exact cosine scans. Schedule rebuilds for modest local corpora and measure memory and contention before expanding usage. A checksum detects accidental vector damage. Authenticity and direct filesystem access remain host responsibilities. A missing encoder does not prevent canonical replay or backup verification.
