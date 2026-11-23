@@ -1,0 +1,43 @@
+{
+  "records": [
+    ["r01", "lab", 1, "The shipment arrived after the promised date."],
+    ["r02", "lab", 1, "The courier delivered the parcel late."],
+    ["r03", "lab", 1, "A filing deadline was extended by the court."],
+    ["r04", "lab", 1, "A flow meter indicates normal circulation."],
+    ["r05", "lab", 1, "Inspection found the flow meter stalled and circulation stopped."],
+    ["r06", "lab", 1, "A flow meter indicates normal circulation."],
+    ["r07", "lab", 1, "The financial market is in a bear cycle."],
+    ["r08", "lab", 1, "Bear tracks were found near the campsite."],
+    ["r09", "lab", 1, "La válvula se quedó abierta anoche."],
+    ["r10", "lab", 1, "The valve was left open overnight."],
+    ["r11", "lab", 2, "The valve was closed after inspection."],
+    ["r12", "lab", 1, "The orchard trees have started to bud."],
+    ["r13", "lab", 1, "The greenhouse recorded new spring growth."],
+    ["r14", "lab", 1, "The server certificate expires in forty days."],
+    ["r15", "lab", 1, "A security credential needs renewal next month."],
+    ["r16", "lab", 1, "The filing cabinet lock has a spare key."],
+    ["r17", "lab", 1, "Cold air escapes through a gap in the door."],
+    ["r18", "lab", 1, "The refrigerator door seal is torn."],
+    ["r19", "lab", 1, "Spring maintenance is scheduled for Tuesday."],
+    ["r20", "archive", 1, "A backup verified the archive successfully."],
+    ["r21", "archive", 1, "The archive recovery rehearsal completed."],
+    ["r22", "offline", 1, "The sensor recorded a voltage spike."],
+    ["p01", "private", 1, "Delayed parcel shipment and confidential treasury."],
+    ["p02", "private", 1, "The flow meter stalled during private inspection."],
+    ["p03", "private", 1, "The archive backup is confidential."]
+  ],
+  "duplicate_origins": {"r06": "r04"},
+  "after_index": ["r23", "archive", 2, "The latest backup copied the archive to a new drive."],
+  "queries": [
+    {"text": "delayed parcel shipment", "scope": "lab", "opt_in": true, "relevant": {"r01": 2, "r02": 2}, "required": ["r01", "r02"]},
+    {"text": "flow meter circulation stopped", "scope": "lab", "opt_in": false, "relevant": {"r04": 2, "r05": 2}, "required": ["r04", "r05"], "contradiction": true},
+    {"text": "bear market", "scope": "lab", "opt_in": false, "relevant": {"r07": 2}, "required": ["r07"]},
+    {"text": "válvula abierta", "scope": "lab", "opt_in": true, "day": 1, "relevant": {"r09": 2, "r10": 1}, "required": ["r09"], "future": ["r11"]},
+    {"text": "plants beginning to grow in spring", "scope": "lab", "opt_in": true, "relevant": {"r12": 2, "r13": 1}, "required": ["r12"]},
+    {"text": "renew expiring credentials", "scope": "lab", "opt_in": true, "relevant": {"r14": 2, "r15": 1}, "required": ["r14"]},
+    {"text": "fridge leaking cool air", "scope": "lab", "opt_in": true, "relevant": {"r17": 2, "r18": 2}, "required": ["r17", "r18"]},
+    {"text": "confidential treasury", "scope": "lab", "opt_in": false, "relevant": {}, "required": []},
+    {"text": "archive backup", "scope": "archive", "opt_in": true, "fallback": "stale", "relevant": {"r20": 2, "r21": 1, "r23": 1}, "required": ["r20"]},
+    {"text": "sensor voltage spike", "scope": "offline", "opt_in": true, "fallback": "provider_unavailable", "relevant": {"r22": 2}, "required": ["r22"]}
+  ]
+}

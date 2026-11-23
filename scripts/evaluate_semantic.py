@@ -47,10 +47,10 @@ def timestamp(day):
     return f"2026-01-{day:02d}T00:00:00Z"
 
 
-def seed(store, identifier, scope, day, text):
+def seed(store, identifier, scope, day, text, *, origin=None):
     access = AccessContext("collector", scope, True)
     payload = text.encode()
-    source = "a07" if identifier == "a09" else identifier
+    source = origin or ("a07" if identifier == "a09" else identifier)
     evidence = Evidence(
         identifier,
         scope,
