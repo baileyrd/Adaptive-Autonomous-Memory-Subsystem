@@ -34,9 +34,10 @@ env:
   PYTHONHASHSEED: "0"
 
 jobs:
-  eval:
+  pins:
+    if: inputs.stage == 'pins'
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,7 +51,6 @@ jobs:
           { python --version; nproc; grep -m1 "model name" /proc/cpuinfo; } > out/environment.txt
           python -m pip freeze > out/pip-freeze.txt
       - name: Resolve pins from HF (revision, sha256, HF id cross-check)
-        if: inputs.stage == 'pins'
         env:
           REVISION: ${{ inputs.revision }}
         run: |
@@ -86,7 +86,6 @@ jobs:
           json.dump({"revision": os.environ["REV"], "files": files}, open("out/onnx_pins.json", "w"), indent=2)
           EOF
       - name: Probe encode time and loaded RSS
-        if: inputs.stage == 'pins'
         run: |
           PYTHONPATH=scripts python - <<'EOF' | tee out/pins-probe.json
           import json, resource, statistics
@@ -103,8 +102,35 @@ jobs:
                             "encode_median_ms": round(statistics.median(ms), 3),
                             "rss_after_load_kib": loaded}))
           EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: embedder-eval-pins-${{ github.run_id }}
+          path: out/
+
+  # One job per workload: the serial run did not fit one job's time limit. Every job runs on
+  # its own fresh runner, so latency is compared only within a job (same process), per D6.
+  full:
+    if: inputs.stage == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [squad-dev, squad-train, scifact, v06, memory]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the package and pinned eval-only runtime
+        run: python -m pip install . onnxruntime==1.32.0 tokenizers==0.23.3 numpy==2.5.3
+      - name: Record the environment
+        run: |
+          mkdir -p out
+          { python --version; nproc; grep -m1 "model name" /proc/cpuinfo; } > out/environment.txt
+          python -m pip freeze > out/pip-freeze.txt
       - name: Fetch the model and verify it against the committed pins
-        if: inputs.stage == 'full'
         run: |
           rev=$(python -c 'import json; print(json.load(open("scripts/onnx_pins.json"))["revision"])')
           python -c 'import json; [print(h + "  model/" + f) for f, h in json.load(open("scripts/onnx_pins.json"))["files"].items()]' > model.sha256
@@ -113,25 +139,27 @@ jobs:
           done
           sha256sum -c model.sha256
       - name: Fetch and verify datasets
-        if: inputs.stage == 'full'
         run: |
           curl -fsSL --retry 3 -o squad-dev.json "$SQUAD_BASE/dev-v1.1.json"
           curl -fsSL --retry 3 -o squad-train.json "$SQUAD_BASE/train-v1.1.json"
           curl -fsSL --retry 3 -o scifact.tar.gz "$SCIFACT_URL"
           printf '%s  %s\n' "$SQUAD_DEV_SHA256" squad-dev.json "$SQUAD_TRAIN_SHA256" squad-train.json \
             "$SCIFACT_SHA256" scifact.tar.gz | sha256sum -c
-      - name: Evaluate (an invalid run exits 3 and fails the job)
-        if: inputs.stage == 'full'
+      - name: Evaluate one workload (an invalid run exits 3 and fails the job)
+        if: matrix.task != 'memory'
+        env:
+          TASK: ${{ matrix.task }}
         run: |
           common=(--ranking bm25 --encoder-dir model --repetitions 5)  # D6: p95 over 5 repetitions
-          python scripts/evaluate_retrieval.py --squad squad-dev.json "${common[@]}" > out/squad-dev.json
-          python scripts/evaluate_retrieval.py --squad squad-train.json --expected-sha256 "$SQUAD_TRAIN_SHA256" \
-            --max-articles 48 "${common[@]}" > out/squad-train.json
-          python scripts/evaluate_scifact.py --scifact scifact.tar.gz --encoder-dir model --repetitions 5 \
-            > out/scifact.json
-          python scripts/offline_experiment.py --split all "${common[@]}" > out/v06.json
+          case "$TASK" in
+            squad-dev) python scripts/evaluate_retrieval.py --squad squad-dev.json "${common[@]}" ;;
+            squad-train) python scripts/evaluate_retrieval.py --squad squad-train.json \
+              --expected-sha256 "$SQUAD_TRAIN_SHA256" --max-articles 48 "${common[@]}" ;;
+            scifact) python scripts/evaluate_scifact.py --scifact scifact.tar.gz --encoder-dir model --repetitions 5 ;;
+            v06) python scripts/offline_experiment.py --split all "${common[@]}" ;;
+          esac > "out/$TASK.json"
       - name: Memory probe (fresh processes, build and serve peaks separated)
-        if: inputs.stage == 'full'
+        if: matrix.task == 'memory'
         run: |
           probe() {  # workload data extra-args...
             local workload=$1 data=$2; shift 2
@@ -149,5 +177,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: embedder-eval-${{ inputs.stage }}-${{ github.run_id }}
+          name: embedder-eval-full-${{ matrix.task }}-${{ github.run_id }}
           path: out/
