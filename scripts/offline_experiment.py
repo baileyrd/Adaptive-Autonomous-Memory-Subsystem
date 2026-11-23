@@ -71,12 +71,21 @@ def load_groups(path=FIXTURE):
 
 
 def replay(
-    path, groups, repetitions, candidate=None, *, candidate_outage=False, shadow_artifact=None
+    path,
+    groups,
+    repetitions,
+    candidate=None,
+    *,
+    candidate_outage=False,
+    shadow_artifact=None,
+    rankings=(),
 ):
+    """Replay every strategy per task. Each ranking adds lexical, hybrid and guarded arms."""
     store = SQLiteMemoryStore(path)
     provider = DeterministicFixtureProvider()
     index = RepresentationIndex(store)
     memory = CognitiveMemory(store)
+    ranked = {ranking: CognitiveMemory(store, lexical_ranking=ranking) for ranking in rankings}
     for group in groups:
         for identifier, scope, day, text, origin in group["records"]:
             seed(store, identifier, scope, day, text, origin=origin)
@@ -112,11 +121,17 @@ def replay(
                 modes["guarded_observed"] = task["opt_in"]
             if candidate is not None:
                 modes["candidate"] = candidate(**features)
+            engines = {"guarded_observed": observed_memory}
+            for ranking in rankings:
+                arms = {"": False, "_hybrid": True, "_guarded": task["opt_in"]}
+                for suffix, hybrid in arms.items():
+                    modes[ranking.value + suffix] = hybrid
+                    engines[ranking.value + suffix] = ranked[ranking]
             for strategy, hybrid in modes.items():
                 mode = RetrievalMode.HYBRID if hybrid else RetrievalMode.LEXICAL
                 available = hybrid and not (strategy == "candidate" and candidate_outage)
                 kwargs = {"provider": provider if available else None, "requested_mode": mode}
-                engine = observed_memory if strategy == "guarded_observed" else memory
+                engine = engines.get(strategy) or memory
                 expected = engine.recall(access, need, **kwargs)
                 latency = []
                 for _ in range(repetitions):

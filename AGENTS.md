@@ -12,7 +12,7 @@ Goal: https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1
 
 ## GitHub coordination
 
-- For v0.7 work, use [issue #67](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/67) as the coordination hub. Issues #1, #14, #23, #34, #45 and #56 retain the previous milestones. Read its latest comments when starting, resuming, and before moving to another implementation slice.
+- For v0.8 work, use [issue #79](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/79) as the coordination hub. Issues #1, #14, #23, #34, #45, #56 and #67 retain the previous milestones. Read its latest comments when starting, resuming, and before moving to another implementation slice.
 - Follow the links to the active implementation issue and PR. Read the PR conversation, review submissions, and inline review threads. Check CI on the current head and address or explicitly route outstanding findings before advancing.
 - At each handoff, update the active coordination issue with the implementation issue and PR, current state, verification, any blockers, and one next action. Record code-specific findings and their resolution on the associated PR so the next session can pick up directly from GitHub.
 
