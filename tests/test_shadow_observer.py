@@ -117,3 +117,32 @@ class ShadowObserverTest(unittest.TestCase):
             finally:
                 finish.set()
             self.assertFalse(self.wait_result(observer).success)
+
+    def test_late_success_is_discarded_and_observation_can_be_disabled(self):
+        observer = ShadowObserver(
+            self.access, ShadowConfig(ShadowMode.OBSERVE_ONLY, 1), self.artifact, timeout_ms=5
+        )
+        memory = CognitiveMemory(self.store, shadow=observer)
+        expected = CognitiveMemory(self.store).recall(self.access, self.need)
+        before = self.store.path.read_bytes()
+        started, finish = Event(), Event()
+
+        def finishes_late(*flags):
+            started.set()
+            finish.wait(2)
+            return "hybrid"
+
+        with patch("aams.shadow_observer._suggest", side_effect=finishes_late):
+            try:
+                self.assertEqual(memory.recall(self.access, self.need), expected)
+                self.assertTrue(started.wait(1))
+                sleep(0.015)
+            finally:
+                finish.set()
+            observation = self.wait_result(observer)
+            self.assertFalse(observation.success)
+            self.assertEqual(observation.proposed_mode, "lexical")
+        revoked = replace(self.access, shadow_observe=False)
+        self.assertEqual(memory.recall(revoked, self.need), expected)
+        self.assertEqual(CognitiveMemory(self.store).recall(self.access, self.need), expected)
+        self.assertEqual(self.store.path.read_bytes(), before)
