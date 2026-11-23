@@ -10,7 +10,7 @@ from dataclasses import asdict
 from hashlib import sha256
 from math import ceil, log2
 from pathlib import Path
-from time import perf_counter_ns
+from time import perf_counter_ns, sleep
 
 from evaluate_semantic import seed, timestamp
 
@@ -19,6 +19,8 @@ from aams.offline_policy import compare_controlled
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.representations import DeterministicFixtureProvider
 from aams.retrieval_routing import ROUTING_POLICY_VERSION, RetrievalMode
+from aams.shadow import ShadowConfig, ShadowMode
+from aams.shadow_observer import ShadowObserver
 from aams.storage import AccessContext, SQLiteMemoryStore
 from aams.vector_index import RepresentationIndex
 
@@ -68,7 +70,9 @@ def load_groups(path=FIXTURE):
     return groups
 
 
-def replay(path, groups, repetitions, candidate=None, *, candidate_outage=False):
+def replay(
+    path, groups, repetitions, candidate=None, *, candidate_outage=False, shadow_artifact=None
+):
     store = SQLiteMemoryStore(path)
     provider = DeterministicFixtureProvider()
     index = RepresentationIndex(store)
@@ -81,7 +85,14 @@ def replay(path, groups, repetitions, candidate=None, *, candidate_outage=False)
     measurements = []
     for group in groups:
         scope = group["domain"]
-        access = AccessContext("fixture", scope)
+        access = AccessContext("fixture", scope, shadow_observe=shadow_artifact is not None)
+        observer = observed_memory = None
+        if shadow_artifact is not None:
+            cap = len(group["tasks"]) * (repetitions + 1)
+            observer = ShadowObserver(
+                access, ShadowConfig(ShadowMode.OBSERVE_ONLY, cap), shadow_artifact
+            )
+            observed_memory = CognitiveMemory(store, shadow=observer)
         visible = {row[0]: row[2] for row in group["records"] if row[1] == scope}
         for ordinal, task in enumerate(group["tasks"]):
             need = CognitiveNeed(
@@ -97,17 +108,20 @@ def replay(path, groups, repetitions, candidate=None, *, candidate_outage=False)
                 "measurements": {},
             }
             modes = {"lexical": False, "hybrid": True, "guarded": task["opt_in"]}
+            if observed_memory is not None:
+                modes["guarded_observed"] = task["opt_in"]
             if candidate is not None:
                 modes["candidate"] = candidate(**features)
             for strategy, hybrid in modes.items():
                 mode = RetrievalMode.HYBRID if hybrid else RetrievalMode.LEXICAL
                 available = hybrid and not (strategy == "candidate" and candidate_outage)
                 kwargs = {"provider": provider if available else None, "requested_mode": mode}
-                expected = memory.recall(access, need, **kwargs)
+                engine = observed_memory if strategy == "guarded_observed" else memory
+                expected = engine.recall(access, need, **kwargs)
                 latency = []
                 for _ in range(repetitions):
                     start = perf_counter_ns()
-                    packet = memory.recall(access, need, **kwargs)
+                    packet = engine.recall(access, need, **kwargs)
                     latency.append((perf_counter_ns() - start) / 1e6)
                     if packet != expected:
                         raise RuntimeError("Controlled replay changed result")
@@ -122,6 +136,8 @@ def replay(path, groups, repetitions, candidate=None, *, candidate_outage=False)
                 row["measurements"][strategy] = {
                     "mode": expected["retrieval"]["mode"],
                     "status": expected["retrieval"]["status"],
+                    "packet_digest": opaque(json.dumps(expected, sort_keys=True)),
+                    "visible": bool(expected["items"]),
                     "satisfied": set(task["required"]) <= set(found),
                     "recall": len(set(found) & relevant) / len(relevant),
                     "ndcg": gain / ideal,
@@ -130,6 +146,13 @@ def replay(path, groups, repetitions, candidate=None, *, candidate_outage=False)
                     "latency_ms": latency,
                 }
             measurements.append(row)
+        if observer is not None:
+            sleep(0.03)  # Offline accounting, outside serving timing.
+            observations = observer.observations(access)
+            measurements[-1]["observer"] = {
+                "completed": len(observations),
+                "failed": sum(not observation.success for observation in observations),
+            }
     return measurements
 
 
