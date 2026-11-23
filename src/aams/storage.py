@@ -33,6 +33,7 @@ from .learning import (
     OutcomeRevision,
 )
 
+from .retrieval_telemetry import _SCHEMA as _TELEMETRY_SCHEMA
 from .vector_index import _SCHEMA as _REPRESENTATION_SCHEMA
 
 _SCHEMA = (
@@ -179,10 +180,14 @@ class AccessContext:
     scope: str
     writable: bool = False
     candidate_review: bool = False
+    telemetry: bool = False
 
     def __post_init__(self) -> None:
         require_text(self.principal, self.scope)
-        if type(self.writable) is not bool or type(self.candidate_review) is not bool:
+        if any(
+            type(grant) is not bool
+            for grant in (self.writable, self.candidate_review, self.telemetry)
+        ):
             raise ValueError("Access grants must be boolean")
 
 
@@ -201,6 +206,7 @@ class SQLiteMemoryStore:
                     _CANDIDATE_SCHEMA,
                     _OUTCOME_SCHEMA,
                     _REPRESENTATION_SCHEMA,
+                    _TELEMETRY_SCHEMA,
                 )
                 if not 0 <= version <= len(migrations):
                     raise StoreIntegrityError(f"Unsupported database schema version {version}")
