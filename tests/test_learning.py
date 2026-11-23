@@ -44,8 +44,13 @@ class LearningContractTests(unittest.TestCase):
             record.claim = "Changed"
 
     def test_candidates_cannot_begin_authoritative(self):
-        for state in (CandidateState.VALIDATED, CandidateState.APPROVED,
-                      CandidateState.PROMOTED, CandidateState.REJECTED, "proposed"):
+        for state in (
+            CandidateState.VALIDATED,
+            CandidateState.APPROVED,
+            CandidateState.PROMOTED,
+            CandidateState.REJECTED,
+            "proposed",
+        ):
             with self.subTest(state=state), self.assertRaises(ValueError):
                 candidate(state=state)
 
@@ -109,12 +114,20 @@ class LearningContractTests(unittest.TestCase):
     def test_stale_and_cross_scope_requests_rejected(self):
         record = candidate()
         for request, state in (
-            (transition(CandidateState.VALIDATED, CandidateState.APPROVED),
-             CandidateState.PROPOSED),
-            (transition(CandidateState.PROPOSED, CandidateState.VALIDATED,
-                        scope="project:b"), CandidateState.PROPOSED),
-            (transition(CandidateState.PROPOSED, CandidateState.VALIDATED,
-                        candidate_id="cand-other"), CandidateState.PROPOSED),
+            (
+                transition(CandidateState.VALIDATED, CandidateState.APPROVED),
+                CandidateState.PROPOSED,
+            ),
+            (
+                transition(CandidateState.PROPOSED, CandidateState.VALIDATED, scope="project:b"),
+                CandidateState.PROPOSED,
+            ),
+            (
+                transition(
+                    CandidateState.PROPOSED, CandidateState.VALIDATED, candidate_id="cand-other"
+                ),
+                CandidateState.PROPOSED,
+            ),
         ):
             with self.subTest(request=request), self.assertRaises(ValueError):
                 request.check_target(record, state)
