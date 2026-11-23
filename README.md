@@ -99,3 +99,5 @@ The [v0.4 acceptance matrix](docs/acceptance/MVP-v0.4.md) records optional hybri
 The [v0.5 acceptance matrix](docs/acceptance/MVP-v0.5.md) documents guarded routing, bounded outcome telemetry, and the held-out comparison.
 
 The [v0.6 offline research acceptance](docs/acceptance/MVP-v0.6.md) records the staged policy, held-out comparison, and activation limits.
+
+The [v0.7 shadow-mode acceptance](docs/acceptance/MVP-v0.7.md) records the isolated observer, public and synthetic replays, and activation boundaries.
