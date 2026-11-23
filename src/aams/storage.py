@@ -761,3 +761,22 @@ class SQLiteMemoryStore:
             raise WriteConflict("Candidate decision could not be committed") from error
         except sqlite3.DatabaseError as error:
             raise StoreIntegrityError("Cannot record candidate decision") from error
+
+    def sample_learning_evidence(
+        self, access: AccessContext, *, since: str, through: str, limit: int
+    ) -> tuple[tuple[Evidence, ...], bool]:
+        """Read a bounded chronological sample of scoped, small evidence records."""
+        since, through = utc_timestamp(since), utc_timestamp(through)
+        if since > through or type(limit) is not int or not 1 <= limit <= 256:
+            raise ValueError("Invalid learning sample window or limit")
+        try:
+            with closing(self._connect()) as db:
+                rows = db.execute(
+                    """SELECT * FROM evidence WHERE scope=? AND recorded_at BETWEEN ? AND ?
+                       AND length(payload)<=4096
+                       ORDER BY recorded_at, evidence_id LIMIT ?""",
+                    (access.scope, since, through, limit + 1),
+                ).fetchall()
+                return tuple(self._decode_evidence(row) for row in rows[:limit]), len(rows) > limit
+        except (sqlite3.DatabaseError, ValueError, TypeError) as error:
+            raise StoreIntegrityError("Cannot read learning evidence sample") from error

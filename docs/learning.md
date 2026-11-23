@@ -5,3 +5,9 @@ Schema 3 adds scoped proposals, ordered support and refutation links, and append
 Validation checks canonical byte digests and scope. It groups connected sources by conservative overlaps in recorded actor, locator or digest. Unverified records and reports attributed to the proposer do not count toward independent support. These rules use recorded source labels and cannot authenticate external origins or adjudicate truth. Reviewers must remain within the local trust boundary.
 
 Approval requires a different reviewer, two eligible support groups and no recorded refutation. Evidence links and contradictory material remain available for inspection and rejection. An approval is a staged decision. It never writes a belief or changes evidence. The native API denies promotion. No learning or review tools are exposed through MCP.
+
+## Previewing consolidation
+
+Call `aams.consolidation.propose(store, access, since=..., through=..., limit=128)` for an opt-in preview of up to 256 small evidence records in the caller's scope and recorded-time window. The rule groups repeated UTF-8 text after Unicode normalization, case folding and whitespace folding. A record prefixed with `not:` is an explicit counterexample for the matching group. This is a textual rule with a fixed uncertainty label. Paraphrases, implicit negation and source credibility require review.
+
+Each preview carries the proposer, ordered evidence IDs, exceptions, rule version and whether the sample hit its record cap. Calling `create_candidate` explicitly stages a selected proposal. Even a repeated text group can consist of one source; the independent-support check still runs separately.
