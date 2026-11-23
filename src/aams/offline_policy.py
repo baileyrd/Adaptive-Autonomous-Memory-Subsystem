@@ -113,20 +113,15 @@ def compare_controlled(
     if before.keys() != after.keys():
         raise ValueError("Comparison requires identical measured tasks")
     if any(
-        before[key].group_id != after[key].group_id
-        or before[key].mode is after[key].mode
+        before[key].group_id != after[key].group_id or before[key].mode is after[key].mode
         for key in before
     ):
         raise ValueError("Group mismatch or no alternate-mode comparison")
     total = len(candidate)
     baseline_satisfied = sum(row.label is OutcomeLabel.SATISFIED for row in baseline)
     candidate_satisfied = sum(row.label is OutcomeLabel.SATISFIED for row in candidate)
-    baseline_unsatisfied = sum(
-        row.label is OutcomeLabel.UNSATISFIED for row in baseline
-    )
-    candidate_unsatisfied = sum(
-        row.label is OutcomeLabel.UNSATISFIED for row in candidate
-    )
+    baseline_unsatisfied = sum(row.label is OutcomeLabel.UNSATISFIED for row in baseline)
+    candidate_unsatisfied = sum(row.label is OutcomeLabel.UNSATISFIED for row in candidate)
     mean_latency = sum(row.latency_ms for row in candidate) / total
     meets_budget = (
         mean_latency <= budget.max_latency_ms
