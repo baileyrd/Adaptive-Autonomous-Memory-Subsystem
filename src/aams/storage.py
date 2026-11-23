@@ -203,7 +203,6 @@ _SCOPED_ID_SCHEMA = (
 )
 
 
-
 class WriteConflict(ValueError):
     """A canonical identifier, evidence link or idempotency key conflicts."""
 
@@ -343,7 +342,6 @@ class SQLiteMemoryStore:
         except sqlite3.DatabaseError as error:
             raise StoreIntegrityError("Cannot write memory store") from error
         return formation
-
 
     def ingestion_time(self, access: AccessContext, request_key: str) -> str | None:
         """Return the trusted, previously committed ingestion time for an idempotency key."""
