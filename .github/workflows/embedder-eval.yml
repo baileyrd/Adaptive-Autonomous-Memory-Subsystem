@@ -1,7 +1,7 @@
 name: Embedder eval (#84)
 
 # Manual, eval-only run of the pinned ONNX encoder. Nothing here changes product defaults.
-# stage=pins: resolve a revision, hash its files, cross-check HF LFS ids, probe the encoder and
+# stage=pins: resolve a revision, hash its files, cross-check HF LFS ids (or git blob sha1), probe the encoder and
 #   upload the proposed scripts/onnx_pins.json. Commit that file before running stage=full.
 # stage=full: verify against the committed pins, then the measured run for Slice B/C.
 on:
@@ -49,7 +49,7 @@ jobs:
           mkdir -p out
           { python --version; nproc; grep -m1 "model name" /proc/cpuinfo; } > out/environment.txt
           python -m pip freeze > out/pip-freeze.txt
-      - name: Resolve pins from HF (revision, sha256, LFS cross-check)
+      - name: Resolve pins from HF (revision, sha256, HF id cross-check)
         if: inputs.stage == 'pins'
         env:
           REVISION: ${{ inputs.revision }}
@@ -64,15 +64,25 @@ jobs:
           done
           REV=$rev python - <<'EOF'
           import json, os
-          from hashlib import sha256
-          files = {name: sha256(open(f"model/{name}", "rb").read()).hexdigest()
-                   for name in ("onnx/model.onnx", "tokenizer.json")}
+          from hashlib import sha1, sha256
+          names = ("onnx/model.onnx", "tokenizer.json")
+          data = {name: open(f"model/{name}", "rb").read() for name in names}
+          files = {name: sha256(payload).hexdigest() for name, payload in data.items()}
           entries = json.load(open("tree-root.json")) + json.load(open("tree-onnx.json"))
-          lfs = {e["path"]: e["lfs"]["oid"] for e in entries if e.get("lfs")}
-          checked = {name: lfs[name] == digest for name, digest in files.items() if name in lfs}
-          print(json.dumps({"lfs_checked": checked}))
-          if not checked.get("onnx/model.onnx") or not all(checked.values()):
-              raise SystemExit("Downloaded bytes do not match the HF LFS object ids")
+          tree = {e["path"]: e for e in entries if e["path"] in names}
+
+          def hf_id_matches(name: str) -> bool:
+              """LFS files carry a sha256 oid; plain files only a git blob sha1."""
+              entry = tree[name]
+              if entry.get("lfs"):
+                  return entry["lfs"]["oid"] == files[name]
+              blob = b"blob %d\0" % len(data[name]) + data[name]
+              return entry["oid"] == sha1(blob).hexdigest()
+
+          checked = {name: hf_id_matches(name) for name in names}
+          print(json.dumps({"hf_id_checked": checked}))
+          if not all(checked.values()):
+              raise SystemExit("Downloaded bytes do not match the HF object ids")
           json.dump({"revision": os.environ["REV"], "files": files}, open("out/onnx_pins.json", "w"), indent=2)
           EOF
       - name: Probe encode time and loaded RSS
