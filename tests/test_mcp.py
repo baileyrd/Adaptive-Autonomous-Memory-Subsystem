@@ -40,6 +40,44 @@ class MCPTest(unittest.IsolatedAsyncioTestCase):
             conflict = await client.call_tool("memory_form", {**OBSERVATION, "text": "mismatch"})
             self.assertEqual(conflict.structured_content, {"code": "WRITE_CONFLICT"})
 
+    async def test_server_assigns_ingestion_time(self):
+        past = "2019-06-01T00:00:00Z"
+        async with local_client(self.path, "writer", "weather", write=True) as client:
+            forged = await client.call_tool("memory_form", {**OBSERVATION, "recorded_at": past})
+            self.assertEqual(forged.structured_content, {"code": "INVALID_INPUT"})
+            first = await client.call_tool(
+                "memory_form", {**OBSERVATION, "text": "Backdate attempt.", "observed_at": past}
+            )
+            self.assertFalse(first.is_error)
+            replay = await client.call_tool(
+                "memory_form", {**OBSERVATION, "text": "Backdate attempt.", "observed_at": past}
+            )
+            self.assertEqual(replay.structured_content, first.structured_content)
+            historical = await client.call_tool(
+                "memory_recall", {"query": "backdate", "recorded_as_of": "2020-01-01T00:00:00Z"}
+            )
+            self.assertEqual(historical.structured_content["items"], [])
+            current = await client.call_tool("memory_recall", {"query": "backdate"})
+            [item] = current.structured_content["items"]
+            self.assertGreater(item["recorded_at"], "2026-01-01")
+            self.assertEqual(
+                item["citations"][0]["observed_at"], "2019-06-01T00:00:00.000000+00:00"
+            )
+
+    async def test_concurrent_identical_ingestion_replays(self):
+        async with (
+            local_client(self.path, "writer", "weather", write=True) as first,
+            local_client(self.path, "writer", "weather", write=True) as second,
+        ):
+            inputs = {**OBSERVATION, "request_key": "concurrent-request"}
+            left, right = await asyncio.gather(
+                first.call_tool("memory_form", inputs),
+                second.call_tool("memory_form", inputs),
+            )
+            self.assertFalse(left.is_error, left.structured_content)
+            self.assertFalse(right.is_error, right.structured_content)
+            self.assertEqual(left.structured_content, right.structured_content)
+
     async def test_modern_wire_validation(self):
         process = await asyncio.create_subprocess_exec(
             sys.executable,
