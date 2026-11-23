@@ -17,7 +17,7 @@ from math import ceil
 from pathlib import Path
 from random import Random
 
-from fusion import ONNX_ARMS, InvalidRun, check_validity
+from fusion import ONNX_ARMS, InvalidRun, check_validity, open_encoder
 from offline_experiment import replay, summarize
 from train_offline_candidate import fit
 
@@ -129,7 +129,11 @@ def versus_baseline(rows: list[dict], details: list[dict], key: str, profiles: d
     base = profiles["bm25_guarded"]
     return {
         **paired(rows, details, key, "bm25_guarded"),
-        "ndcg_delta": round(profiles[key]["ndcg_at_3"] - base["ndcg_at_3"], 4),
+        # Unrounded: the gate is ndcg_delta >= 0, and rounding can hide a small regression.
+        "ndcg_delta": statistics.fmean(
+            row["measurements"][key]["ndcg"] - row["measurements"]["bm25_guarded"]["ndcg"]
+            for row in rows
+        ),
         "added_p95_ms": round(profiles[key]["p95_ms"] - base["p95_ms"], 3),
     }
 
@@ -287,6 +291,7 @@ def evaluate_groups(
         "staged_training_checksum": staged.training_checksum,
     }
     if encoder is not None:
+        result["valid"] = True
         result["onnx_spec"] = repr(encoder.spec)
         result["onnx_index_build_ms"] = {
             "total": round(sum(build_ms), 1),
@@ -299,25 +304,16 @@ def evaluate_groups(
     return result
 
 
-def load_encoder(
-    parser: argparse.ArgumentParser, directory: Path | None, rankings
-) -> object | None:
-    """Load and probe the pinned encoder, or return None. ONNX needs the BM25 baseline arm."""
-    if directory is None:
-        return None
-    if LexicalRanking.BM25 not in rankings:
+def require_bm25(parser: argparse.ArgumentParser, directory: Path | None, rankings) -> None:
+    """ONNX arms are compared against bm25_guarded, so they need the BM25 ranking."""
+    if directory is not None and LexicalRanking.BM25 not in rankings:
         parser.error("--encoder-dir requires --ranking bm25")
-    from onnx_encoder import OnnxSentenceEncoder, probe
-
-    encoder = OnnxSentenceEncoder(directory)
-    probe(encoder)
-    return encoder
 
 
-def run_valid(evaluation) -> dict:
-    """Run an evaluation; an invalid run prints its reason and exits 3, never a result."""
+def run_valid(evaluation, directory: Path | None) -> dict:
+    """Open the encoder (if any) and run; an invalid run prints its reason and exits 3."""
     try:
-        return evaluation()
+        return evaluation(open_encoder(directory) if directory is not None else None)
     except InvalidRun as error:
         print(json.dumps({"valid": False, "reason": str(error)}))
         sys.exit(3)
@@ -350,7 +346,7 @@ def main() -> None:
     if digest != args.expected_sha256:
         parser.error("Dataset checksum mismatch")
     rankings = tuple(LexicalRanking(value) for value in dict.fromkeys(args.ranking))
-    encoder = load_encoder(parser, args.encoder_dir, rankings)
+    require_bm25(parser, args.encoder_dir, rankings)
     data = json.loads(raw)
     data["data"] = data["data"][: args.max_articles]
     result = {
@@ -360,13 +356,14 @@ def main() -> None:
         "questions_per_paragraph": args.questions_per_paragraph,
         "repetitions": args.repetitions,
         **run_valid(
-            lambda: evaluate(
+            lambda encoder: evaluate(
                 data,
                 args.questions_per_paragraph,
                 args.repetitions,
                 rankings,
                 encoder=encoder,
-            )
+            ),
+            args.encoder_dir,
         ),
         "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     }

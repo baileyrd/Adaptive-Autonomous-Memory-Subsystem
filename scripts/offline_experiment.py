@@ -15,7 +15,7 @@ from pathlib import Path
 from time import perf_counter_ns, sleep
 
 from evaluate_semantic import seed, timestamp
-from fusion import ONNX_ARMS, InvalidRun, check_validity, dense_arm, rrf_arm
+from fusion import ONNX_ARMS, InvalidRun, check_validity, dense_arm, open_encoder, rrf_arm
 
 from aams.offline_policy import EvidenceBasis, OfflineOutcome, OfflineRiskBudget, OutcomeLabel
 from aams.offline_policy import compare_controlled
@@ -106,7 +106,10 @@ def replay(
         index.rebuild(AccessContext("fixture", group["domain"], True), provider)
         if encoder is not None:
             start = perf_counter_ns()
-            built = index.rebuild(AccessContext("fixture", group["domain"], True), encoder)
+            try:
+                built = index.rebuild(AccessContext("fixture", group["domain"], True), encoder)
+            except Exception as error:
+                raise InvalidRun(f"ONNX index rebuild failed: {error}") from error
             if built.status != "fresh":
                 raise InvalidRun(f"ONNX index rebuild returned {built.status}")
             if build_ms is not None:
@@ -304,17 +307,14 @@ def main():
     if not 1 <= args.repetitions <= 100:
         parser.error("Use 1 to 100 repetitions")
     rankings = tuple(LexicalRanking(value) for value in dict.fromkeys(args.ranking))
-    encoder = None
-    if args.encoder_dir is not None:
-        if LexicalRanking.BM25 not in rankings:
-            parser.error("--encoder-dir requires --ranking bm25")
-        from onnx_encoder import OnnxSentenceEncoder, probe
-
-        encoder = OnnxSentenceEncoder(args.encoder_dir)
-        probe(encoder)
+    if args.encoder_dir is not None and LexicalRanking.BM25 not in rankings:
+        parser.error("--encoder-dir requires --ranking bm25")
     splits = SPLITS if args.split == "all" else (args.split,)
     groups = load_groups()
+    encoder = None
     try:
+        if args.encoder_dir is not None:
+            encoder = open_encoder(args.encoder_dir)
         results = {
             split: split_result(
                 [group for group in groups if group["split"] == split],

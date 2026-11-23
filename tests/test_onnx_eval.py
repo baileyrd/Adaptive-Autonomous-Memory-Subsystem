@@ -14,9 +14,16 @@ from types import SimpleNamespace
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
-from evaluate_retrieval import evaluate_groups  # noqa: E402
+from evaluate_retrieval import evaluate_groups, versus_baseline  # noqa: E402
 from evaluate_semantic import seed, timestamp  # noqa: E402
-from fusion import InvalidRun, check_validity, dense_list, lexical_list, rrf  # noqa: E402
+from fusion import (  # noqa: E402
+    InvalidRun,
+    check_validity,
+    dense_list,
+    lexical_list,
+    open_encoder,
+    rrf,
+)
 from offline_experiment import SPLITS, load_groups, replay  # noqa: E402
 from onnx_encoder import (  # noqa: E402
     DIMENSIONS,
@@ -255,6 +262,34 @@ class FusionTest(unittest.TestCase):
             ids = lexical_list(memory, AccessContext("reader", "lab"), CognitiveNeed("shared"))
             self.assertEqual(len(ids), 20)
 
+    def test_backdated_formations_cannot_take_lexical_slots(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = SQLiteMemoryStore(Path(directory) / "s.sqlite3")
+            for index in range(3):
+                seed(store, f"visible-{index}", "lab", 1, "comet " * (index + 1) + "tail")
+            memory = CognitiveMemory(store)
+            access = AccessContext("reader", "lab")
+            need = CognitiveNeed("comet", recorded_as_of=timestamp(2))
+            before = lexical_list(memory, access, need)
+            for index in range(25):  # IDs match the query; their evidence is recorded later.
+                ingest(store, f"comet-{index}", "lab", 1, 3, "unrelated text")
+            self.assertEqual(lexical_list(memory, access, need), before)
+            self.assertEqual(set(before), {"visible-0", "visible-1", "visible-2"})
+
+
+class GateTest(unittest.TestCase):
+    def test_ndcg_delta_is_not_rounded_away(self):
+        rows = [
+            {"measurements": {"bm25_guarded": {"satisfied": True, "ndcg": 1.0}}}
+            for _ in range(4000)
+        ]
+        for row in rows:
+            row["measurements"]["arm"] = dict(row["measurements"]["bm25_guarded"])
+        rows[0]["measurements"]["arm"]["ndcg"] = 0.87  # One rank 2 -> 3 style loss.
+        details = [{"article": f"a{i % 10}"} for i in range(len(rows))]
+        profiles = {name: {"ndcg_at_3": 1.0, "p95_ms": 1.0} for name in ("arm", "bm25_guarded")}
+        self.assertLess(versus_baseline(rows, details, "arm", profiles)["ndcg_delta"], 0)
+
 
 class ReplayTest(unittest.TestCase):
     def test_default_replay_matches_committed_v06_baseline(self):
@@ -325,6 +360,16 @@ class ReplayTest(unittest.TestCase):
                 evaluate_groups(
                     groups, details, 1, (LexicalRanking.BM25,), encoder=FixtureEncoder()
                 )
+
+        class FailsDuringBuild(FixtureEncoder):
+            def encode(self, text):
+                raise RuntimeError("model crashed")
+
+        with self.assertRaisesRegex(InvalidRun, "rebuild failed"):
+            evaluate_groups(groups, details, 1, (LexicalRanking.BM25,), encoder=FailsDuringBuild())
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(InvalidRun, "load or probe"):
+                open_encoder(Path(directory))  # No pinned files: refused, not a traceback.
         with self.assertRaisesRegex(ValueError, "BM25"):
             replay(Path("unused"), groups, 1, encoder=FixtureEncoder())
 

@@ -8,6 +8,7 @@ recall's own citation path yields. Nothing here re-implements authorization or t
 from collections import defaultdict
 from dataclasses import replace
 from math import fsum
+from pathlib import Path
 
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.representations import RepresentationProvider
@@ -40,16 +41,38 @@ def visible_citations(memory: CognitiveMemory, access: AccessContext, need: Cogn
 
 
 def lexical_list(memory: CognitiveMemory, access: AccessContext, need: CognitiveNeed) -> list[str]:
-    """Evidence IDs of a depth-20 lexical packet. Fails if the byte cap, not depth, cut it."""
-    packet = memory.recall(
-        access,
-        replace(need, max_items=DEPTH, max_bytes=LIST_BYTES),
-        requested_mode=RetrievalMode.LEXICAL,
-    )
-    if packet["truncated"] and len(packet["items"]) < DEPTH:
-        raise InvalidRun("Lexical list shortened by the byte cap")
-    cited = (c["evidence_id"] for item in packet["items"] for c in item["citations"])
-    return list(dict.fromkeys(cited))
+    """The first 20 cited evidence IDs of recall's own lexical ranking.
+
+    Records with no time-visible citation (a backdated formation citing later evidence) cannot
+    take list slots: the packet deepens until it holds 20 cited IDs or recall has no more.
+    Fails if the byte cap, not depth, cut a packet.
+    """
+    items = DEPTH
+    while True:
+        packet = memory.recall(
+            access,
+            replace(need, max_items=items, max_bytes=LIST_BYTES),
+            requested_mode=RetrievalMode.LEXICAL,
+        )
+        if packet["truncated"] and len(packet["items"]) < items:
+            raise InvalidRun("Lexical list shortened by the byte cap")
+        cited = (c["evidence_id"] for item in packet["items"] for c in item["citations"])
+        identifiers = list(dict.fromkeys(cited))
+        if len(identifiers) >= DEPTH or not packet["truncated"]:
+            return identifiers[:DEPTH]
+        items *= 2
+
+
+def open_encoder(directory: Path) -> RepresentationProvider:
+    """Load and probe the pinned encoder; any failure is an invalid run, never a traceback."""
+    from onnx_encoder import OnnxSentenceEncoder, probe
+
+    try:
+        encoder = OnnxSentenceEncoder(directory)
+        probe(encoder)
+    except Exception as error:
+        raise InvalidRun(f"Encoder failed to load or probe: {error}") from error
+    return encoder
 
 
 def dense_list(

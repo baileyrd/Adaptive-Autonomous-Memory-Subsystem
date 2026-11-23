@@ -13,7 +13,7 @@ import tarfile
 from hashlib import sha256
 from pathlib import Path
 
-from evaluate_retrieval import DAY, PREVIEW_BYTES, evaluate_groups, load_encoder, run_valid
+from evaluate_retrieval import DAY, PREVIEW_BYTES, evaluate_groups, require_bm25, run_valid
 
 from aams.ranking import LexicalRanking
 
@@ -106,7 +106,7 @@ def main() -> None:
     args = parser.parse_args()
     if not 2 <= args.shards <= 256 or not 1 <= args.repetitions <= 20:
         parser.error("Use 2 to 256 shards and 1 to 20 repetitions")
-    encoder = load_encoder(parser, args.encoder_dir, (LexicalRanking.BM25,))
+    require_bm25(parser, args.encoder_dir, (LexicalRanking.BM25,))
     digest = sha256(args.scifact.read_bytes()).hexdigest()
     if digest != args.expected_sha256:
         parser.error("Dataset checksum mismatch")
@@ -119,10 +119,12 @@ def main() -> None:
         "dataset_sha256": digest,
         "shards": args.shards,
         "excluded_cross_shard_claims": excluded,
+        "repetitions": args.repetitions,
         **run_valid(
-            lambda: evaluate_groups(
+            lambda encoder: evaluate_groups(
                 groups, details, args.repetitions, (LexicalRanking.BM25,), encoder=encoder
-            )
+            ),
+            args.encoder_dir,
         ),
         "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     }

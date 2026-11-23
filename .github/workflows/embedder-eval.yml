@@ -123,21 +123,22 @@ jobs:
       - name: Evaluate (an invalid run exits 3 and fails the job)
         if: inputs.stage == 'full'
         run: |
-          common=(--ranking bm25 --encoder-dir model)
+          common=(--ranking bm25 --encoder-dir model --repetitions 5)  # D6: p95 over 5 repetitions
           python scripts/evaluate_retrieval.py --squad squad-dev.json "${common[@]}" > out/squad-dev.json
           python scripts/evaluate_retrieval.py --squad squad-train.json --expected-sha256 "$SQUAD_TRAIN_SHA256" \
             --max-articles 48 "${common[@]}" > out/squad-train.json
-          python scripts/evaluate_scifact.py --scifact scifact.tar.gz --encoder-dir model > out/scifact.json
+          python scripts/evaluate_scifact.py --scifact scifact.tar.gz --encoder-dir model --repetitions 5 \
+            > out/scifact.json
           python scripts/offline_experiment.py --split all "${common[@]}" > out/v06.json
       - name: Memory probe (fresh processes, build and serve peaks separated)
         if: inputs.stage == 'full'
         run: |
           probe() {  # workload data extra-args...
             local workload=$1 data=$2; shift 2
-            for arm in baseline candidate; do
-              local encoder=(); [ "$arm" = candidate ] && encoder=(--encoder-dir model)
+            for arm in baseline bm25_guarded_onnx rrf_onnx; do
+              local encoder=(); [ "$arm" != baseline ] && encoder=(--encoder-dir model)
               for phase in build serve; do
-                printf '{"workload":"%s","arm":"%s","phase":"%s","result":' "$workload" "$arm" "$phase"
+                printf '{"workload":"%s","result":' "$workload"
                 python -I scripts/memory_probe.py --workload "$workload" --arm "$arm" --phase "$phase" \
                   --db "mem-$workload-$arm.db" --data "$data" "${encoder[@]}" "$@"
                 echo "}"

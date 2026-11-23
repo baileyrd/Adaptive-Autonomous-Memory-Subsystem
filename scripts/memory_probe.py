@@ -1,9 +1,10 @@
 """Peak RSS for one phase of one arm, in a fresh process (#84 memory gate). Eval-only.
 
-Run four times with `python -I`, once per arm and phase, each with its own `--db`:
-`build` ingests the workload and builds the arm's representation index, and `serve` reopens
-that database and answers every task once through `bm25_guarded` recall. The baseline uses
-the fixture provider and never imports onnxruntime. Prints `{"peak_rss_kib": ...}`.
+Run with `python -I`, once per arm and phase, each arm with its own `--db`: `build` ingests
+the workload and builds the arm's representation index, and `serve` reopens that database and
+answers every task once through the arm's own serving path. `baseline` is `bm25_guarded` with
+the fixture provider and never imports onnxruntime; `bm25_guarded_onnx` and `rrf_onnx` are
+the two primary candidate arms. Prints `{"arm": ..., "phase": ..., "peak_rss_kib": ...}`.
 """
 
 import argparse
@@ -19,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # `python -I` drops th
 from evaluate_retrieval import SQUAD_SHA256, squad_groups  # noqa: E402
 from evaluate_scifact import CLAIM_FILES, SCIFACT_SHA256, read_jsonl, scifact_groups  # noqa: E402
 from evaluate_semantic import seed, timestamp  # noqa: E402
+from fusion import open_encoder, rrf_arm  # noqa: E402
 
 from aams.ranking import LexicalRanking  # noqa: E402
 from aams.recall import CognitiveMemory, CognitiveNeed  # noqa: E402
@@ -28,6 +30,7 @@ from aams.storage import AccessContext, SQLiteMemoryStore  # noqa: E402
 from aams.vector_index import RepresentationIndex  # noqa: E402
 
 CHECKSUMS = {"squad": SQUAD_SHA256, "scifact": SCIFACT_SHA256}
+ARMS = ("baseline", "bm25_guarded_onnx", "rrf_onnx")
 TOP_K = 3
 
 
@@ -45,11 +48,7 @@ def load_groups(workload: str, raw: bytes, path: Path, max_articles: int | None)
 def provider_for(arm: str, encoder_dir: Path | None) -> RepresentationProvider:
     if arm == "baseline":
         return DeterministicFixtureProvider()
-    from onnx_encoder import OnnxSentenceEncoder, probe
-
-    encoder = OnnxSentenceEncoder(encoder_dir)
-    probe(encoder)
-    return encoder
+    return open_encoder(encoder_dir)
 
 
 def build(store: SQLiteMemoryStore, groups: list[dict], provider: RepresentationProvider) -> None:
@@ -62,7 +61,10 @@ def build(store: SQLiteMemoryStore, groups: list[dict], provider: Representation
             raise RuntimeError(f"Index rebuild returned {built.status}")
 
 
-def serve(store: SQLiteMemoryStore, groups: list[dict], provider: RepresentationProvider) -> None:
+def serve(
+    store: SQLiteMemoryStore, groups: list[dict], provider: RepresentationProvider, arm: str
+) -> None:
+    """Answer every task once through the arm's serving path (guarded recall or RRF)."""
     memory = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25)
     for group in groups:
         access = AccessContext("fixture", group["domain"])
@@ -70,6 +72,9 @@ def serve(store: SQLiteMemoryStore, groups: list[dict], provider: Representation
             need = CognitiveNeed(
                 task["query"], max_items=TOP_K, recorded_as_of=timestamp(task["day"])
             )
+            if arm == "rrf_onnx":
+                rrf_arm(memory, provider, access, need, TOP_K)
+                continue
             opt_in = task["opt_in"]
             memory.recall(
                 access,
@@ -82,16 +87,16 @@ def serve(store: SQLiteMemoryStore, groups: list[dict], provider: Representation
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workload", choices=tuple(CHECKSUMS), required=True)
-    parser.add_argument("--arm", choices=("baseline", "candidate"), required=True)
+    parser.add_argument("--arm", choices=ARMS, required=True)
     parser.add_argument("--phase", choices=("build", "serve"), required=True)
     parser.add_argument("--db", type=Path, required=True)
     parser.add_argument("--data", type=Path, required=True, help="SQuAD JSON or SciFact tarball")
     parser.add_argument("--expected-sha256")
     parser.add_argument("--max-articles", type=int, help="SQuAD only: first N articles")
-    parser.add_argument("--encoder-dir", type=Path, help="Pinned ONNX encoder (candidate)")
+    parser.add_argument("--encoder-dir", type=Path, help="Pinned ONNX encoder (ONNX arms)")
     args = parser.parse_args()
-    if (args.arm == "candidate") != (args.encoder_dir is not None):
-        parser.error("--encoder-dir is required for, and only for, the candidate arm")
+    if (args.arm != "baseline") != (args.encoder_dir is not None):
+        parser.error("--encoder-dir is required for, and only for, the ONNX arms")
     if (args.phase == "build") == args.db.exists():
         parser.error("build needs a new --db; serve needs the database its build made")
     raw = args.data.read_bytes()
@@ -100,9 +105,13 @@ def main() -> None:
     groups = load_groups(args.workload, raw, args.data, args.max_articles)
     del raw
     provider = provider_for(args.arm, args.encoder_dir)
-    phase = build if args.phase == "build" else serve
-    phase(SQLiteMemoryStore(args.db), groups, provider)
-    print(json.dumps({"peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss}))
+    store = SQLiteMemoryStore(args.db)
+    if args.phase == "build":
+        build(store, groups, provider)
+    else:
+        serve(store, groups, provider, args.arm)
+    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    print(json.dumps({"arm": args.arm, "phase": args.phase, "peak_rss_kib": peak}))
 
 
 if __name__ == "__main__":
