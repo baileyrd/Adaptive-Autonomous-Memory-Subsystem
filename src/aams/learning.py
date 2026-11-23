@@ -1,7 +1,7 @@
 """Proposed learning abstractions: contracts only, never authoritative memory.
 
 This module defines inert, inspectable candidate values and transition *requests*.
-Only a future policy-enforcing persistence service may approve or apply them.
+The storage service enforces review policy before recording a decision.
 """
 
 from dataclasses import dataclass
@@ -88,3 +88,32 @@ class CandidateTransitionRequest:
             raise ValueError("Candidate transition identity or scope mismatch")
         if self.from_state is not current_state:
             raise ValueError("Stale candidate transition")
+
+
+@dataclass(frozen=True, slots=True)
+class CandidateDecision:
+    version: int
+    request: CandidateTransitionRequest
+    recorded_at: str
+
+
+@dataclass(frozen=True, slots=True)
+class CandidateRecord:
+    proposal: LearningCandidate
+    history: tuple[CandidateDecision, ...] = ()
+
+    @property
+    def version(self) -> int:
+        return len(self.history)
+
+    @property
+    def state(self) -> CandidateState:
+        return self.history[-1].request.to_state if self.history else self.proposal.state
+
+
+@dataclass(frozen=True, slots=True)
+class CandidateValidation:
+    independent_support: tuple[str, ...]
+    duplicate_support: tuple[str, ...]
+    unverified_support: tuple[str, ...]
+    refute_ids: tuple[str, ...]
