@@ -24,10 +24,12 @@ jobs:
       - name: Install pinned lint tooling
         run: python -m pip install ruff==0.14.6 ".[mcp]"
       - name: Format check
-        run: ruff format --check src tests
+        run: ruff format --check src tests scripts
       - name: Lint check
-        run: ruff check src tests
+        run: ruff check src tests scripts
       - name: Compile check
-        run: python -m compileall -q src tests
+        run: python -m compileall -q src tests scripts
       - name: Unit tests
         run: PYTHONPATH=src python -m unittest discover -s tests -v
+      - name: Run MCP acceptance demo
+        run: python -m aams.demo

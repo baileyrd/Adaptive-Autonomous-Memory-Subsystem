@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import tempfile
+from hashlib import sha256
 from pathlib import Path
 
 from mcp import Client
@@ -43,7 +44,7 @@ async def _call(client: Client, tool: str, arguments: dict) -> dict:
     return result.structured_content
 
 
-async def run_demo(path: Path) -> dict:
+async def _collect(path: Path) -> dict:
     async with local_client(path, "collector", "weather", write=True) as collector:
         tools = {tool.name for tool in (await collector.list_tools()).tools}
         if collector.protocol_version != PROTOCOL_VERSION or tools != {
@@ -57,14 +58,20 @@ async def run_demo(path: Path) -> dict:
         if await _call(collector, "memory_form", OBSERVATION) != observation:
             raise RuntimeError("Replay changed observation identity")
 
+    return observation
+
+
+async def _analyze(path: Path, observation: dict) -> dict:
     async with local_client(path, "analyst", "weather", write=True) as analyst:
         packet = await _call(
             analyst,
             "memory_recall",
             {"entity": "formation", "identifier": observation["formation_id"]},
         )
-        preview = packet["items"][0]["citations"][0]["preview"]
-        if preview != OBSERVATION["text"]:
+        citation = packet["items"][0]["citations"][0]
+        preview = citation["preview"]
+        digest = "sha256:" + sha256(OBSERVATION["text"].encode()).hexdigest()
+        if preview != OBSERVATION["text"] or citation["digest"] != digest:
             raise RuntimeError("Reopened process returned unexpected evidence")
         proposal = {
             "belief_id": "weather-assessment",
@@ -113,6 +120,18 @@ async def run_demo(path: Path) -> dict:
         if [edge["role"] for edge in current["citations"]] != ["support", "refute"]:
             raise RuntimeError("Explanation omitted supporting or refuting evidence")
 
+    return {
+        "protocol": PROTOCOL_VERSION,
+        "observation_after_restart": preview,
+        "observation_digest_verified": True,
+        "prior_belief": past["proposition"],
+        "current_belief": current["proposition"],
+        "provenance_roles": [edge["role"] for edge in current["citations"]],
+    }
+
+
+async def _check_denial(path: Path) -> dict:
+    target = {"entity": "belief", "identifier": "weather-assessment"}
     async with local_client(path, "visitor", "other") as visitor:
         denied = await _call(visitor, "memory_explain", target)
         missing = await _call(visitor, "memory_explain", {**target, "identifier": "unknown"})
@@ -123,22 +142,60 @@ async def run_demo(path: Path) -> dict:
             or write.structured_content != {"code": "ACCESS_DENIED"}
         ):
             raise RuntimeError("Expected scope and write restrictions")
-    return {
-        "protocol": PROTOCOL_VERSION,
-        "observation_after_restart": preview,
-        "prior_belief": past["proposition"],
-        "current_belief": current["proposition"],
-        "provenance_roles": [edge["role"] for edge in current["citations"]],
-        "out_of_scope": denied,
-        "write_denial": write.structured_content,
-    }
+    return {"out_of_scope": denied, "write_denial": write.structured_content}
+
+
+async def _run_phase(path: Path, phase: str, inputs: dict) -> dict:
+    process = await asyncio.create_subprocess_exec(
+        sys.executable,
+        "-m",
+        "aams.demo",
+        "--phase",
+        phase,
+        "--db",
+        str(path),
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+    )
+    try:
+        output, _ = await asyncio.wait_for(process.communicate(json.dumps(inputs).encode()), 30)
+    except TimeoutError:
+        process.kill()
+        await process.wait()
+        raise
+    if process.returncode:
+        raise RuntimeError(
+            f"Demo client phase {phase} failed with exit status {process.returncode}"
+        )
+    return json.loads(output)
+
+
+async def run_demo(path: Path) -> dict:
+    observation = await _run_phase(path, "collect", {})
+    result = await _run_phase(path, "analyze", observation)
+    return {**result, **(await _run_phase(path, "check-denial", {}))}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args()
-    with tempfile.TemporaryDirectory(prefix="aams-demo-") as directory:
-        result = asyncio.run(run_demo(Path(directory) / "memory.db"))
+    parser.add_argument(
+        "--phase", choices=("collect", "analyze", "check-denial"), help=argparse.SUPPRESS
+    )
+    parser.add_argument("--db", type=Path, help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    if args.phase is None:
+        with tempfile.TemporaryDirectory(prefix="aams-demo-") as directory:
+            result = asyncio.run(run_demo(Path(directory) / "memory.db"))
+    else:
+        if args.db is None:
+            parser.error("--phase requires --db")
+        data = json.load(sys.stdin)
+        if args.phase == "collect":
+            result = asyncio.run(_collect(args.db))
+        elif args.phase == "analyze":
+            result = asyncio.run(_analyze(args.db, data))
+        else:
+            result = asyncio.run(_check_denial(args.db))
     print(json.dumps(result, indent=2))
 
 
