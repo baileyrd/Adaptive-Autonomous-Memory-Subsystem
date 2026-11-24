@@ -1,0 +1,16 @@
+{
+  "data_preregistration_sha": "bcb6eb5643b5bbd3c4d14d4b0d99d63ab87d3386",
+  "fresh_aggregate_outcomes_inspected": false,
+  "source_sha256": {
+    "scripts/cognitive_task_agent.py": "b70098bde0141ada35d54c2850519a001f06fbf810dd247032b6d5814ca27eeb",
+    "scripts/cognitive_task_cases.py": "bb9e7ab30abd666240ff8d024e2cb510a7ee7d7ce6ff699869f00320c56e8f4d",
+    "scripts/copy_context_cases.py": "7c2758e9ffad2c127387930f4a97ddcec35c315ac8337e0799e0b5101a62e27b",
+    "scripts/copy_context_preregistration.json": "5660ce3347dd33e94557138fcd6cb4e691b48774d634113223fb3da4847bfc36",
+    "scripts/copy_context_recipe.json": "957703d709b80d15b0b29eb124cd68c28060cad8a0fc68dcfe78de71a72ea150",
+    "scripts/copy_context_selector.py": "fa9b754725077efdb47dcbb4903eb58ac00dcb770ed1c3737a7b4efc2fb27174",
+    "scripts/evaluate_cognitive_tasks.py": "84d2fa661645d80360fcc5ce7de73688ccb99cb9d18bb163fd7bcabce38e74cb",
+    "scripts/evaluate_copy_context.py": "acfaac0fe80f8456dbe43262b0145f28f23d7af877a4565775da31addf8a8436",
+    "tests/test_copy_context.py": "2ad03fdfd82a1d477d124c23c28425ee95772c62fb0087183ae1957bb1c45a60"
+  },
+  "version": "copy-context-execution-v1"
+}
