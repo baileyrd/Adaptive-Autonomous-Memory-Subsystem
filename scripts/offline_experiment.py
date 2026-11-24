@@ -15,7 +15,16 @@ from pathlib import Path
 from time import perf_counter_ns, sleep
 
 from evaluate_semantic import seed, timestamp
-from fusion import ONNX_ARMS, InvalidRun, check_validity, dense_arm, open_encoder, rrf_arm
+from fusion import (
+    ONNX_ARMS,
+    InvalidRun,
+    check_validity,
+    dense_arm,
+    fusion_arm,
+    open_encoder,
+    rerank_arm,
+    rrf_arm,
+)
 
 from aams.offline_policy import EvidenceBasis, OfflineOutcome, OfflineRiskBudget, OutcomeLabel
 from aams.offline_policy import compare_controlled
@@ -88,7 +97,8 @@ def replay(
 ):
     """Replay every strategy per task. Each ranking adds lexical, hybrid and guarded arms.
 
-    An ``encoder`` adds the eval-only ``bm25_guarded_onnx``, ``onnx`` and ``rrf_onnx`` arms
+    An ``encoder`` adds the eval-only ``bm25_guarded_onnx``, ``onnx``, ``rrf_onnx``,
+    ``bm25_rerank`` and ``bm25_fusion`` arms
     beside the unchanged fixture-provider arms. Its per-scope index build times are appended
     to ``build_ms`` when given.
     """
@@ -172,6 +182,8 @@ def replay(
                 )
                 calls["onnx"] = partial(dense_arm, bm25, encoder, access, need, TOP_K)
                 calls["rrf_onnx"] = partial(rrf_arm, bm25, encoder, access, need, TOP_K)
+                calls["bm25_rerank"] = partial(rerank_arm, bm25, encoder, access, need, TOP_K)
+                calls["bm25_fusion"] = partial(fusion_arm, bm25, encoder, access, need, TOP_K)
             for strategy, call in calls.items():
                 first_call = len(encoder.encode_ns) if encoder is not None else 0
                 expected = call()

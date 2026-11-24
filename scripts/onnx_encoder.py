@@ -119,10 +119,12 @@ def l2_normalize(values: Sequence[Any]) -> tuple[float, ...]:
     return tuple(value / norm for value in floats)
 
 
-def probe(encoder: "OnnxSentenceEncoder") -> None:
-    """Fail fast unless one query encodes to a finite, unit-norm, 384-d tuple of floats."""
+def probe(encoder: Any) -> None:
+    """Fail fast unless one query encodes to a finite, unit-norm tuple of floats of the spec's
+    dimension (384 for the ONNX exports)."""
     values = encoder.encode("validity probe")
-    if len(values) != DIMENSIONS or any(type(value) is not float for value in values):
+    width = encoder.spec.dimensions
+    if len(values) != width or any(type(value) is not float for value in values):
         raise ValueError("Probe vector has the wrong shape or element type")
     if abs(fsum(value * value for value in values) - 1.0) > 1e-6:
         raise ValueError("Probe vector is not unit norm")

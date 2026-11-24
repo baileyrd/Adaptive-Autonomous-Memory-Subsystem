@@ -327,6 +327,9 @@ def main() -> None:
     parser.add_argument("--repetitions", type=int, default=1)
     parser.add_argument("--max-articles", type=int, help="Use only the first N articles")
     parser.add_argument(
+        "--first-article", type=int, default=0, help="Skip articles before this index"
+    )
+    parser.add_argument(
         "--ranking",
         action="append",
         default=[],
@@ -339,6 +342,8 @@ def main() -> None:
     args = parser.parse_args()
     if not 1 <= args.repetitions <= 20 or not 1 <= args.questions_per_paragraph <= 10:
         parser.error("Use 1 to 20 repetitions and 1 to 10 questions per paragraph")
+    if args.first_article < 0:
+        parser.error("--first-article must be nonnegative")
     if args.max_articles is not None and args.max_articles < 1:
         parser.error("Use at least one article")
     raw = args.squad.read_bytes()
@@ -348,10 +353,12 @@ def main() -> None:
     rankings = tuple(LexicalRanking(value) for value in dict.fromkeys(args.ranking))
     require_bm25(parser, args.encoder_dir, rankings)
     data = json.loads(raw)
-    data["data"] = data["data"][: args.max_articles]
+    end = None if args.max_articles is None else args.first_article + args.max_articles
+    data["data"] = data["data"][args.first_article : end]
     result = {
         "workload": "squad_v1.1_article_grouped",
         "dataset_sha256": digest,
+        "first_article": args.first_article,
         "articles": len(data["data"]),
         "questions_per_paragraph": args.questions_per_paragraph,
         "repetitions": args.repetitions,

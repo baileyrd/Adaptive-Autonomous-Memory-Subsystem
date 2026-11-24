@@ -1,0 +1,201 @@
+name: Static embedder eval (#105)
+
+# Eval-only. Nothing here changes product defaults or installs a runtime dependency for AAMS.
+# Order is pre-registered: pins -> tokenizer parity + cost gate -> quality only if cost passes.
+# With an empty revision in scripts/static_embedder_pins.json the pins job only prints
+# proposed pins and fails; commit them to run the rest.
+on:
+  pull_request:
+    paths:
+      - scripts/static_encoder.py
+      - scripts/prepare_static_embedder.py
+      - scripts/static_embedder_pins.json
+      - scripts/fusion.py
+      - scripts/benchmark_onnx_cpu.py
+      - .github/workflows/static-embedder-eval.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  SQUAD_BASE: https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset
+  SQUAD_DEV_SHA256: 95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9
+  SQUAD_TRAIN_SHA256: 3527663986b8295af4f7fcdff1ba1ff3f72d07d61a20f487cb238a6ef92fd955
+  SCIFACT_URL: https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz
+  SCIFACT_SHA256: 11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be
+  PYTHONHASHSEED: "0"
+
+jobs:
+  cost:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # potion-retrieval-32m failed the RSS gate in run 45314502181 (3.67x); not re-run.
+        variant: [potion-base-8m]
+    env:
+      VARIANT: ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install AAMS only (the static encoder is stdlib)
+        run: python -m pip install .
+      - name: Fetch the pinned model and write the int8 table
+        run: |
+          mkdir -p out
+          python scripts/prepare_static_embedder.py "$VARIANT" model
+          cp model/static_manifest.json out/
+      - name: Fetch and verify SQuAD
+        run: |
+          curl -fsSL --retry 3 -o dev.json "$SQUAD_BASE/dev-v1.1.json"
+          curl -fsSL --retry 3 -o train.json "$SQUAD_BASE/train-v1.1.json"
+          printf '%s  %s\n' "$SQUAD_DEV_SHA256" dev.json "$SQUAD_TRAIN_SHA256" train.json | sha256sum -c
+      - name: Cost gate (v0.9 protocol, fresh processes, guarded comparator)
+        run: |
+          for split in dev train; do
+            python scripts/benchmark_onnx_cpu.py --static --model model --data "$split.json" \
+              --partition "$split" > "out/cost-$split.json"
+          done
+          python - <<'PY'
+          import json, os
+          gate = {}
+          for split in ("dev", "train"):
+              arms = json.load(open(f"out/cost-{split}.json"))["arms"]
+              keys = ("added_p95_ms", "rss_ratio", "load_rss_kib", "peak_rss_kib", "phase_ms")
+              for arm in ("static_rerank", "static_fusion"):
+                  row = arms[arm]
+                  print(f"::notice title=Cost {os.environ['VARIANT']} {arm} {split}::"
+                        + json.dumps({k: row[k] for k in keys}, separators=(",", ":")))
+                  gate[f"{arm}/{split}"] = row["qualifies"]
+          json.dump({"qualifies": all(gate.values()), "splits": gate}, open("out/gate.json", "w"))
+          print(f"::notice title=Gate {os.environ['VARIANT']}::{json.dumps(gate)}")
+          PY
+      - name: Tokenizer parity with the reference implementation (validity, not cost)
+        run: |
+          python -m pip install tokenizers==0.23.3
+          curl -fsSL --retry 3 -o scifact.tar.gz "$SCIFACT_URL"
+          echo "$SCIFACT_SHA256  scifact.tar.gz" | sha256sum -c
+          PYTHONPATH=scripts python - <<'PY'
+          import json, tarfile
+          from pathlib import Path
+          from static_encoder import WordPiece, VOCAB_FILE
+          from tokenizers import Tokenizer
+          reference = Tokenizer.from_file("model/source-tokenizer.json")  # Pin-verified bytes.
+          reference.no_truncation()
+          ours = WordPiece(Path("model", VOCAB_FILE).read_text(encoding="utf-8").split("\n"))
+          texts = []
+          for article in json.load(open("dev.json"))["data"]:
+              for paragraph in article["paragraphs"]:
+                  texts.append(paragraph["context"])
+                  texts.extend(q["question"] for q in paragraph["qas"])
+          with tarfile.open("scifact.tar.gz") as archive:
+              for name in ("data/corpus.jsonl", "data/claims_train.jsonl", "data/claims_dev.jsonl"):
+                  for line in archive.extractfile(name).read().splitlines():
+                      row = json.loads(line)
+                      texts.append(row.get("claim") or "\n".join([row["title"], *row["abstract"]]))
+          mismatched = [t for t in texts if ours.ids(t) != reference.encode(t, add_special_tokens=False).ids]
+          print(f"::notice title=Tokenizer parity::{len(texts) - len(mismatched)}/{len(texts)} identical")
+          if mismatched:
+              raise SystemExit(f"Tokenizer mismatch, first: {mismatched[0][:200]!r}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-cost-${{ matrix.variant }}
+          path: out/
+
+  quality:
+    needs: cost
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [potion-base-8m]
+        # squad-train-fresh (articles 48-95) is the primary, never-before-evaluated workload.
+        task: [squad-train-fresh, squad-dev, squad-train, scifact, v06]
+    env:
+      VARIANT: ${{ matrix.variant }}
+      TASK: ${{ matrix.task }}
+    steps:
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: static-cost-${{ matrix.variant }}
+          path: cost
+      - name: Run only if this variant passed the cost gate
+        id: gate
+        run: |
+          if [ -f cost/gate.json ] && python -c 'import json,sys; sys.exit(0 if json.load(open("cost/gate.json"))["qualifies"] else 1)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice title=Quality $VARIANT $TASK::NOT MEASURED (cost gate not passed)"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
+        with:
+          python-version: "3.12"
+      - name: Prepare model and data
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python -m pip install .
+          python scripts/prepare_static_embedder.py "$VARIANT" model
+          curl -fsSL --retry 3 -o squad-dev.json "$SQUAD_BASE/dev-v1.1.json"
+          curl -fsSL --retry 3 -o squad-train.json "$SQUAD_BASE/train-v1.1.json"
+          curl -fsSL --retry 3 -o scifact.tar.gz "$SCIFACT_URL"
+          printf '%s  %s\n' "$SQUAD_DEV_SHA256" squad-dev.json "$SQUAD_TRAIN_SHA256" squad-train.json \
+            "$SCIFACT_SHA256" scifact.tar.gz | sha256sum -c
+      - name: Evaluate one workload (an invalid run exits 3 and fails the job)
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          mkdir -p out
+          common=(--ranking bm25 --encoder-dir model --repetitions 5)
+          case "$TASK" in
+            squad-dev) python scripts/evaluate_retrieval.py --squad squad-dev.json "${common[@]}" ;;
+            squad-train) python scripts/evaluate_retrieval.py --squad squad-train.json \
+              --expected-sha256 "$SQUAD_TRAIN_SHA256" --max-articles 48 "${common[@]}" ;;
+            squad-train-fresh) python scripts/evaluate_retrieval.py --squad squad-train.json \
+              --expected-sha256 "$SQUAD_TRAIN_SHA256" --first-article 48 --max-articles 48 "${common[@]}" ;;
+            scifact) python scripts/evaluate_scifact.py --scifact scifact.tar.gz --encoder-dir model --repetitions 5 ;;
+            v06) python scripts/offline_experiment.py --split all "${common[@]}" ;;
+          esac > "out/$TASK.json"
+      - name: Summarize against bm25_guarded
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python - <<'PY'
+          import json, os
+          result = json.load(open(f"out/{os.environ['TASK']}.json"))
+          arms = ("bm25_fusion", "bm25_rerank", "bm25_guarded_onnx")
+          def walk(node, path):
+              if isinstance(node, dict):
+                  if "versus_bm25_guarded" in node:
+                      block = {a: node["versus_bm25_guarded"].get(a) for a in arms}
+                      leaks = {a: [node["profiles"][a]["scope_leaks"], node["profiles"][a]["time_leaks"]]
+                               for a in arms if a in node.get("profiles", {})}
+                      print(f"::notice title=Quality {os.environ['TASK']} {path}::"
+                            + json.dumps({"at": path, "vs_bm25_guarded": block, "leaks": leaks}, separators=(",", ":")))
+                  if "contradictions" in node:
+                      print(f"::notice title=Contradictions {os.environ['VARIANT']} {path}::"
+                            + json.dumps({a: node["contradictions"]["arms"].get(a) for a in ("bm25_guarded", *arms)},
+                                         separators=(",", ":")))
+                  for key, value in node.items():
+                      walk(value, f"{path}/{key}")
+          walk(result, "")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.gate.outputs.run == 'true'
+        with:
+          name: static-quality-${{ matrix.variant }}-${{ matrix.task }}
+          path: out/
