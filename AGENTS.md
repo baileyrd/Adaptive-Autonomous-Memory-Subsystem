@@ -13,6 +13,7 @@ Goal: https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/1
 ## GitHub coordination
 
 - For v1.0 research, use [issue #105](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/105) as the coordination hub. Issues #1, #14, #23, #34, #45, #56, #67, #79 and #94 retain previous milestones. Read its latest comments when starting, resuming, and before moving to another implementation slice.
+- Apply the approved [alignment decision #115](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/115) and [research acceptance contract](docs/acceptance/v1.0-research.md): measure bounded offline neural quality even when resource costs fail. Keep safety/correctness, cognitive task utility, retrieval effectiveness and operating cost separate. Resource limits remain deployment gates; they are not prerequisites for reporting offline quality. Preserve scoped BM25 with guarded routing as the native/MCP default and keep neural/learned activation offline.
 - Follow the links to the active implementation issue and PR. Read the PR conversation, review submissions, and inline review threads. Check CI on the current head and address or explicitly route outstanding findings before advancing.
 - At each handoff, update the active coordination issue with the implementation issue and PR, current state, verification, any blockers, and one next action. Record code-specific findings and their resolution on the associated PR so the next session can pick up directly from GitHub.
 
