@@ -89,3 +89,27 @@ This section was committed before the run. It was chosen after seeing the result
   - Zero scope and time leaks, and zero contradiction regressions.
   - The cost gate passes.
 - Meeting the criterion authorizes only a separate proposal. The default stays BM25.
+
+### Results: `bm25_fusion`
+
+Run [45332012602](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/actions/runs/45332012602) at head `853c5b0`. Hosted Linux, Python 3.12.16. Tokenizer parity: 18,929/18,929.
+
+**Cost gate** (vs guarded, same runner): `static_fusion` added +0.412 ms p95 / 1.660× RSS on dev and +0.320 ms / 1.649× on train. `static_rerank` added +0.397 / 1.654× and +0.363 / 1.647×. **PASS.**
+
+**Quality** (paired task-success Δ vs `bm25_guarded`, 95% grouped CI):
+
+| Workload | Partition | `bm25_fusion` Δ | nDCG@3 Δ | Wins / losses |
+| --- | --- | --- | --- | --- |
+| **SQuAD train 48–95 (primary)** | design | **+1.51 pp [+0.99, +2.00]** | +0.018 | 115 / 36 |
+| **SQuAD train 48–95 (primary)** | heldout | **+1.62 pp [+1.01, +2.23]** | +0.016 | 120 / 52 |
+| SQuAD dev (reuse) | heldout | +1.34 pp [+0.41, +2.40] | +0.012 | |
+| SQuAD train 0–47 (reuse) | heldout | +1.87 pp [+1.10, +2.71] | +0.018 | |
+| SciFact (reuse) | heldout | +1.70 pp [+0.71, +2.86] | +0.017 | 12 / 1 |
+
+On the reused workloads `bm25_fusion` matched the full-scan `bm25_guarded_onnx` exactly, so restricting to the top 20 lost nothing; full scan still added +9 to +24 ms p95. `bm25_rerank` stayed null on the primary heldout split (−0.07 pp [−1.04, +0.89]). Every arm had zero scope and time leaks and zero contradiction regressions on the v0.6 fixture.
+
+### Disposition: `bm25_fusion`
+
+- **Go criterion met.** The primary CI lower bound is above zero on both partitions, nDCG@3 Δ is positive, no secondary workload loses, leaks and contradiction regressions are zero, and the cost gate passes with about 12× headroom on latency.
+- This authorizes **only a separate canary proposal**. The default stays BM25. A runtime change would make the static encoder an optional extra, and it needs explicit approval before any dependency or default change.
+- Caveats: the gain is about +1.5 pp of task success, measured on SQuAD and SciFact; the v0.6 fixture showed no regression but is too small to show gain. The secondary workloads informed the hypothesis, so only the primary partition is confirmatory.
