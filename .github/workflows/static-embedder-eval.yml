@@ -37,7 +37,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [potion-base-8m, potion-retrieval-32m]
+        # potion-retrieval-32m failed the RSS gate in run 45314502181 (3.67x); not re-run.
+        variant: [potion-base-8m]
     env:
       VARIANT: ${{ matrix.variant }}
     steps:
@@ -68,11 +69,12 @@ jobs:
           gate = {}
           for split in ("dev", "train"):
               arms = json.load(open(f"out/cost-{split}.json"))["arms"]
-              row = arms["static_rerank"]
               keys = ("added_p95_ms", "rss_ratio", "load_rss_kib", "peak_rss_kib", "phase_ms")
-              print(f"::notice title=Cost {os.environ['VARIANT']} {split}::"
-                    + json.dumps({k: row[k] for k in keys}, separators=(",", ":")))
-              gate[split] = row["qualifies"]
+              for arm in ("static_rerank", "static_fusion"):
+                  row = arms[arm]
+                  print(f"::notice title=Cost {os.environ['VARIANT']} {arm} {split}::"
+                        + json.dumps({k: row[k] for k in keys}, separators=(",", ":")))
+                  gate[f"{arm}/{split}"] = row["qualifies"]
           json.dump({"qualifies": all(gate.values()), "splits": gate}, open("out/gate.json", "w"))
           print(f"::notice title=Gate {os.environ['VARIANT']}::{json.dumps(gate)}")
           PY
@@ -118,8 +120,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [potion-base-8m, potion-retrieval-32m]
-        task: [squad-dev, squad-train, scifact, v06]
+        variant: [potion-base-8m]
+        # squad-train-fresh (articles 48-95) is the primary, never-before-evaluated workload.
+        task: [squad-train-fresh, squad-dev, squad-train, scifact, v06]
     env:
       VARIANT: ${{ matrix.variant }}
       TASK: ${{ matrix.task }}
@@ -163,6 +166,8 @@ jobs:
             squad-dev) python scripts/evaluate_retrieval.py --squad squad-dev.json "${common[@]}" ;;
             squad-train) python scripts/evaluate_retrieval.py --squad squad-train.json \
               --expected-sha256 "$SQUAD_TRAIN_SHA256" --max-articles 48 "${common[@]}" ;;
+            squad-train-fresh) python scripts/evaluate_retrieval.py --squad squad-train.json \
+              --expected-sha256 "$SQUAD_TRAIN_SHA256" --first-article 48 --max-articles 48 "${common[@]}" ;;
             scifact) python scripts/evaluate_scifact.py --scifact scifact.tar.gz --encoder-dir model --repetitions 5 ;;
             v06) python scripts/offline_experiment.py --split all "${common[@]}" ;;
           esac > "out/$TASK.json"
@@ -172,15 +177,15 @@ jobs:
           python - <<'PY'
           import json, os
           result = json.load(open(f"out/{os.environ['TASK']}.json"))
-          arms = ("bm25_rerank", "rrf_onnx", "onnx", "bm25_guarded_onnx")
+          arms = ("bm25_fusion", "bm25_rerank", "bm25_guarded_onnx")
           def walk(node, path):
               if isinstance(node, dict):
                   if "versus_bm25_guarded" in node:
                       block = {a: node["versus_bm25_guarded"].get(a) for a in arms}
                       leaks = {a: [node["profiles"][a]["scope_leaks"], node["profiles"][a]["time_leaks"]]
                                for a in arms if a in node.get("profiles", {})}
-                      print(f"::notice title=Quality {os.environ['VARIANT']} {os.environ['TASK']} {path}::"
-                            + json.dumps({"vs_bm25_guarded": block, "leaks": leaks}, separators=(",", ":")))
+                      print(f"::notice title=Quality {os.environ['TASK']} {path}::"
+                            + json.dumps({"at": path, "vs_bm25_guarded": block, "leaks": leaks}, separators=(",", ":")))
                   if "contradictions" in node:
                       print(f"::notice title=Contradictions {os.environ['VARIANT']} {path}::"
                             + json.dumps({a: node["contradictions"]["arms"].get(a) for a in ("bm25_guarded", *arms)},

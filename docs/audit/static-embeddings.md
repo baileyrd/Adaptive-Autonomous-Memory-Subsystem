@@ -73,3 +73,19 @@ Every arm had zero scope leaks, zero time leaks and zero contradiction regressio
 - **Score fusion.** The existing score-averaging fusion (`bm25_guarded_onnx`) improves every workload significantly. It fails latency only because the full-scan snapshot path reads and verifies every vector in the scope on each query; encoding is not the cause.
 - **Hypothesis for the next pre-registration (post hoc, untested here):** the same score fusion, restricted to BM25 guarded's top 20 cited vectors, keeps the gain at rerank cost. It must be tested on fresh partitions or under a stated reuse caveat, because it was chosen after seeing these results.
 - No runtime or default change is authorized by these results.
+
+## Follow-up pre-registration: top-20 score fusion (`bm25_fusion`)
+
+This section was committed before the run. It was chosen after seeing the results above, so it is a follow-up hypothesis, not a confirmation of them.
+
+- **Arm.** Take BM25 guarded's first 20 cited evidence IDs and their BM25 scores (the best score of any item citing each one). Read only those IDs' stored vectors, under the same rules as `bm25_rerank`, and encode only the query. Score each candidate as (BM25 / list peak + cosine, counted only if ≥ 0.35) / 2. This is recall's hybrid rule, restricted to the lexical candidates. Sort descending, with ties broken by ID. A zero query vector keeps the lexical order and reports `no_match`.
+- **Model.** potion-base-8M only, at the same pins and recipe.
+- **Cost gate.** The v0.9 protocol is unchanged. The `static_fusion` serving arm must add ≤5 ms p95 and stay within ≤2× guarded RSS on both samples.
+- **Primary workload.** SQuAD train articles 48–95 (`--first-article 48 --max-articles 48`), never evaluated by any earlier run. Both hash partitions count, reported separately and pooled by the article-grouped bootstrap.
+- **Secondary workloads, with a reuse caveat.** SQuAD dev, SQuAD train 0–47, SciFact and the v0.6 contradiction fixture.
+- **Go criterion for proposing a canary.** All of the following must hold:
+  - Primary paired task-success Δ vs `bm25_guarded` has a 95% CI lower bound > 0, and nDCG@3 Δ ≥ 0.
+  - No secondary workload shows a significant loss.
+  - Zero scope and time leaks, and zero contradiction regressions.
+  - The cost gate passes.
+- Meeting the criterion authorizes only a separate proposal. The default stays BM25.

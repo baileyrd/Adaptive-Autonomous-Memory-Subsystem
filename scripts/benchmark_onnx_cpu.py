@@ -18,7 +18,7 @@ from time import perf_counter_ns, process_time_ns
 
 from evaluate_retrieval import squad_groups
 from evaluate_semantic import timestamp
-from fusion import rerank_arm
+from fusion import fusion_arm, rerank_arm
 from memory_probe import build
 from onnx_encoder import CPU_PROFILES, OnnxSentenceEncoder, Variant, file_sha256
 from static_encoder import StaticEmbeddingEncoder
@@ -34,6 +34,8 @@ DATASET_PINS = {
 }
 PARITY_TOLERANCE = 1e-5
 STATIC_ARM = "static_rerank"
+STATIC_FUSION_ARM = "static_fusion"
+STATIC_ARMS = {STATIC_ARM: rerank_arm, STATIC_FUSION_ARM: fusion_arm}
 
 
 def percentile(samples):
@@ -59,7 +61,7 @@ def measure(args):
     start = perf_counter_ns()
     if args.arm == "guarded":
         provider = DeterministicFixtureProvider()
-    elif args.arm == STATIC_ARM:
+    elif args.arm in STATIC_ARMS:
         provider = StaticEmbeddingEncoder(args.model, record_phases=True)
     else:
         provider = OnnxSentenceEncoder(
@@ -78,8 +80,8 @@ def measure(args):
         memory = CognitiveMemory(store)
 
         def serve(access, need):
-            if args.arm == STATIC_ARM:
-                return rerank_arm(memory, provider, access, need, 3)
+            if args.arm in STATIC_ARMS:
+                return STATIC_ARMS[args.arm](memory, provider, access, need, 3)
             return memory.recall(
                 access, need, provider=provider, requested_mode=RetrievalMode.HYBRID
             )
@@ -121,7 +123,7 @@ def measure(args):
             peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         )
         if args.arm != "guarded":
-            if args.arm != STATIC_ARM and len(provider.phase_timings_ns) != len(wall):
+            if args.arm not in STATIC_ARMS and len(provider.phase_timings_ns) != len(wall):
                 raise RuntimeError("A timed request did not execute the encoder")
             fields["phase_ms"] = {
                 name: percentile([getattr(t, name + "_ns") for t in provider.phase_timings_ns])
@@ -152,7 +154,7 @@ def run(args):
             timeout=90,
         )
         if args.static:
-            candidates = (STATIC_ARM,)
+            candidates = tuple(STATIC_ARMS)
         else:
             candidates = ("baseline", "threads2") if args.variant else CPU_PROFILES
         for arm in ("guarded", *candidates):
@@ -184,7 +186,7 @@ def run(args):
             if arm == "guarded":
                 continue
             actual = json.loads(vectors.read_text())
-            if arm == candidates[0]:
+            if arm == candidates[0] or args.static:  # Serving modes differ in ranking.
                 reference = actual
             error = max(
                 abs(a - b)
@@ -223,7 +225,7 @@ def main():
     parser.add_argument("--variant", type=Path)
     parser.add_argument("--static", action="store_true", help="Static encoder, rerank serving")
     parser.add_argument(
-        "--arm", choices=("guarded", STATIC_ARM, *CPU_PROFILES), help=argparse.SUPPRESS
+        "--arm", choices=("guarded", *STATIC_ARMS, *CPU_PROFILES), help=argparse.SUPPRESS
     )
     parser.add_argument("--prepare", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--groups", type=Path, help=argparse.SUPPRESS)

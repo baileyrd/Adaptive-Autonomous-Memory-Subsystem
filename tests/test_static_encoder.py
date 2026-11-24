@@ -12,9 +12,17 @@ from types import SimpleNamespace
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
-from benchmark_onnx_cpu import STATIC_ARM, measure  # noqa: E402
+from benchmark_onnx_cpu import STATIC_ARM, STATIC_FUSION_ARM, measure  # noqa: E402
 from evaluate_semantic import seed, timestamp  # noqa: E402
-from fusion import InvalidRun, check_validity, lexical_list, open_encoder, rerank_arm  # noqa: E402
+from fusion import (  # noqa: E402
+    InvalidRun,
+    check_validity,
+    fusion_arm,
+    lexical_list,
+    lexical_scored,
+    open_encoder,
+    rerank_arm,
+)
 from offline_experiment import load_groups, replay  # noqa: E402
 from prepare_static_embedder import convert, embedding_rows, wordpiece_vocab  # noqa: E402
 from static_encoder import (  # noqa: E402
@@ -246,6 +254,41 @@ class RerankArmTest(unittest.TestCase):
             with self.assertRaisesRegex(InvalidRun, "rerank"):
                 rerank_arm(memory, encoder, AccessContext("r", "lab"), CognitiveNeed("comet"), 3)
 
+    def test_fusion_scores_lexical_candidates_with_the_hybrid_rule(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store, encoder = self.build(Path(directory))
+            memory = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25)
+            access = AccessContext("reader", "lab")
+            need = CognitiveNeed("what comet", recorded_as_of=timestamp(2))
+            scored = lexical_scored(memory, access, need)
+            self.assertEqual(list(scored), ["lexical", "semantic"])
+            self.assertGreater(scored["lexical"][1], scored["semantic"][1])
+            built = len(encoder.encode_ns)
+            result = fusion_arm(memory, encoder, access, need, 3)
+            found = [item["citations"][0]["evidence_id"] for item in result["items"]]
+            self.assertEqual(result["retrieval"], {"mode": "fused", "status": "fresh"})
+            self.assertEqual(sorted(found), ["lexical", "semantic"])  # No future or private.
+            self.assertEqual(len(encoder.encode_ns) - built, 1)
+            unknown = fusion_arm(memory, encoder, access, CognitiveNeed("xylem"), 3)
+            self.assertEqual(unknown["retrieval"]["status"], "no_match")
+            seed(store, "added", "lab", 1, "what comet")
+            stale = fusion_arm(memory, encoder, access, CognitiveNeed("what comet"), 3)
+            self.assertEqual(stale["retrieval"]["status"], "stale")
+
+    def test_fusion_promotes_a_strong_semantic_match(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = SQLiteMemoryStore(Path(directory) / "s.sqlite3")
+            seed(store, "a-lexical", "lab", 1, "sun comet sun sun")
+            seed(store, "b-semantic", "lab", 1, "comet ice tail ice tail ice")
+            encoder = prepared(Path(directory) / "model")
+            RepresentationIndex(store).rebuild(AccessContext("i", "lab", True), encoder)
+            memory = CognitiveMemory(store, lexical_ranking=LexicalRanking.BM25)
+            need = CognitiveNeed("comet sun ice")
+            access = AccessContext("reader", "lab")
+            self.assertEqual(lexical_list(memory, access, need)[0], "a-lexical")
+            result = fusion_arm(memory, encoder, access, need, 3)
+            self.assertEqual(result["items"][0]["citations"][0]["evidence_id"], "b-semantic")
+
     def test_replay_measures_rerank_without_leaks(self):
         groups = [group for group in load_groups() if group["split"] == "test_a"]
         with tempfile.TemporaryDirectory() as directory:
@@ -259,9 +302,10 @@ class RerankArmTest(unittest.TestCase):
             )
         self.assertEqual(check_validity(rows), [])
         for row in rows:
-            measured = row["measurements"]["bm25_rerank"]
-            self.assertEqual((measured["scope_leaks"], measured["time_leaks"]), (0, 0))
-            self.assertLessEqual(measured["encoder_calls"], 1)
+            for arm in ("bm25_rerank", "bm25_fusion"):
+                measured = row["measurements"][arm]
+                self.assertEqual((measured["scope_leaks"], measured["time_leaks"]), (0, 0))
+                self.assertLessEqual(measured["encoder_calls"], 1)
 
 
 class StaticBenchmarkTest(unittest.TestCase):
@@ -286,11 +330,13 @@ class StaticBenchmarkTest(unittest.TestCase):
                 repetitions=1,
                 variant=None,
             )
-            fields = measure(args)
-            vectors = json.loads(args.vectors.read_text())
-        self.assertEqual(vectors["rankings"], [["a0p0"]])
-        self.assertEqual(fields["requests"], 1)
-        self.assertIn("inference", fields["phase_ms"])
+            for arm in (STATIC_ARM, STATIC_FUSION_ARM):
+                args.arm = arm
+                fields = measure(args)
+                vectors = json.loads(args.vectors.read_text())
+                self.assertEqual(vectors["rankings"], [["a0p0"]])
+                self.assertEqual(fields["requests"], 1)
+                self.assertIn("inference", fields["phase_ms"])
 
     def test_prepare_helper_imports_with_the_standard_library_only(self):
         result = subprocess.run(

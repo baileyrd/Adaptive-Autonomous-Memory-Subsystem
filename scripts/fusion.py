@@ -23,7 +23,8 @@ RRF_K = 60
 DEPTH = 20
 LIST_BYTES = 65536
 # Historical names: the arms take any pinned encoder, ONNX or static, named by its spec.
-ONNX_ARMS = ("bm25_guarded_onnx", "onnx", "rrf_onnx", "bm25_rerank")
+ONNX_ARMS = ("bm25_guarded_onnx", "onnx", "rrf_onnx", "bm25_rerank", "bm25_fusion")
+SEMANTIC_FLOOR = 0.35  # Mirrors recall's hybrid threshold.
 
 
 class InvalidRun(RuntimeError):
@@ -44,10 +45,11 @@ def visible_citations(memory: CognitiveMemory, access: AccessContext, need: Cogn
     return eligible
 
 
-def lexical_cited(
+def lexical_scored(
     memory: CognitiveMemory, access: AccessContext, need: CognitiveNeed
-) -> dict[str, str]:
-    """Evidence ID -> digest of the first 20 citations of recall's own lexical ranking.
+) -> dict[str, tuple[str, float]]:
+    """Evidence ID -> (digest, lexical score) of the first 20 citations of recall's own lexical
+    ranking. The score is the best BM25 score of any item citing that evidence.
 
     Records with no time-visible citation (a backdated formation citing later evidence) cannot
     take list slots: the packet deepens until it holds 20 cited IDs or recall has no more.
@@ -62,13 +64,21 @@ def lexical_cited(
         )
         if packet["truncated"] and len(packet["items"]) < items:
             raise InvalidRun("Lexical list shortened by the byte cap")
-        cited: dict[str, str] = {}
+        cited: dict[str, tuple[str, float]] = {}
         for item in packet["items"]:
+            score = float(item["relevance"]["score"])
             for citation in item["citations"]:
-                cited.setdefault(citation["evidence_id"], citation["digest"])
+                cited.setdefault(citation["evidence_id"], (citation["digest"], score))
         if len(cited) >= DEPTH or not packet["truncated"]:
             return dict(list(cited.items())[:DEPTH])
         items *= 2
+
+
+def lexical_cited(
+    memory: CognitiveMemory, access: AccessContext, need: CognitiveNeed
+) -> dict[str, str]:
+    """Evidence ID -> digest of the first 20 citations of recall's own lexical ranking."""
+    return {key: digest for key, (digest, _) in lexical_scored(memory, access, need).items()}
 
 
 def lexical_list(memory: CognitiveMemory, access: AccessContext, need: CognitiveNeed) -> list[str]:
@@ -201,6 +211,38 @@ def rerank_arm(memory, encoder, access, need, top_k: int) -> dict:
         return packet(list(cited), top_k, "fused", "no_match")
     dense = sorted(vectors, key=lambda i: (-fsum(a * b for a, b in zip(query, vectors[i])), i))
     return packet(rrf([list(cited), dense]), top_k, "fused", "fresh")
+
+
+def fusion_arm(memory, encoder, access, need, top_k: int) -> dict:
+    """BM25 guarded's top 20 citations, reordered by recall's hybrid score rule.
+
+    Score = (BM25 / list peak + cosine if >= 0.35 else 0) / 2, ties by ID. This is the
+    `bm25_guarded_onnx` fusion restricted to the lexical candidates, so only their stored
+    vectors are read and only the query is encoded. An all-zero query vector keeps the
+    lexical order and reports `no_match`.
+    """
+    scored = lexical_scored(memory, access, need)
+    if not scored:
+        return packet([], top_k, "fused", "no_match")
+    cited = {key: digest for key, (digest, _) in scored.items()}
+    vectors, status = cited_vectors(memory, access, encoder.spec, cited)
+    if status != "fresh":
+        return packet(list(cited), top_k, "fused", status)
+    try:
+        query = encoder.encode(need.query)
+    except Exception as error:  # Any encoder failure voids the run; never a silent fallback.
+        raise InvalidRun(f"Encoder failed on a fusion query: {error}") from error
+    if not any(query):
+        return packet(list(cited), top_k, "fused", "no_match")
+    peak = max(score for _, score in scored.values()) or 1.0
+
+    def fused(key: str) -> float:
+        vector = vectors.get(key)
+        cosine = fsum(a * b for a, b in zip(query, vector)) if vector else 0.0
+        return (scored[key][1] / peak + (cosine if cosine >= SEMANTIC_FLOOR else 0.0)) / 2
+
+    ranked = sorted(cited, key=lambda key: (-fused(key), key))
+    return packet(ranked, top_k, "fused", "fresh")
 
 
 def check_validity(rows: list[dict]) -> list[str]:
