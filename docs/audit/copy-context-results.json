@@ -1,0 +1,447 @@
+{
+  "arms": {
+    "copy_diverse": {
+      "arm": "copy_diverse",
+      "canonical_unchanged": true,
+      "cost": {
+        "cpu_median_ms": 2.030396,
+        "database_bytes": 1671168,
+        "p50_ms": 2.029732,
+        "p95_ms": 3.985593,
+        "peak_rss_kib": 29064
+      },
+      "heldout_by_family": {
+        "copy_clean": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "copy_failure": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "independent_clean": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "recovery": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "relabelled_failure": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "same_time_conflict": {
+          "abstentions": 8,
+          "successes": 0,
+          "tasks": 16,
+          "unsafe_proceed": 8
+        },
+        "temporal_history": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        }
+      },
+      "pid": 9720,
+      "prepare_pid": 9719,
+      "summary": {
+        "design": {
+          "abstention_rate": 0.07142857142857142,
+          "benign_abstentions": 0,
+          "benign_losses": 0,
+          "benign_tasks": 10,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 1.0,
+          "context_sensitive_rate": 0.9285714285714286,
+          "families": 7,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": null,
+          "later_report_coverage": 1.0,
+          "later_report_tasks": 10,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.8571428571428571,
+          "tasks": 28,
+          "truncated_candidate_windows": 0,
+          "unsafe_proceed_count": 2,
+          "unsafe_proceed_rate": 0.07142857142857142,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.07142857142857142,
+          "wrong_stops": 0
+        },
+        "heldout": {
+          "abstention_rate": 0.07142857142857142,
+          "benign_abstentions": 0,
+          "benign_losses": 0,
+          "benign_tasks": 40,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 1.0,
+          "context_sensitive_rate": 0.9285714285714286,
+          "families": 7,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": null,
+          "later_report_coverage": 1.0,
+          "later_report_tasks": 40,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.8571428571428571,
+          "tasks": 112,
+          "truncated_candidate_windows": 0,
+          "unsafe_proceed_count": 8,
+          "unsafe_proceed_rate": 0.07142857142857142,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.07142857142857142,
+          "wrong_stops": 0
+        }
+      }
+    },
+    "raw_search": {
+      "arm": "raw_search",
+      "canonical_unchanged": true,
+      "cost": {
+        "cpu_median_ms": 0.461488,
+        "database_bytes": 1671168,
+        "p50_ms": 0.4612215,
+        "p95_ms": 0.703827,
+        "peak_rss_kib": 28040
+      },
+      "heldout_by_family": {
+        "copy_clean": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "copy_failure": {
+          "abstentions": 0,
+          "successes": 8,
+          "tasks": 16,
+          "unsafe_proceed": 8
+        },
+        "independent_clean": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "recovery": {
+          "abstentions": 0,
+          "successes": 8,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "relabelled_failure": {
+          "abstentions": 0,
+          "successes": 8,
+          "tasks": 16,
+          "unsafe_proceed": 8
+        },
+        "same_time_conflict": {
+          "abstentions": 0,
+          "successes": 0,
+          "tasks": 16,
+          "unsafe_proceed": 16
+        },
+        "temporal_history": {
+          "abstentions": 0,
+          "successes": 8,
+          "tasks": 16,
+          "unsafe_proceed": 8
+        }
+      },
+      "pid": 9716,
+      "prepare_pid": 9715,
+      "summary": {
+        "design": {
+          "abstention_rate": 0.0,
+          "benign_abstentions": 0,
+          "benign_losses": 2,
+          "benign_tasks": 10,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 0.0,
+          "context_sensitive_rate": 1.0,
+          "families": 7,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": null,
+          "later_report_coverage": 0.0,
+          "later_report_tasks": 10,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.5714285714285714,
+          "tasks": 28,
+          "truncated_candidate_windows": 0,
+          "unsafe_proceed_count": 10,
+          "unsafe_proceed_rate": 0.35714285714285715,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.42857142857142855,
+          "wrong_stops": 2
+        },
+        "heldout": {
+          "abstention_rate": 0.0,
+          "benign_abstentions": 0,
+          "benign_losses": 8,
+          "benign_tasks": 40,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 0.0,
+          "context_sensitive_rate": 1.0,
+          "families": 7,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": null,
+          "later_report_coverage": 0.0,
+          "later_report_tasks": 40,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.5714285714285714,
+          "tasks": 112,
+          "truncated_candidate_windows": 0,
+          "unsafe_proceed_count": 40,
+          "unsafe_proceed_rate": 0.35714285714285715,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.42857142857142855,
+          "wrong_stops": 8
+        }
+      }
+    },
+    "structured": {
+      "arm": "structured",
+      "canonical_unchanged": true,
+      "cost": {
+        "cpu_median_ms": 0.6220319999999999,
+        "database_bytes": 1671168,
+        "p50_ms": 0.621815,
+        "p95_ms": 0.87305,
+        "peak_rss_kib": 29148
+      },
+      "heldout_by_family": {
+        "copy_clean": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "copy_failure": {
+          "abstentions": 0,
+          "successes": 8,
+          "tasks": 16,
+          "unsafe_proceed": 8
+        },
+        "independent_clean": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "recovery": {
+          "abstentions": 0,
+          "successes": 8,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "relabelled_failure": {
+          "abstentions": 0,
+          "successes": 16,
+          "tasks": 16,
+          "unsafe_proceed": 0
+        },
+        "same_time_conflict": {
+          "abstentions": 0,
+          "successes": 0,
+          "tasks": 16,
+          "unsafe_proceed": 16
+        },
+        "temporal_history": {
+          "abstentions": 0,
+          "successes": 8,
+          "tasks": 16,
+          "unsafe_proceed": 8
+        }
+      },
+      "pid": 9718,
+      "prepare_pid": 9717,
+      "summary": {
+        "design": {
+          "abstention_rate": 0.0,
+          "benign_abstentions": 0,
+          "benign_losses": 2,
+          "benign_tasks": 10,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 0.0,
+          "context_sensitive_rate": 1.0,
+          "families": 7,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": null,
+          "later_report_coverage": 0.2,
+          "later_report_tasks": 10,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.6428571428571429,
+          "tasks": 28,
+          "truncated_candidate_windows": 0,
+          "unsafe_proceed_count": 8,
+          "unsafe_proceed_rate": 0.2857142857142857,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.35714285714285715,
+          "wrong_stops": 2
+        },
+        "heldout": {
+          "abstention_rate": 0.0,
+          "benign_abstentions": 0,
+          "benign_losses": 8,
+          "benign_tasks": 40,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 0.0,
+          "context_sensitive_rate": 1.0,
+          "families": 7,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": null,
+          "later_report_coverage": 0.2,
+          "later_report_tasks": 40,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.6428571428571429,
+          "tasks": 112,
+          "truncated_candidate_windows": 0,
+          "unsafe_proceed_count": 32,
+          "unsafe_proceed_rate": 0.2857142857142857,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.35714285714285715,
+          "wrong_stops": 8
+        }
+      }
+    }
+  },
+  "cases_sha256": "b6e90f881aa4fc2f390ca7fc2349aedeaf0b78bca49d5541070cc4f0520ea26d",
+  "commands": [
+    "python scripts/evaluate_cognitive_tasks.py",
+    "python scripts/evaluate_copy_context.py",
+    "python -m unittest discover -s tests -p test_copy_context.py -v",
+    "ruff format --check src tests scripts",
+    "ruff check src tests scripts",
+    "python -m compileall -q src tests scripts",
+    "python -m unittest discover -s tests -v",
+    "python -m aams.demo"
+  ],
+  "data_preregistration_sha": "bcb6eb5643b5bbd3c4d14d4b0d99d63ab87d3386",
+  "environment": {
+    "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.12.14"
+  },
+  "execution": {
+    "data_preregistration_sha": "bcb6eb5643b5bbd3c4d14d4b0d99d63ab87d3386",
+    "fresh_aggregate_outcomes_inspected": false,
+    "source_sha256": {
+      "scripts/cognitive_task_agent.py": "b70098bde0141ada35d54c2850519a001f06fbf810dd247032b6d5814ca27eeb",
+      "scripts/cognitive_task_cases.py": "bb9e7ab30abd666240ff8d024e2cb510a7ee7d7ce6ff699869f00320c56e8f4d",
+      "scripts/copy_context_cases.py": "7c2758e9ffad2c127387930f4a97ddcec35c315ac8337e0799e0b5101a62e27b",
+      "scripts/copy_context_preregistration.json": "5660ce3347dd33e94557138fcd6cb4e691b48774d634113223fb3da4847bfc36",
+      "scripts/copy_context_recipe.json": "957703d709b80d15b0b29eb124cd68c28060cad8a0fc68dcfe78de71a72ea150",
+      "scripts/copy_context_selector.py": "fa9b754725077efdb47dcbb4903eb58ac00dcb770ed1c3737a7b4efc2fb27174",
+      "scripts/evaluate_cognitive_tasks.py": "84d2fa661645d80360fcc5ce7de73688ccb99cb9d18bb163fd7bcabce38e74cb",
+      "scripts/evaluate_copy_context.py": "acfaac0fe80f8456dbe43262b0145f28f23d7af877a4565775da31addf8a8436",
+      "tests/test_copy_context.py": "2ad03fdfd82a1d477d124c23c28425ee95772c62fb0087183ae1957bb1c45a60"
+    },
+    "version": "copy-context-execution-v1"
+  },
+  "limits": [
+    "Unchanged synthetic rule agent; no model/learning claim.",
+    "Declared-copy key does not attest independence or detect relabelled/paraphrased copies.",
+    "Control inspects a larger bounded internal candidate pool; agent context ceiling unchanged.",
+    "No product serving change, canonical mutation, activation or authority change."
+  ],
+  "matched_historical_decisions": 144,
+  "paired_control_minus_structured": {
+    "design": {
+      "abstained": {
+        "ci95": [
+          0,
+          0.21428571428571427
+        ],
+        "limitation": "Seven source-held-out mechanism families, not independent real-world reasoning samples; descriptive synthetic pilot.",
+        "mean_delta": 0.07142857142857142,
+        "resampling_families": 7,
+        "samples": 2000
+      },
+      "success": {
+        "ci95": [
+          0.07142857142857142,
+          0.35714285714285715
+        ],
+        "limitation": "Seven source-held-out mechanism families, not independent real-world reasoning samples; descriptive synthetic pilot.",
+        "mean_delta": 0.21428571428571427,
+        "resampling_families": 7,
+        "samples": 2000
+      },
+      "unsafe_proceed": {
+        "ci95": [
+          -0.42857142857142855,
+          -0.07142857142857142
+        ],
+        "limitation": "Seven source-held-out mechanism families, not independent real-world reasoning samples; descriptive synthetic pilot.",
+        "mean_delta": -0.21428571428571427,
+        "resampling_families": 7,
+        "samples": 2000
+      }
+    },
+    "heldout": {
+      "abstained": {
+        "ci95": [
+          0,
+          0.21428571428571427
+        ],
+        "limitation": "Seven source-held-out mechanism families, not independent real-world reasoning samples; descriptive synthetic pilot.",
+        "mean_delta": 0.07142857142857142,
+        "resampling_families": 7,
+        "samples": 2000
+      },
+      "success": {
+        "ci95": [
+          0.07142857142857142,
+          0.35714285714285715
+        ],
+        "limitation": "Seven source-held-out mechanism families, not independent real-world reasoning samples; descriptive synthetic pilot.",
+        "mean_delta": 0.21428571428571427,
+        "resampling_families": 7,
+        "samples": 2000
+      },
+      "unsafe_proceed": {
+        "ci95": [
+          -0.42857142857142855,
+          -0.07142857142857142
+        ],
+        "limitation": "Seven source-held-out mechanism families, not independent real-world reasoning samples; descriptive synthetic pilot.",
+        "mean_delta": -0.21428571428571427,
+        "resampling_families": 7,
+        "samples": 2000
+      }
+    }
+  },
+  "registration": {
+    "base_sha": "0b09cfad4ff087ecd8195f8834c2b2a06d0e9fb5",
+    "cases_sha256": "b6e90f881aa4fc2f390ca7fc2349aedeaf0b78bca49d5541070cc4f0520ea26d",
+    "fresh_outcomes_inspected": false,
+    "generator_sha256": "7c2758e9ffad2c127387930f4a97ddcec35c315ac8337e0799e0b5101a62e27b",
+    "historical_trace_sha256": "9eb8a5db18b744a800bc70fb5d478f25f1517ec0bb00c8ad827de54819d1bf48",
+    "recipe_sha256": "957703d709b80d15b0b29eb124cd68c28060cad8a0fc68dcfe78de71a72ea150",
+    "source_disjointness": "Verified id/scope/source sets across splits and original #118",
+    "version": "copy-context-data-preregistration-v1"
+  },
+  "reproduction_sha256": "69289aa1ffb0038882e5b1c2100d51795bc9bff0aaefd981efcda8e7d4eacc97",
+  "status": "completed_offline_copy_context_experiment",
+  "tested_sha": "d4b45bd034d701c757cb373bce5ebb9350c64666",
+  "trace_sha256": "26080b23c66e6c7f3f40b69804d64f0b699fbe0300e642d480daf8180c1f13ff",
+  "verification": {
+    "compile": "PASS",
+    "format": "PASS",
+    "lint": "PASS",
+    "mcp_demo": "PASS",
+    "targeted_tests": 6,
+    "unit_tests": 181
+  }
+}
