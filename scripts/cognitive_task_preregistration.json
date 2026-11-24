@@ -1,0 +1,14 @@
+{
+  "amendment": "Producer/status validation and unsafe-decision counter only; no agent, generator, case or instruction changes.",
+  "base_sha": "8811b6c",
+  "cases_sha256": "4661ada750b0b9d1c2af3bf40cd58c55684a51e7b6a4cf5bfabce5de70770e2c",
+  "first_execution_sha": "e093c283398107dd8cb04f25aa2c0c9a2c75a53b",
+  "outcomes_inspected_before_freeze": false,
+  "recipe_sha256": "13df30ce75fe65c48403e23062f267edfdad52f6a731ac464a6248bd3e34a17f",
+  "source_sha256": {
+    "cognitive_task_agent.py": "b70098bde0141ada35d54c2850519a001f06fbf810dd247032b6d5814ca27eeb",
+    "cognitive_task_cases.py": "bb9e7ab30abd666240ff8d024e2cb510a7ee7d7ce6ff699869f00320c56e8f4d",
+    "evaluate_cognitive_tasks.py": "84d2fa661645d80360fcc5ce7de73688ccb99cb9d18bb163fd7bcabce38e74cb"
+  },
+  "version": "cognitive-pilot-preregistration-v2"
+}

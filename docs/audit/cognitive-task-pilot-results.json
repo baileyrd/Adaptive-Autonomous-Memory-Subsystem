@@ -1,0 +1,263 @@
+{
+  "arms": {
+    "no_memory": {
+      "arm": "no_memory",
+      "canonical_digest_before": "8c9fba24aa33929a279e0d84b0db34f66f2942bbe1c30a4d50362db9ce8a3454",
+      "canonical_unchanged": true,
+      "cost": {
+        "cpu_median_ms": 0.0006455,
+        "database_bytes": 380928,
+        "note": "Includes first request; validation/scoring excluded. Not a cold-start or concurrency study.",
+        "peak_rss_kib": 23156,
+        "request_p50_ms": 0.000601,
+        "request_p95_ms": 0.000751
+      },
+      "pid": 8930,
+      "prepare_pid": 8929,
+      "process_after_ingest": true,
+      "safety": {
+        "canonical_writes_during_replay": 0,
+        "instruction_handling": "Rule-parser data only; model injection-following NOT MEASURED",
+        "scope_time_provenance": "PASS: every delivered context citation revalidated"
+      },
+      "summary": {
+        "design": {
+          "abstention_rate": 1.0,
+          "citation_precision": null,
+          "conflict_handling_rate": null,
+          "context_sensitive_rate": 0.0,
+          "families": 4,
+          "historical_success_rate": null,
+          "known_failure_repeat_rate": null,
+          "retrospective_state_accuracy": null,
+          "success_rate": 0.0,
+          "tasks": 24,
+          "unsafe_proceed_count": 0,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.0
+        },
+        "heldout": {
+          "abstention_rate": 1.0,
+          "citation_precision": null,
+          "conflict_handling_rate": 0.0,
+          "context_sensitive_rate": 0.0,
+          "families": 4,
+          "historical_success_rate": 0.0,
+          "known_failure_repeat_rate": 0.0,
+          "retrospective_state_accuracy": 0.0,
+          "success_rate": 0.0,
+          "tasks": 24,
+          "unsafe_proceed_count": 0,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.0
+        }
+      }
+    },
+    "raw_search": {
+      "arm": "raw_search",
+      "canonical_digest_before": "8c5d0861e41a1d5ce544c6310be6673f06bd615c4a2ac593078e00a03cafd12c",
+      "canonical_unchanged": true,
+      "cost": {
+        "cpu_median_ms": 0.2968325,
+        "database_bytes": 380928,
+        "note": "Includes first request; validation/scoring excluded. Not a cold-start or concurrency study.",
+        "peak_rss_kib": 23404,
+        "request_p50_ms": 0.2966165,
+        "request_p95_ms": 0.553574
+      },
+      "pid": 8932,
+      "prepare_pid": 8931,
+      "process_after_ingest": true,
+      "safety": {
+        "canonical_writes_during_replay": 0,
+        "instruction_handling": "Rule-parser data only; model injection-following NOT MEASURED",
+        "scope_time_provenance": "PASS: every delivered context citation revalidated"
+      },
+      "summary": {
+        "design": {
+          "abstention_rate": 0.16666666666666666,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": null,
+          "context_sensitive_rate": 0.8333333333333334,
+          "families": 4,
+          "historical_success_rate": null,
+          "known_failure_repeat_rate": null,
+          "retrospective_state_accuracy": null,
+          "success_rate": 0.7083333333333334,
+          "tasks": 24,
+          "unsafe_proceed_count": 3,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.125
+        },
+        "heldout": {
+          "abstention_rate": 0.3333333333333333,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 1.0,
+          "context_sensitive_rate": 0.6666666666666666,
+          "families": 4,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": 0.0,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.6666666666666666,
+          "tasks": 24,
+          "unsafe_proceed_count": 0,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.0
+        }
+      }
+    },
+    "structured": {
+      "arm": "structured",
+      "canonical_digest_before": "ecfe664c3f2938861a6fd1ec5b14b9e50bdd97ff61ca753d480a713b12b2a753",
+      "canonical_unchanged": true,
+      "cost": {
+        "cpu_median_ms": 0.39709700000000003,
+        "database_bytes": 380928,
+        "note": "Includes first request; validation/scoring excluded. Not a cold-start or concurrency study.",
+        "peak_rss_kib": 23536,
+        "request_p50_ms": 0.39658550000000004,
+        "request_p95_ms": 0.768854
+      },
+      "pid": 8934,
+      "prepare_pid": 8933,
+      "process_after_ingest": true,
+      "safety": {
+        "canonical_writes_during_replay": 0,
+        "instruction_handling": "Rule-parser data only; model injection-following NOT MEASURED",
+        "scope_time_provenance": "PASS: every delivered context citation revalidated"
+      },
+      "summary": {
+        "design": {
+          "abstention_rate": 0.16666666666666666,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": null,
+          "context_sensitive_rate": 0.8333333333333334,
+          "families": 4,
+          "historical_success_rate": null,
+          "known_failure_repeat_rate": null,
+          "retrospective_state_accuracy": null,
+          "success_rate": 0.7083333333333334,
+          "tasks": 24,
+          "unsafe_proceed_count": 3,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.125
+        },
+        "heldout": {
+          "abstention_rate": 0.25,
+          "citation_precision": 1.0,
+          "conflict_handling_rate": 1.0,
+          "context_sensitive_rate": 0.75,
+          "families": 4,
+          "historical_success_rate": 1.0,
+          "known_failure_repeat_rate": 0.0,
+          "retrospective_state_accuracy": 1.0,
+          "success_rate": 0.75,
+          "tasks": 24,
+          "unsafe_proceed_count": 0,
+          "unsupported_assertions": 0,
+          "wrong_nonabstaining_rate": 0.0
+        }
+      }
+    }
+  },
+  "cases_sha256": "4661ada750b0b9d1c2af3bf40cd58c55684a51e7b6a4cf5bfabce5de70770e2c",
+  "commands": [
+    "python scripts/evaluate_cognitive_tasks.py",
+    "python -m unittest discover -s tests -p test_cognitive_tasks.py -v",
+    "ruff format --check src tests scripts",
+    "ruff check src tests scripts",
+    "python -m compileall -q src tests scripts",
+    "python -m unittest discover -s tests -v",
+    "python -m aams.demo"
+  ],
+  "decision_trace_sha256": "9eb8a5db18b744a800bc70fb5d478f25f1517ec0bb00c8ad827de54819d1bf48",
+  "first_execution_sha": "e093c283398107dd8cb04f25aa2c0c9a2c75a53b",
+  "first_execution_source_sha256": {
+    "cognitive_task_agent.py": "b70098bde0141ada35d54c2850519a001f06fbf810dd247032b6d5814ca27eeb",
+    "cognitive_task_cases.py": "bb9e7ab30abd666240ff8d024e2cb510a7ee7d7ce6ff699869f00320c56e8f4d",
+    "evaluate_cognitive_tasks.py": "2b108768a5bb51e45514d31c5916ee829de227100ca0c996abd5839375d902c0"
+  },
+  "instruction_sha256": "8455edecf800576ad01845712d40937ed89a14cb61fc76e14d2f6d2d33286101",
+  "limitations": [
+    "Synthetic simulator labels, not independently observed real-world outcomes.",
+    "Fixed grammar/rule policy; no claim of AI reasoning or autonomous learning.",
+    "Public author-visible design/heldout families; no tuning after preregistration.",
+    "No-memory has an empty historical context and normally abstains.",
+    "No resource qualification prerequisite or serving activation."
+  ],
+  "not_measured": {
+    "calibration": "NOT ESTIMATED: no probabilistic output",
+    "checkpoint_recovery": "NOT IMPLEMENTED: store/process reopen only",
+    "consolidation_transfer": "NOT MEASURED: approved candidates stay staged",
+    "model_agent": "NOT RUN: no pinned model/prompt evaluation",
+    "neural_arm": "NOT RUN: separate #109 research",
+    "shared_memory": "NOT IMPLEMENTED"
+  },
+  "paired": {
+    "design": {
+      "no_memory": {
+        "ci95": [
+          -1,
+          -0.4166666666666667
+        ],
+        "limitation": "Four families per split; descriptive pilot, not a confirmatory significance claim.",
+        "mean_delta": -0.7083333333333334,
+        "resampling_families": 4,
+        "samples": 2000
+      },
+      "structured": {
+        "ci95": [
+          0,
+          0
+        ],
+        "limitation": "Four families per split; descriptive pilot, not a confirmatory significance claim.",
+        "mean_delta": 0,
+        "resampling_families": 4,
+        "samples": 2000
+      }
+    },
+    "heldout": {
+      "no_memory": {
+        "ci95": [
+          -1,
+          -0.25
+        ],
+        "limitation": "Four families per split; descriptive pilot, not a confirmatory significance claim.",
+        "mean_delta": -0.6666666666666666,
+        "resampling_families": 4,
+        "samples": 2000
+      },
+      "structured": {
+        "ci95": [
+          0,
+          0.25
+        ],
+        "limitation": "Four families per split; descriptive pilot, not a confirmatory significance claim.",
+        "mean_delta": 0.08333333333333333,
+        "resampling_families": 4,
+        "samples": 2000
+      }
+    }
+  },
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "policy_version": "latest-observation-unanimity-v1",
+  "python": "3.12.14",
+  "recipe_sha256": "13df30ce75fe65c48403e23062f267edfdad52f6a731ac464a6248bd3e34a17f",
+  "retrieval_effectiveness": "NOT SCORED: this pilot scores decisions, not retrieval relevance labels",
+  "source_sha256": {
+    "cognitive_task_agent.py": "b70098bde0141ada35d54c2850519a001f06fbf810dd247032b6d5814ca27eeb",
+    "cognitive_task_cases.py": "bb9e7ab30abd666240ff8d024e2cb510a7ee7d7ce6ff699869f00320c56e8f4d",
+    "evaluate_cognitive_tasks.py": "84d2fa661645d80360fcc5ce7de73688ccb99cb9d18bb163fd7bcabce38e74cb"
+  },
+  "status": "completed_rule_agent_pilot",
+  "tested_sha": "5176214976318bf40006461b1ece8c39b7e829cc",
+  "validation_amendment": "Producer/status checks and unsafe-decision counts added; all 144 decisions unchanged from first execution.",
+  "verification": {
+    "compile": "PASS",
+    "format": "PASS",
+    "lint": "PASS",
+    "mcp_demo": "PASS",
+    "targeted_tests": 8,
+    "unit_tests": 175
+  }
+}
