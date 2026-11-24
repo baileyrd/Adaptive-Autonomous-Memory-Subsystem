@@ -103,3 +103,5 @@ The [v0.6 offline research acceptance](docs/acceptance/MVP-v0.6.md) records the 
 The [v0.7 shadow-mode acceptance](docs/acceptance/MVP-v0.7.md) records the isolated observer, public and synthetic replays, and activation boundaries.
 
 The [v0.8 retrieval optimization acceptance](docs/acceptance/MVP-v0.8.md) records the root causes behind the routing tie, the article-grouped benchmark, the opt-in scoped BM25 ranker and its held-out gains over guarded retrieval, and the rejected or blocked experiments.
+
+The [v0.9 feasibility acceptance](docs/acceptance/MVP-v0.9.md) records CPU and quantization measurements and the resource gate for future neural evaluation.
