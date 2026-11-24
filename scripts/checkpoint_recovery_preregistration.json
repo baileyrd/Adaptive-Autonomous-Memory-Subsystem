@@ -1,0 +1,9 @@
+{
+  "base_sha": "f5ea24b53eab67b5ce7d4c4b03401fb5def2e829",
+  "cases_sha256": "005bba360d62de192a3ab972c2043436f4f65d47eea6ba9c6caf49744ba53c23",
+  "generator_sha256": "322ee3687740ddfb6b3d292ed70202e41b5e3126b5bbcd5238eb20f23b17c574",
+  "outcomes_inspected": false,
+  "recipe_sha256": "7eab8789da423dfaf1fe7447586866f9dee05261003a3c3bc7636a12f8dbc113",
+  "source_disjointness": "Verified design/heldout record IDs, scopes and actors against #117/#119/#123 fixtures",
+  "version": "checkpoint-recovery-data-v1"
+}

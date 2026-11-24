@@ -1,0 +1,12 @@
+{
+  "version": "checkpoint-recovery-124-v1",
+  "seed": 1242026,
+  "episodes_per_family": {"design": 2, "heldout": 4},
+  "families": ["ready", "truncated_transcript", "fabricated_progress", "changed_constraints", "expired", "superseded", "revoked_checkpoint", "revoked_access", "cross_scope_ref", "contradictory_state", "future_reference", "wrong_digest"],
+  "context_bytes": 8192,
+  "transcript_records": 8,
+  "max_evidence_refs": 8,
+  "repetitions": 3,
+  "bootstrap_samples": 2000,
+  "bootstrap_seed": 0
+}

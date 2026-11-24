@@ -1,0 +1,13 @@
+{
+  "aggregate_outcomes_inspected": false,
+  "data_preregistration_sha": "37cfe47839e608821a350d93ff42ca75f6ace347",
+  "source_sha256": {
+    "scripts/checkpoint_recovery_cases.py": "322ee3687740ddfb6b3d292ed70202e41b5e3126b5bbcd5238eb20f23b17c574",
+    "scripts/checkpoint_recovery_contract.py": "0b839953dc4ed994638bd88f1aea990e709f63d8de205fd76daa316711a93d37",
+    "scripts/checkpoint_recovery_preregistration.json": "3a37b72773aa4c35cde9d7a724867ebfeb7004f09b4a190fb4fb71bb9582dd05",
+    "scripts/checkpoint_recovery_recipe.json": "7eab8789da423dfaf1fe7447586866f9dee05261003a3c3bc7636a12f8dbc113",
+    "scripts/evaluate_checkpoint_recovery.py": "5224b8aa2677b82a76146e4714ac19b4a9053b70526331b899a3933eac9c8af0",
+    "tests/test_checkpoint_recovery.py": "fb0860d010a560c4e650f1a7949cbf3743023ac73bce7033d3d9de9f202b0c6b"
+  },
+  "version": "checkpoint-recovery-execution-v1"
+}
