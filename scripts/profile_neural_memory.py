@@ -125,9 +125,7 @@ def profile(stages, directory=None, pins_path=None):
         command = [sys.executable, "-I", str(Path(__file__).resolve()), "--child", stage]
         if stage in ("tokenizer_load", "onnx_session"):
             command += ["--model-dir", str(directory), "--pins", str(pins_path)]
-        completed = subprocess.run(
-            command, capture_output=True, text=True, check=True, timeout=90
-        )
+        completed = subprocess.run(command, capture_output=True, text=True, check=True, timeout=90)
         results.append(checked_result(stage, json.loads(completed.stdout)))
     return {
         "platform": sys.platform,
