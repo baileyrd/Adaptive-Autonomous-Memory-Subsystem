@@ -35,7 +35,9 @@ def cases():
                         recorded=recorded,
                         source=identifier + source,
                         origin=identifier + origin,
-                        text=json.dumps(dict(topic=topic, check=check, state=state), sort_keys=True),
+                        text=json.dumps(
+                            dict(topic=topic, check=check, state=state), sort_keys=True
+                        ),
                     )
                 )
 
@@ -45,13 +47,19 @@ def cases():
                 alias = f"p{i + 1:02}"
                 distinct = family in ("alias_failure", "derived_failure", "independent_clear")
                 add(
-                    f"a{i:03}", initial, 1, 2, alias if distinct else "p00",
+                    f"a{i:03}",
+                    initial,
+                    1,
+                    2,
+                    alias if distinct else "p00",
                     alias if family == "independent_clear" else "p00",
                 )
                 if family == "derived_failure":
                     rows[-1]["text"] += " " * (1 + i % 3)
                 if family == "paraphrase_failure":
-                    rows[-1]["text"] = f"{topic} seal inspection passed according to the initial log."
+                    rows[-1]["text"] = (
+                        f"{topic} seal inspection passed according to the initial log."
+                    )
             changes = family not in ("independent_clear", "missing_check")
             world = [dict(day=1, check="seal", clear=initial == "clear")]
             if changes:
@@ -66,10 +74,24 @@ def cases():
             add("foreign", "blocked", 1, 1, "p98", "p98", target="other" + scope)
             add("future", "blocked", 8, 8, "p97", "p97")
             tasks = [
-                dict(id=f"{identifier}-{label}", topic=topic, scope=scope, checks=checks,
-                     day=day, as_of=cutoff)
+                dict(
+                    id=f"{identifier}-{label}",
+                    topic=topic,
+                    scope=scope,
+                    checks=checks,
+                    day=day,
+                    as_of=cutoff,
+                )
                 for label, day, cutoff in (("then", 2, 6), ("pending", 4, 4), ("now", 6, 6))
             ]
-            episodes.append(dict(id=identifier, family=family, split="heldout", tasks=tasks,
-                                 observations=rows, world=world))
+            episodes.append(
+                dict(
+                    id=identifier,
+                    family=family,
+                    split="heldout",
+                    tasks=tasks,
+                    observations=rows,
+                    world=world,
+                )
+            )
     return episodes
