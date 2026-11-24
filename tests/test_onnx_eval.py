@@ -32,6 +32,7 @@ from onnx_encoder import (  # noqa: E402
     TOKENIZER_FILE,
     OnnxSentenceEncoder,
     Pins,
+    Variant,
     l2_normalize,
     probe,
     verify,
@@ -170,6 +171,39 @@ def ingest(store, identifier, scope, formed_day, recorded_day, text):
 
 
 class EncoderTest(unittest.TestCase):
+    def test_variant_metadata_is_strict_and_names_an_independent_space(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            pins = pinned_directory(path)
+            recipe = dict(
+                model="Xenova/example",
+                revision="a" * 40,
+                source_file="onnx/model_quantized.onnx",
+                dimensions=DIMENSIONS,
+                files=pins.files,
+            )
+            reference = fake_encoder(path)
+            variant = OnnxSentenceEncoder(
+                path,
+                variant=Variant(pooling="cls", **recipe),
+                session=FakeSession(),
+                tokenizer=FakeTokenizer(),
+            )
+            self.assertEqual(reference.encode("same text"), variant.encode("same text"))
+            self.assertNotEqual(reference.spec, variant.spec)
+            with self.assertRaises(ValueError):
+                Variant(pooling="unknown", **recipe)
+            with self.assertRaises(ValueError):
+                Variant(pooling="cls", **{**recipe, "revision": "main"})
+            with self.assertRaises(ValueError):
+                Variant(
+                    pooling="cls",
+                    **{
+                        **recipe,
+                        "files": {MODEL_FILE: "z" * 64, TOKENIZER_FILE: pins.files[TOKENIZER_FILE]},
+                    },
+                )
+
     def test_l2_normalize_returns_plain_unit_floats(self):
         values = l2_normalize([Float32(3.0), Float32(4.0)])
         self.assertEqual(values, (0.6, 0.8))

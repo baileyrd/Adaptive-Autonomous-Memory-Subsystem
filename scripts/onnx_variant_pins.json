@@ -1,0 +1,24 @@
+{
+  "bge-q8": {
+    "model": "Xenova/bge-small-en-v1.5",
+    "revision": "ea104dacec62c0de699686887e3f920caeb4f3e3",
+    "source_file": "onnx/model_quantized.onnx",
+    "pooling": "cls",
+    "dimensions": 384,
+    "files": {
+      "onnx/model.onnx": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4",
+      "tokenizer.json": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
+    }
+  },
+  "minilm-l3-q8": {
+    "model": "Xenova/paraphrase-MiniLM-L3-v2",
+    "revision": "4b544e74dfc3256b2b56849ea5d7064fee1ac846",
+    "source_file": "onnx/model_quantized.onnx",
+    "pooling": "mean",
+    "dimensions": 384,
+    "files": {
+      "onnx/model.onnx": "b190f50dd46296b9895ae8f274c3455762d08610f8788f4a9bd15019f4f7160c",
+      "tokenizer.json": "2fc687b11de0bc1b3d8348f92e3b49ef1089a621506c7661fbf3248fcd54947e"
+    }
+  }
+}

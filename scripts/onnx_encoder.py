@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 from math import fsum, isfinite, sqrt
 from pathlib import Path
+from re import fullmatch
 from time import perf_counter_ns
 from typing import Any
 
@@ -57,13 +58,37 @@ class Pins:
             raise ValueError(
                 f"Pins must name a revision and exactly {MODEL_FILE}, {TOKENIZER_FILE}"
             )
-        if any(len(value) != 64 for value in self.files.values()):
+        if any(
+            not isinstance(value, str) or not fullmatch(r"[0-9a-f]{64}", value)
+            for value in self.files.values()
+        ):
             raise ValueError("Pinned hashes must be hex sha256 digests")
 
 
 def load_pins(path: Path = PINS) -> Pins:
     data = json.loads(path.read_text())
     return Pins(data["revision"], dict(data["files"]))
+
+
+@dataclass(frozen=True, slots=True)
+class Variant:
+    model: str
+    revision: str
+    source_file: str
+    pooling: str
+    dimensions: int
+    files: dict[str, str]
+
+    def __post_init__(self) -> None:
+        if not fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", self.model) or not fullmatch(
+            r"[0-9a-f]{40}", self.revision
+        ):
+            raise ValueError("Variant requires exact model repository and revision")
+        if self.source_file != "onnx/model_quantized.onnx" or self.pooling not in ("cls", "mean"):
+            raise ValueError("Unknown evaluation format")
+        if type(self.dimensions) is not int or self.dimensions != DIMENSIONS:
+            raise ValueError("Unsupported variant dimension")
+        Pins(self.revision, self.files)
 
 
 def file_sha256(path: Path) -> str:
@@ -116,13 +141,23 @@ class OnnxSentenceEncoder:
         as_array: Callable[[list[list[int]]], Any] | None = None,
         record_phases: bool = False,
         cpu_profile: str = "baseline",
+        variant: Variant | None = None,
     ) -> None:
         if cpu_profile not in CPU_PROFILES:
             raise ValueError("Unknown bounded CPU profile")
         if type(record_phases) is not bool:
             raise ValueError("record_phases must be boolean")
+        if variant is not None:
+            if type(variant) is not Variant or pins is not None:
+                raise ValueError("Expected one verified model recipe")
+            pins = Pins(variant.revision, variant.files)
         pins = pins or load_pins()
         version = verify(directory, pins)
+        self._pooling = variant.pooling if variant else POOLING
+        if variant:
+            version = sha256(
+                f"{version}:{variant.model}:{variant.revision}:{variant.pooling}:{variant.dimensions}".encode()
+            ).hexdigest()[:12]
         if session is None:
             import numpy
             import onnxruntime
@@ -147,7 +182,9 @@ class OnnxSentenceEncoder:
         self._tokenizer = tokenizer
         self._as_array = as_array or (lambda rows: rows)
         self._inputs = frozenset(item.name for item in session.get_inputs())
-        self._spec = RepresentationSpec("onnx", f"{MODEL}@{pins.revision}", version, DIMENSIONS)
+        self._spec = RepresentationSpec(
+            "onnx", f"{variant.model if variant else MODEL}@{pins.revision}", version, DIMENSIONS
+        )
         self.encode_ns: list[int] = []
         self._record_phases = record_phases
         self.phase_timings_ns: list[EncodePhaseTiming] = []
@@ -177,7 +214,12 @@ class OnnxSentenceEncoder:
         prepared = perf_counter_ns() if self._record_phases else start
         hidden = self._session.run(None, arrays)[0]
         inferred = perf_counter_ns() if self._record_phases else start
-        values = l2_normalize(hidden[0][0])  # CLS: batch 0, token 0.
+        if self._pooling == "mean":
+            # The tokenizer disables padding; every token in this single row is visible.
+            pooled = hidden[0].mean(axis=0)
+        else:
+            pooled = hidden[0][0]
+        values = l2_normalize(pooled)
         if len(values) != DIMENSIONS:
             raise ValueError("Unexpected encoder dimensions")
         finished = perf_counter_ns()
