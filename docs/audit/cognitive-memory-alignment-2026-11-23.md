@@ -4,6 +4,8 @@
 **Status:** Initial design-to-roadmap audit; implementation-level traceability and task-outcome validation remain open.  
 **Coordination:** [alignment issue #115](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/115); [current research goal #105](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/105).
 
+**Implementation follow-up:** The [31-item traceability matrix](cognitive-memory-traceability.md) now inspects code and named tests, with [reproduced baseline evidence](cognitive-memory-baseline.json), a [bounded offline evaluation plan](cognitive-memory-evaluation-plan.md), and a [revised research acceptance contract](../acceptance/v1.0-research.md). The preliminary assessments below are retained as the initial review; consult the matrix for implementation status. Neural public quality and comparative cognitive task outcomes remain open.
+
 ## Original design intent
 
 The [v0.1.0 dossier](../design/v0.1.0/README.md) defines AAMS as an independent, model-neutral, evidence-preserving **cognitive memory** service. Its thesis is to measurably improve AI reasoning, reliability, continuity and future decisions. Embeddings and latent representations are replaceable indexing aids, not canonical truth.

@@ -1,0 +1,430 @@
+{
+  "audit_date": "2026-11-23",
+  "audited_main_sha": "79a4d1f0ae4026a185b03abaecc9507022444115",
+  "commands": [
+    "python -m pip install -e '.[mcp]' ruff==0.14.6",
+    "ruff format --check src tests scripts",
+    "ruff check src tests scripts",
+    "python -m compileall -q src tests scripts",
+    "python -m unittest discover -s tests -v",
+    "python -m aams.demo",
+    "python scripts/evaluate_learning.py --repetitions 30",
+    "python scripts/offline_experiment.py --split all --ranking bm25 --repetitions 5"
+  ],
+  "environment": {
+    "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.12.14"
+  },
+  "executed_checkout_sha": "7eb791884e13743029d9ef54ae1c85908cb04cb9",
+  "input_sha256": {
+    "tests/fixtures/learning_evaluation.json": "4c31df1c68ac82f9576214d91a426a6bee259cb01913bd0c81b57c31bf2f521e",
+    "tests/fixtures/offline_policy_v06.json": "b993e9f2d98681a39d97cb1a8372ce85a7358ab956309bedbd921d06178973e9",
+    "tests/fixtures/offline_policy_v06_baseline.json": "b1e55f129cd0350202a77b98c96e52c7538a2a8e20b953c9c43ab81b50bf902c"
+  },
+  "learning_fixture": {
+    "approvals": [
+      "rain likely"
+    ],
+    "augmented_evidence_links": 6,
+    "augmented_median_ms": 1.611,
+    "augmented_tasks_complete": 3,
+    "baseline_evidence_links": 5,
+    "baseline_median_ms": 1.103,
+    "baseline_tasks_complete": 2,
+    "canonical_promotions": 0,
+    "false_approvals": 0,
+    "foreign_candidates_visible": 0,
+    "proposal_precision": 0.5,
+    "proposal_recall": 0.6666666666666666,
+    "proposal_scan_median_ms": 0.259,
+    "proposals": [
+      "gauge clear",
+      "rain likely",
+      "river rising",
+      "wind rising"
+    ],
+    "restarted_records": {
+      "gauge clear": {
+        "canonical": false,
+        "foreign_visible": false,
+        "refutations": [
+          "gauge-z"
+        ],
+        "state": "rejected",
+        "support_groups": 2,
+        "versions": [
+          1,
+          2
+        ]
+      },
+      "rain likely": {
+        "canonical": false,
+        "foreign_visible": false,
+        "refutations": [],
+        "state": "approved",
+        "support_groups": 2,
+        "versions": [
+          1,
+          2
+        ]
+      },
+      "river rising": {
+        "canonical": false,
+        "foreign_visible": false,
+        "refutations": [],
+        "state": "rejected",
+        "support_groups": 0,
+        "versions": [
+          1,
+          2
+        ]
+      },
+      "wind rising": {
+        "canonical": false,
+        "foreign_visible": false,
+        "refutations": [],
+        "state": "rejected",
+        "support_groups": 1,
+        "versions": [
+          1,
+          2
+        ]
+      }
+    },
+    "task_count": 3
+  },
+  "limitations": [
+    "Fixed public/synthetic fixtures, not new independent held-out samples.",
+    "Fixture provider is deterministic; no neural quality claim.",
+    "Timing repeats are not independent task samples.",
+    "Reviewer task coverage measures evidence-link completeness, not agent decision success.",
+    "Stored measured feedback fields do not attest external source truth.",
+    "Cost qualification does not control admission to future bounded offline quality research."
+  ],
+  "retrieval_fixture": {
+    "observational_counterfactual": "NOT ESTABLISHED",
+    "peak_rss_kib": 17792,
+    "splits": {
+      "test_a": {
+        "bm25": {
+          "median_ms": 0.244,
+          "ndcg_at_3": 0.4599,
+          "p95_ms": 0.346,
+          "recall_at_3": 0.5,
+          "satisfied": 2,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "bm25_guarded": {
+          "median_ms": 0.426,
+          "ndcg_at_3": 0.9197,
+          "p95_ms": 0.605,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "bm25_hybrid": {
+          "median_ms": 0.498,
+          "ndcg_at_3": 0.9197,
+          "p95_ms": 0.547,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "contradictions": {
+          "arms": {
+            "bm25": {
+              "regressions": 0,
+              "retained": 0
+            },
+            "bm25_guarded": {
+              "regressions": 0,
+              "retained": 0
+            },
+            "bm25_hybrid": {
+              "regressions": 0,
+              "retained": 0
+            },
+            "guarded": {
+              "regressions": 0,
+              "retained": 0
+            },
+            "hybrid": {
+              "regressions": 0,
+              "retained": 0
+            },
+            "lexical": {
+              "regressions": 0,
+              "retained": 0
+            }
+          },
+          "tasks": 0
+        },
+        "guarded": {
+          "median_ms": 0.357,
+          "ndcg_at_3": 0.9197,
+          "p95_ms": 0.547,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "guarded_distinct_mode_pairs": {
+          "baseline_satisfied": 0,
+          "baseline_unsatisfied": 2,
+          "candidate_mean_latency_ms": 0.472914,
+          "candidate_satisfied": 2,
+          "candidate_unsatisfied": 0,
+          "meets_risk_budget": true,
+          "sample_count": 2
+        },
+        "hybrid": {
+          "median_ms": 0.522,
+          "ndcg_at_3": 0.9197,
+          "p95_ms": 0.765,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "lexical": {
+          "median_ms": 0.221,
+          "ndcg_at_3": 0.4599,
+          "p95_ms": 0.267,
+          "recall_at_3": 0.5,
+          "satisfied": 2,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        }
+      },
+      "test_b": {
+        "bm25": {
+          "median_ms": 0.238,
+          "ndcg_at_3": 0.5365,
+          "p95_ms": 0.297,
+          "recall_at_3": 0.5,
+          "satisfied": 2,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "bm25_guarded": {
+          "median_ms": 0.412,
+          "ndcg_at_3": 0.8631,
+          "p95_ms": 0.562,
+          "recall_at_3": 0.875,
+          "satisfied": 3,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "bm25_hybrid": {
+          "median_ms": 0.528,
+          "ndcg_at_3": 0.9398,
+          "p95_ms": 0.792,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "contradictions": {
+          "arms": {
+            "bm25": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "bm25_guarded": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "bm25_hybrid": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "guarded": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "hybrid": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "lexical": {
+              "regressions": 0,
+              "retained": 1
+            }
+          },
+          "tasks": 1
+        },
+        "guarded": {
+          "median_ms": 0.443,
+          "ndcg_at_3": 0.8631,
+          "p95_ms": 0.519,
+          "recall_at_3": 0.875,
+          "satisfied": 3,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "guarded_distinct_mode_pairs": {
+          "baseline_satisfied": 1,
+          "baseline_unsatisfied": 1,
+          "candidate_mean_latency_ms": 0.4861535,
+          "candidate_satisfied": 2,
+          "candidate_unsatisfied": 0,
+          "meets_risk_budget": true,
+          "sample_count": 2
+        },
+        "hybrid": {
+          "median_ms": 0.505,
+          "ndcg_at_3": 0.9398,
+          "p95_ms": 0.618,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "lexical": {
+          "median_ms": 0.227,
+          "ndcg_at_3": 0.5365,
+          "p95_ms": 0.276,
+          "recall_at_3": 0.5,
+          "satisfied": 2,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        }
+      },
+      "train": {
+        "bm25": {
+          "median_ms": 0.26,
+          "ndcg_at_3": 0.4599,
+          "p95_ms": 0.454,
+          "recall_at_3": 0.5,
+          "satisfied": 2,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "bm25_guarded": {
+          "median_ms": 0.399,
+          "ndcg_at_3": 0.9398,
+          "p95_ms": 0.65,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "bm25_hybrid": {
+          "median_ms": 0.544,
+          "ndcg_at_3": 0.9398,
+          "p95_ms": 0.685,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "contradictions": {
+          "arms": {
+            "bm25": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "bm25_guarded": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "bm25_hybrid": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "guarded": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "hybrid": {
+              "regressions": 0,
+              "retained": 1
+            },
+            "lexical": {
+              "regressions": 0,
+              "retained": 1
+            }
+          },
+          "tasks": 1
+        },
+        "guarded": {
+          "median_ms": 0.437,
+          "ndcg_at_3": 0.9398,
+          "p95_ms": 0.551,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "guarded_distinct_mode_pairs": {
+          "baseline_satisfied": 0,
+          "baseline_unsatisfied": 2,
+          "candidate_mean_latency_ms": 0.5016815,
+          "candidate_satisfied": 2,
+          "candidate_unsatisfied": 0,
+          "meets_risk_budget": true,
+          "sample_count": 2
+        },
+        "hybrid": {
+          "median_ms": 0.55,
+          "ndcg_at_3": 0.9398,
+          "p95_ms": 0.817,
+          "recall_at_3": 1.0,
+          "satisfied": 4,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        },
+        "lexical": {
+          "median_ms": 0.228,
+          "ndcg_at_3": 0.4599,
+          "p95_ms": 0.347,
+          "recall_at_3": 0.5,
+          "satisfied": 2,
+          "scope_leaks": 0,
+          "tasks": 4,
+          "time_leaks": 0
+        }
+      }
+    }
+  },
+  "scope": "Existing executable code and fixture rerun; documentation edits do not change these code bytes.",
+  "timezone": "America/Chicago",
+  "unmeasured": [
+    "independent no-memory/raw-search/structured-memory decision success",
+    "historical-decision improvement",
+    "false confidence and error recurrence",
+    "unseen-family consolidation transfer",
+    "task checkpoints and model replacement",
+    "full public ONNX quality",
+    "production traffic and concurrency"
+  ],
+  "verification": {
+    "compile": "PASS",
+    "format": "PASS",
+    "lint": "PASS",
+    "mcp_demo": "PASS",
+    "unit_result": "PASS",
+    "unit_tests": 137
+  }
+}

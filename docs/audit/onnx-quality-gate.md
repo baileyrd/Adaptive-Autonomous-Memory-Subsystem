@@ -1,5 +1,7 @@
 # v0.9 neural quality gate disposition
 
+Historical v0.9 result. For future offline research, the approved [#115 alignment decision](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/115) and [v1.0 research contract](../acceptance/v1.0-research.md) supersede the cost-before-quality ordering below. Resource failures remain deployment evidence; they no longer block bounded offline quality measurement. The recorded v0.9 results are unchanged.
+
 The held-out SQuAD, SciFact, and paraphrase/contradiction quality runs are **NOT MEASURED** for this milestone. The pre-registered gate requires at most 5 ms added p95 and 2× guarded peak RSS on both matched resource samples. No measured profile passed both limits. Retrieval quality remains unknown for these variants.
 
 | Exact evaluated recipe/profile | Dev / train added p95 | Dev / train RSS ratio | Resource gate |

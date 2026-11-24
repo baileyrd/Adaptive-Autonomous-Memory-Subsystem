@@ -46,3 +46,5 @@ Neural training, autonomous generalization, proactive model context injection, d
 
 ## Validation and release rule
 A feature is not done when only its schema or interface exists. Cite test commands, outputs, CI URLs and reviewed commit SHA. Never label the MVP released without the full end-to-end demonstration. Protocol versions and SDK compatibility must be verified at implementation time rather than copied from design notes without testing.
+
+Later cognitive-memory research follows the approved [#115 alignment decision](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/115) and [v1.0 research acceptance contract](acceptance/v1.0-research.md). Offline quality and task outcomes are measured separately from deployment costs; cost failure must not suppress offline quality. This does not expand the original MVP feature scope or authorize neural serving. The [traceability matrix](audit/cognitive-memory-traceability.md) records verified, partial, unimplemented and unknown capabilities.
