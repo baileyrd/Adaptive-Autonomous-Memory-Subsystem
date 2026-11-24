@@ -27,3 +27,7 @@ Pair identical task IDs and bootstrap whole scenario families (2,000 resamples, 
 Final context ceiling: 8,192 bytes, at most eight checkpoint evidence refs / transcript records. Three timing passes per request do not create additional task samples. Sequential arms, 60-second preparer and 120-second worker limits. Record process IDs, CPU/wall p50/p95, process peak RSS, sidecar/database bytes and all input/source/trace hashes. Costs never veto offline task reporting. No model downloads, optional inference dependencies, network calls, default-CI model installs or product writes.
 
 Freeze a separate execution source/test manifest before the first aggregate run, after this data/design preregistration commit. Reject changed source/data/old-artifact hashes. Preserve earlier artifacts and record any correction as a protocol amendment before rerun, never held-out tuning. Publish proposed contract, source-disjointness proof, per-arm decisions, negative cases and recommendations with exact-head CI. Product checkpoint persistence/API remains unimplemented pending contract review and a separate bounded implementation.
+
+## Post-run review note
+
+The text above records the original preregistration. The [corrected evidence report](checkpoint-recovery-results.md) identifies the host-head assistance in the journal baseline, the post-open integrity window and the author-reported cross-study disjointness check. The [amended contract](../adr/0010-disposable-task-checkpoints.md) has a separate regression suite and contributes no additional scored cases.
