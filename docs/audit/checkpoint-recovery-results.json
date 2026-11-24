@@ -1,0 +1,560 @@
+{
+  "arms": {
+    "canonical_control": {
+      "arm": "canonical_control",
+      "canonical_unchanged": true,
+      "cost": {
+        "checkpoint_bytes": 76098,
+        "cpu_median_ms": 0.317606,
+        "database_bytes": 720896,
+        "p50_ms": 0.3168775,
+        "p95_ms": 1.428871,
+        "peak_rss_kib": 25004
+      },
+      "evidence_digest_after": "60344281b24a61d0e663d05e9a64e68e944fa0865dfff2430ece0021b7bafa99",
+      "evidence_digest_before": "60344281b24a61d0e663d05e9a64e68e944fa0865dfff2430ece0021b7bafa99",
+      "heldout_by_family": {
+        "changed_constraints": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "contradictory_state": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "contradictory"
+          ]
+        },
+        "cross_scope_ref": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "expired": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "fabricated_progress": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "future_reference": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "ready": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "revoked_access": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "unavailable"
+          ]
+        },
+        "revoked_checkpoint": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "superseded": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "truncated_transcript": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "wrong_digest": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        }
+      },
+      "pid": 767,
+      "prepare_pid": 766,
+      "sidecars_unchanged": true,
+      "summary": {
+        "design": {
+          "abstained": 4,
+          "cases": 24,
+          "citation_count": 20,
+          "constraint_state_unavailable": 0,
+          "correct_actions": 22,
+          "expired_checkpoint_disclosure": 0,
+          "families": 12,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "ready_cases": 20,
+          "repeated_completed_work": 0,
+          "status_counts": {
+            "contradictory": 2,
+            "ready": 20,
+            "unavailable": 2
+          },
+          "success_rate": 0.9166666666666666,
+          "unauthorized_disclosure": 0
+        },
+        "heldout": {
+          "abstained": 8,
+          "cases": 48,
+          "citation_count": 40,
+          "constraint_state_unavailable": 0,
+          "correct_actions": 44,
+          "expired_checkpoint_disclosure": 0,
+          "families": 12,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "ready_cases": 40,
+          "repeated_completed_work": 0,
+          "status_counts": {
+            "contradictory": 4,
+            "ready": 40,
+            "unavailable": 4
+          },
+          "success_rate": 0.9166666666666666,
+          "unauthorized_disclosure": 0
+        }
+      }
+    },
+    "checkpoint": {
+      "arm": "checkpoint",
+      "canonical_unchanged": true,
+      "cost": {
+        "checkpoint_bytes": 76098,
+        "cpu_median_ms": 0.403335,
+        "database_bytes": 720896,
+        "p50_ms": 0.3991745,
+        "p95_ms": 1.227916,
+        "peak_rss_kib": 24916
+      },
+      "evidence_digest_after": "60344281b24a61d0e663d05e9a64e68e944fa0865dfff2430ece0021b7bafa99",
+      "evidence_digest_before": "60344281b24a61d0e663d05e9a64e68e944fa0865dfff2430ece0021b7bafa99",
+      "heldout_by_family": {
+        "changed_constraints": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "stale"
+          ]
+        },
+        "contradictory_state": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "contradictory"
+          ]
+        },
+        "cross_scope_ref": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "unavailable"
+          ]
+        },
+        "expired": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "expired"
+          ]
+        },
+        "fabricated_progress": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "contradictory"
+          ]
+        },
+        "future_reference": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "unavailable"
+          ]
+        },
+        "ready": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "revoked_access": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "unavailable"
+          ]
+        },
+        "revoked_checkpoint": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "unavailable"
+          ]
+        },
+        "superseded": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "superseded"
+          ]
+        },
+        "truncated_transcript": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "wrong_digest": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "unavailable"
+          ]
+        }
+      },
+      "pid": 765,
+      "prepare_pid": 764,
+      "sidecars_unchanged": true,
+      "summary": {
+        "design": {
+          "abstained": 20,
+          "cases": 24,
+          "citation_count": 4,
+          "constraint_state_unavailable": 2,
+          "correct_actions": 6,
+          "expired_checkpoint_disclosure": 0,
+          "families": 12,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "ready_cases": 4,
+          "repeated_completed_work": 0,
+          "status_counts": {
+            "contradictory": 4,
+            "expired": 2,
+            "ready": 4,
+            "stale": 2,
+            "superseded": 2,
+            "unavailable": 10
+          },
+          "success_rate": 0.25,
+          "unauthorized_disclosure": 0
+        },
+        "heldout": {
+          "abstained": 40,
+          "cases": 48,
+          "citation_count": 8,
+          "constraint_state_unavailable": 4,
+          "correct_actions": 12,
+          "expired_checkpoint_disclosure": 0,
+          "families": 12,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "ready_cases": 8,
+          "repeated_completed_work": 0,
+          "status_counts": {
+            "contradictory": 8,
+            "expired": 4,
+            "ready": 8,
+            "stale": 4,
+            "superseded": 4,
+            "unavailable": 20
+          },
+          "success_rate": 0.25,
+          "unauthorized_disclosure": 0
+        }
+      }
+    },
+    "transcript": {
+      "arm": "transcript",
+      "canonical_unchanged": true,
+      "cost": {
+        "checkpoint_bytes": 76098,
+        "cpu_median_ms": 0.90918,
+        "database_bytes": 720896,
+        "p50_ms": 0.9074245,
+        "p95_ms": 2.998404,
+        "peak_rss_kib": 25144
+      },
+      "evidence_digest_after": "60344281b24a61d0e663d05e9a64e68e944fa0865dfff2430ece0021b7bafa99",
+      "evidence_digest_before": "60344281b24a61d0e663d05e9a64e68e944fa0865dfff2430ece0021b7bafa99",
+      "heldout_by_family": {
+        "changed_constraints": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "contradictory_state": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "contradictory"
+          ]
+        },
+        "cross_scope_ref": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "expired": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "fabricated_progress": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "future_reference": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "ready": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "revoked_access": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "unavailable"
+          ]
+        },
+        "revoked_checkpoint": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "superseded": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        },
+        "truncated_transcript": {
+          "abstentions": 4,
+          "cases": 4,
+          "correct_actions": 0,
+          "statuses": [
+            "insufficient"
+          ]
+        },
+        "wrong_digest": {
+          "abstentions": 0,
+          "cases": 4,
+          "correct_actions": 4,
+          "statuses": [
+            "ready"
+          ]
+        }
+      },
+      "pid": 763,
+      "prepare_pid": 762,
+      "sidecars_unchanged": true,
+      "summary": {
+        "design": {
+          "abstained": 6,
+          "cases": 24,
+          "citation_count": 18,
+          "constraint_state_unavailable": 0,
+          "correct_actions": 20,
+          "expired_checkpoint_disclosure": 0,
+          "families": 12,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "ready_cases": 18,
+          "repeated_completed_work": 0,
+          "status_counts": {
+            "contradictory": 2,
+            "insufficient": 2,
+            "ready": 18,
+            "unavailable": 2
+          },
+          "success_rate": 0.8333333333333334,
+          "unauthorized_disclosure": 0
+        },
+        "heldout": {
+          "abstained": 12,
+          "cases": 48,
+          "citation_count": 36,
+          "constraint_state_unavailable": 0,
+          "correct_actions": 40,
+          "expired_checkpoint_disclosure": 0,
+          "families": 12,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "ready_cases": 36,
+          "repeated_completed_work": 0,
+          "status_counts": {
+            "contradictory": 4,
+            "insufficient": 4,
+            "ready": 36,
+            "unavailable": 4
+          },
+          "success_rate": 0.8333333333333334,
+          "unauthorized_disclosure": 0
+        }
+      }
+    }
+  },
+  "cases_sha256": "005bba360d62de192a3ab972c2043436f4f65d47eea6ba9c6caf49744ba53c23",
+  "checkpoint_minus_transcript": {
+    "design": {
+      "ci95": [
+        -0.9166666666666666,
+        -0.25
+      ],
+      "families": 12,
+      "limitation": "Twelve synthetic family units; descriptive, not model-agent evidence.",
+      "mean_delta": -0.5833333333333334
+    },
+    "heldout": {
+      "ci95": [
+        -0.9166666666666666,
+        -0.25
+      ],
+      "families": 12,
+      "limitation": "Twelve synthetic family units; descriptive, not model-agent evidence.",
+      "mean_delta": -0.5833333333333334
+    }
+  },
+  "commands": [
+    "python scripts/evaluate_checkpoint_recovery.py",
+    "python -m unittest discover -s tests -p test_checkpoint_recovery.py -v",
+    "ruff format --check src tests scripts",
+    "ruff check src tests scripts",
+    "python -m compileall -q src tests scripts",
+    "python -m unittest discover -s tests -v",
+    "python -m aams.demo"
+  ],
+  "environment": {
+    "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.12.14"
+  },
+  "execution": {
+    "aggregate_outcomes_inspected": false,
+    "data_preregistration_sha": "37cfe47839e608821a350d93ff42ca75f6ace347",
+    "source_sha256": {
+      "scripts/checkpoint_recovery_cases.py": "322ee3687740ddfb6b3d292ed70202e41b5e3126b5bbcd5238eb20f23b17c574",
+      "scripts/checkpoint_recovery_contract.py": "0b839953dc4ed994638bd88f1aea990e709f63d8de205fd76daa316711a93d37",
+      "scripts/checkpoint_recovery_preregistration.json": "3a37b72773aa4c35cde9d7a724867ebfeb7004f09b4a190fb4fb71bb9582dd05",
+      "scripts/checkpoint_recovery_recipe.json": "7eab8789da423dfaf1fe7447586866f9dee05261003a3c3bc7636a12f8dbc113",
+      "scripts/evaluate_checkpoint_recovery.py": "5224b8aa2677b82a76146e4714ac19b4a9053b70526331b899a3933eac9c8af0",
+      "tests/test_checkpoint_recovery.py": "fb0860d010a560c4e650f1a7949cbf3743023ac73bce7033d3d9de9f202b0c6b"
+    },
+    "version": "checkpoint-recovery-execution-v1"
+  },
+  "not_measured": {
+    "cold_start_concurrency": "NOT MEASURED",
+    "model_agent_utility": "NOT MEASURED: deterministic reconstruction and action control",
+    "model_replacement": "NOT RUN: no model/runtime available; interpreter replacement only",
+    "product_persistence": "NOT IMPLEMENTED: proposed contract and temporary sidecars only",
+    "real_completion_attestation": "NOT IMPLEMENTED: trusted synthetic host/executor fixture"
+  },
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "registration": {
+    "base_sha": "f5ea24b53eab67b5ce7d4c4b03401fb5def2e829",
+    "cases_sha256": "005bba360d62de192a3ab972c2043436f4f65d47eea6ba9c6caf49744ba53c23",
+    "generator_sha256": "322ee3687740ddfb6b3d292ed70202e41b5e3126b5bbcd5238eb20f23b17c574",
+    "outcomes_inspected": false,
+    "recipe_sha256": "7eab8789da423dfaf1fe7447586866f9dee05261003a3c3bc7636a12f8dbc113",
+    "source_disjointness": "Verified design/heldout record IDs, scopes and actors against #117/#119/#123 fixtures",
+    "version": "checkpoint-recovery-data-v1"
+  },
+  "status": "completed_disposable_contract_experiment",
+  "tested_sha": "2531d98175138cdae6b398d8a5ff32b9b88ca7a2",
+  "trace_sha256": "ab62dcf31554e7ef436a0950d6dd7c669c885898666d7fb7ec2754079f0abf11",
+  "verification": {
+    "compile": "PASS",
+    "format": "PASS",
+    "lint": "PASS",
+    "mcp_demo": "PASS",
+    "targeted_tests": 8,
+    "unit_tests": 191
+  }
+}
