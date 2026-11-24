@@ -1,0 +1,150 @@
+{
+  "cases_sha256": "e8cc9911649d3b03d43c82d8d46bfbf023482103a425abb0b55dc669f16b3de8",
+  "contrasts": {
+    "correct/B-A": [
+      0,
+      0,
+      0
+    ],
+    "correct/C-A": [
+      0,
+      0,
+      0
+    ],
+    "correct/D-A": [
+      0.16666666666666666,
+      0.03333333333333333,
+      0.3333333333333333
+    ],
+    "correct/D-B": [
+      0.16666666666666666,
+      0.03333333333333333,
+      0.3333333333333333
+    ],
+    "correct/D-C": [
+      0.16666666666666666,
+      0.03333333333333333,
+      0.3333333333333333
+    ],
+    "correct/interaction": [
+      0.16666666666666666,
+      0.03333333333333333,
+      0.3333333333333333
+    ],
+    "unsafe/B-A": [
+      0,
+      0,
+      0
+    ],
+    "unsafe/C-A": [
+      0,
+      0,
+      0
+    ],
+    "unsafe/D-A": [
+      -0.16666666666666666,
+      -0.3333333333333333,
+      -0.03333333333333333
+    ],
+    "unsafe/D-B": [
+      -0.16666666666666666,
+      -0.3333333333333333,
+      -0.03333333333333333
+    ],
+    "unsafe/D-C": [
+      -0.16666666666666666,
+      -0.3333333333333333,
+      -0.03333333333333333
+    ],
+    "unsafe/interaction": [
+      -0.16666666666666666,
+      -0.3333333333333333,
+      -0.03333333333333333
+    ]
+  },
+  "summary": {
+    "A": {
+      "actual_origins": 212,
+      "benign_regressions": 0,
+      "byt5_tokens": 485668,
+      "candidates": 960,
+      "conflict": 12,
+      "correct": 48,
+      "declared_groups": 392,
+      "failures": {
+        "missing_evidence": 16,
+        "not_retrieved": 56
+      },
+      "handled": 0,
+      "incorrect_abstentions": 12,
+      "median_ms": 1.743228000009367,
+      "negative_eligible": 60,
+      "negative_surfaced": 12,
+      "truncated": 120,
+      "unsafe": 52
+    },
+    "B": {
+      "actual_origins": 212,
+      "benign_regressions": 0,
+      "byt5_tokens": 485668,
+      "candidates": 2362,
+      "conflict": 12,
+      "correct": 48,
+      "declared_groups": 392,
+      "failures": {
+        "excluded_from_context": 44,
+        "missing_evidence": 16,
+        "not_retrieved": 12
+      },
+      "handled": 0,
+      "incorrect_abstentions": 12,
+      "median_ms": 2.441941500009648,
+      "negative_eligible": 60,
+      "negative_surfaced": 12,
+      "truncated": 12,
+      "unsafe": 52
+    },
+    "C": {
+      "actual_origins": 212,
+      "benign_regressions": 0,
+      "byt5_tokens": 198540,
+      "candidates": 960,
+      "conflict": 12,
+      "correct": 48,
+      "declared_groups": 392,
+      "failures": {
+        "missing_evidence": 16,
+        "not_retrieved": 56
+      },
+      "handled": 0,
+      "incorrect_abstentions": 12,
+      "median_ms": 1.742175499998666,
+      "negative_eligible": 60,
+      "negative_surfaced": 12,
+      "truncated": 120,
+      "unsafe": 52
+    },
+    "D": {
+      "actual_origins": 240,
+      "benign_regressions": 0,
+      "byt5_tokens": 212804,
+      "candidates": 2362,
+      "conflict": 12,
+      "correct": 68,
+      "declared_groups": 420,
+      "failures": {
+        "excluded_from_context": 16,
+        "missing_evidence": 16,
+        "not_retrieved": 12,
+        "prudent_conflict_abstention": 8
+      },
+      "handled": 8,
+      "incorrect_abstentions": 20,
+      "median_ms": 2.58939600000474,
+      "negative_eligible": 60,
+      "negative_surfaced": 32,
+      "truncated": 12,
+      "unsafe": 32
+    }
+  }
+}
