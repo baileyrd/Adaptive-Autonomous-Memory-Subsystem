@@ -1,0 +1,20 @@
+{
+  "version": "cognitive-pilot-v1",
+  "seed": 117,
+  "episodes_per_family": 3,
+  "families": {
+    "stable_condition": "design",
+    "changed_condition": "design",
+    "copied_report": "design",
+    "missing_check": "design",
+    "conflicting_sources": "heldout",
+    "late_historical_report": "heldout",
+    "recurring_failure": "heldout",
+    "interrupted_constraints": "heldout"
+  },
+  "max_citations": 8,
+  "context_bytes": 8192,
+  "repetitions": 5,
+  "bootstrap_samples": 2000,
+  "bootstrap_seed": 0
+}
