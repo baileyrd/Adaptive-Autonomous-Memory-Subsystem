@@ -1,4 +1,8 @@
-"""Bounded, evaluation-only ONNX resource measurements in separate processes."""
+"""Bounded, evaluation-only encoder resource measurements in separate processes.
+
+`--static` measures the stdlib static encoder serving through the BM25 rerank arm against the
+same guarded comparator and gates as the v0.9 ONNX profiles.
+"""
 
 import argparse
 import json
@@ -14,8 +18,10 @@ from time import perf_counter_ns, process_time_ns
 
 from evaluate_retrieval import squad_groups
 from evaluate_semantic import timestamp
+from fusion import rerank_arm
 from memory_probe import build
 from onnx_encoder import CPU_PROFILES, OnnxSentenceEncoder, Variant, file_sha256
+from static_encoder import StaticEmbeddingEncoder
 
 from aams.recall import CognitiveMemory, CognitiveNeed
 from aams.representations import DeterministicFixtureProvider
@@ -27,6 +33,7 @@ DATASET_PINS = {
     "train": "3527663986b8295af4f7fcdff1ba1ff3f72d07d61a20f487cb238a6ef92fd955",
 }
 PARITY_TOLERANCE = 1e-5
+STATIC_ARM = "static_rerank"
 
 
 def percentile(samples):
@@ -50,16 +57,17 @@ def groups_for(path, partition):
 def measure(args):
     groups = json.loads(args.groups.read_text())
     start = perf_counter_ns()
-    provider = (
-        DeterministicFixtureProvider()
-        if args.arm == "guarded"
-        else OnnxSentenceEncoder(
+    if args.arm == "guarded":
+        provider = DeterministicFixtureProvider()
+    elif args.arm == STATIC_ARM:
+        provider = StaticEmbeddingEncoder(args.model, record_phases=True)
+    else:
+        provider = OnnxSentenceEncoder(
             args.model,
             cpu_profile=args.arm,
             record_phases=True,
             variant=Variant(**json.loads(args.variant.read_text())) if args.variant else None,
         )
-    )
     fields = {
         "load_ms": round((perf_counter_ns() - start) / 1e6, 3),
         "load_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
@@ -68,6 +76,14 @@ def measure(args):
         store = SQLiteMemoryStore(Path(directory) / "memory.db")
         build(store, groups, provider)
         memory = CognitiveMemory(store)
+
+        def serve(access, need):
+            if args.arm == STATIC_ARM:
+                return rerank_arm(memory, provider, access, need, 3)
+            return memory.recall(
+                access, need, provider=provider, requested_mode=RetrievalMode.HYBRID
+            )
+
         workload = [
             (
                 AccessContext("fixture", group["domain"]),
@@ -83,10 +99,10 @@ def measure(args):
             fields["first_query_pass_ms"] = round((perf_counter_ns() - cold) / 1e6, 3)
         rankings = []
         for access, need in workload:
-            packet = memory.recall(
-                access, need, provider=provider, requested_mode=RetrievalMode.HYBRID
+            packet = serve(access, need)
+            rankings.append(
+                [item.get("id") or item["citations"][0]["evidence_id"] for item in packet["items"]]
             )
-            rankings.append([item["id"] for item in packet["items"]])
         if args.arm != "guarded":
             args.vectors.write_text(json.dumps({"vectors": vectors, "rankings": rankings}))
         if args.arm != "guarded":
@@ -95,7 +111,7 @@ def measure(args):
         for _ in range(args.repetitions):
             for access, need in workload:
                 start, cpu_start = perf_counter_ns(), process_time_ns()
-                memory.recall(access, need, provider=provider, requested_mode=RetrievalMode.HYBRID)
+                serve(access, need)
                 cpu.append(process_time_ns() - cpu_start)
                 wall.append(perf_counter_ns() - start)
         fields.update(
@@ -105,7 +121,7 @@ def measure(args):
             peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         )
         if args.arm != "guarded":
-            if len(provider.phase_timings_ns) != len(wall):
+            if args.arm != STATIC_ARM and len(provider.phase_timings_ns) != len(wall):
                 raise RuntimeError("A timed request did not execute the encoder")
             fields["phase_ms"] = {
                 name: percentile([getattr(t, name + "_ns") for t in provider.phase_timings_ns])
@@ -135,7 +151,11 @@ def run(args):
             check=True,
             timeout=90,
         )
-        for arm in ("guarded", *(("baseline", "threads2") if args.variant else CPU_PROFILES)):
+        if args.static:
+            candidates = (STATIC_ARM,)
+        else:
+            candidates = ("baseline", "threads2") if args.variant else CPU_PROFILES
+        for arm in ("guarded", *candidates):
             vectors = Path(directory) / f"{arm}.json"
             command = [
                 sys.executable,
@@ -164,7 +184,7 @@ def run(args):
             if arm == "guarded":
                 continue
             actual = json.loads(vectors.read_text())
-            if arm == "baseline":
+            if arm == candidates[0]:
                 reference = actual
             error = max(
                 abs(a - b)
@@ -201,13 +221,18 @@ def main():
     parser.add_argument("--partition", choices=tuple(DATASET_PINS), required=True)
     parser.add_argument("--repetitions", type=int, default=10)
     parser.add_argument("--variant", type=Path)
-    parser.add_argument("--arm", choices=("guarded", *CPU_PROFILES), help=argparse.SUPPRESS)
+    parser.add_argument("--static", action="store_true", help="Static encoder, rerank serving")
+    parser.add_argument(
+        "--arm", choices=("guarded", STATIC_ARM, *CPU_PROFILES), help=argparse.SUPPRESS
+    )
     parser.add_argument("--prepare", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--groups", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--vectors", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     if not 1 <= args.repetitions <= 20:
         parser.error("Use 1 to 20 repetitions")
+    if args.static and args.variant:
+        parser.error("--static and --variant name different encoders")
     if args.prepare:
         args.groups.write_text(json.dumps(groups_for(args.data, args.partition)))
     else:

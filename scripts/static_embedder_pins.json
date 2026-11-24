@@ -1,0 +1,12 @@
+{
+  "potion-base-8m": {
+    "model": "minishlab/potion-base-8M",
+    "revision": "",
+    "files": {}
+  },
+  "potion-retrieval-32m": {
+    "model": "minishlab/potion-retrieval-32M",
+    "revision": "",
+    "files": {}
+  }
+}
