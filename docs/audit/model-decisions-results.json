@@ -1,0 +1,1415 @@
+{
+  "model_sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+  "database_bytes": 401408,
+  "arms": {
+    "no_memory": [
+      {
+        "task_id": "pilot123-prior_failure-0",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 95,
+        "elapsed_ms": 970.2876990000391
+      },
+      {
+        "task_id": "pilot123-prior_failure-1",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 95,
+        "elapsed_ms": 926.1871850000034
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-0",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 107,
+        "elapsed_ms": 1031.9504340000094
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-1",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 107,
+        "elapsed_ms": 1012.3794179999663
+      },
+      {
+        "task_id": "pilot123-interruption-0",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 105,
+        "elapsed_ms": 996.9744079999714
+      },
+      {
+        "task_id": "pilot123-interruption-1",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 105,
+        "elapsed_ms": 998.9293660000271
+      },
+      {
+        "task_id": "pilot123-belief_update-0",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 98,
+        "elapsed_ms": 913.029459000029
+      },
+      {
+        "task_id": "pilot123-belief_update-1",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 98,
+        "elapsed_ms": 912.4018649999925
+      },
+      {
+        "task_id": "pilot123-common_origin-0",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 100,
+        "elapsed_ms": 938.433563999979
+      },
+      {
+        "task_id": "pilot123-common_origin-1",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 100,
+        "elapsed_ms": 938.762974000042
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-0",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 95,
+        "elapsed_ms": 904.7236419999081
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-1",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 95,
+        "elapsed_ms": 922.94549799999
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-0",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 95,
+        "elapsed_ms": 928.4596979999833
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-1",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [],
+        "neural_only": [],
+        "prompt_tokens": 95,
+        "elapsed_ms": 936.4546699999892
+      }
+    ],
+    "raw_search": [
+      {
+        "task_id": "pilot123-prior_failure-0",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-prior_failure-0-outcome",
+          "pilot123-prior_failure-0-copy0",
+          "pilot123-prior_failure-0-copy1",
+          "pilot123-prior_failure-0-copy2",
+          "pilot123-prior_failure-0-copy3",
+          "pilot123-prior_failure-0-copy4",
+          "pilot123-prior_failure-0-copy5",
+          "pilot123-prior_failure-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 647,
+        "elapsed_ms": 6614.6789010000475
+      },
+      {
+        "task_id": "pilot123-prior_failure-1",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-prior_failure-1-copy0",
+          "pilot123-prior_failure-1-copy1",
+          "pilot123-prior_failure-1-copy2",
+          "pilot123-prior_failure-1-copy3",
+          "pilot123-prior_failure-1-copy4",
+          "pilot123-prior_failure-1-copy5",
+          "pilot123-prior_failure-1-copy6",
+          "pilot123-prior_failure-1-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 638,
+        "elapsed_ms": 7176.318148000064
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-0",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-0-outcome",
+          "pilot123-lesson_transfer-0-copy0",
+          "pilot123-lesson_transfer-0-copy1",
+          "pilot123-lesson_transfer-0-copy2",
+          "pilot123-lesson_transfer-0-copy3",
+          "pilot123-lesson_transfer-0-copy4",
+          "pilot123-lesson_transfer-0-copy5",
+          "pilot123-lesson_transfer-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 670,
+        "elapsed_ms": 6981.957159999979
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-1",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-1-outcome",
+          "pilot123-lesson_transfer-1-copy0",
+          "pilot123-lesson_transfer-1-copy1",
+          "pilot123-lesson_transfer-1-copy2",
+          "pilot123-lesson_transfer-1-copy3",
+          "pilot123-lesson_transfer-1-copy4",
+          "pilot123-lesson_transfer-1-copy5",
+          "pilot123-lesson_transfer-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 667,
+        "elapsed_ms": 6721.928526999932
+      },
+      {
+        "task_id": "pilot123-interruption-0",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-0-outcome",
+          "pilot123-interruption-0-copy0",
+          "pilot123-interruption-0-copy1",
+          "pilot123-interruption-0-copy2",
+          "pilot123-interruption-0-copy3",
+          "pilot123-interruption-0-copy4",
+          "pilot123-interruption-0-copy5",
+          "pilot123-interruption-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 691,
+        "elapsed_ms": 6885.65061700001
+      },
+      {
+        "task_id": "pilot123-interruption-1",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-1-outcome",
+          "pilot123-interruption-1-copy0",
+          "pilot123-interruption-1-copy1",
+          "pilot123-interruption-1-copy2",
+          "pilot123-interruption-1-copy3",
+          "pilot123-interruption-1-copy4",
+          "pilot123-interruption-1-copy5",
+          "pilot123-interruption-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 693,
+        "elapsed_ms": 7017.514602000006
+      },
+      {
+        "task_id": "pilot123-belief_update-0",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-belief_update-0-copy0",
+          "pilot123-belief_update-0-copy1",
+          "pilot123-belief_update-0-copy2",
+          "pilot123-belief_update-0-copy3",
+          "pilot123-belief_update-0-copy4",
+          "pilot123-belief_update-0-copy5",
+          "pilot123-belief_update-0-copy6",
+          "pilot123-belief_update-0-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 649,
+        "elapsed_ms": 6523.89881900001
+      },
+      {
+        "task_id": "pilot123-belief_update-1",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-belief_update-1-copy0",
+          "pilot123-belief_update-1-copy1",
+          "pilot123-belief_update-1-copy2",
+          "pilot123-belief_update-1-copy3",
+          "pilot123-belief_update-1-copy4",
+          "pilot123-belief_update-1-copy5",
+          "pilot123-belief_update-1-copy6",
+          "pilot123-belief_update-1-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 649,
+        "elapsed_ms": 6519.797534999952
+      },
+      {
+        "task_id": "pilot123-common_origin-0",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-common_origin-0-copy0",
+          "pilot123-common_origin-0-copy1",
+          "pilot123-common_origin-0-copy2",
+          "pilot123-common_origin-0-copy3",
+          "pilot123-common_origin-0-copy4",
+          "pilot123-common_origin-0-copy5",
+          "pilot123-common_origin-0-copy6",
+          "pilot123-common_origin-0-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 659,
+        "elapsed_ms": 6652.353109000046
+      },
+      {
+        "task_id": "pilot123-common_origin-1",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "A",
+        "expected": "A",
+        "success": true,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-common_origin-1-outcome",
+          "pilot123-common_origin-1-copy0",
+          "pilot123-common_origin-1-copy1",
+          "pilot123-common_origin-1-copy2",
+          "pilot123-common_origin-1-copy3",
+          "pilot123-common_origin-1-copy4",
+          "pilot123-common_origin-1-copy5",
+          "pilot123-common_origin-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 664,
+        "elapsed_ms": 7053.307619999941
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-0",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "A",
+        "expected": "B",
+        "success": false,
+        "false_yes": true,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-0-outcome",
+          "pilot123-repeat_mistake-0-copy0",
+          "pilot123-repeat_mistake-0-copy1",
+          "pilot123-repeat_mistake-0-copy2",
+          "pilot123-repeat_mistake-0-copy3",
+          "pilot123-repeat_mistake-0-copy4",
+          "pilot123-repeat_mistake-0-copy5",
+          "pilot123-repeat_mistake-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 655,
+        "elapsed_ms": 6856.230992000064
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-1",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "A",
+        "expected": "A",
+        "success": true,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-1-outcome",
+          "pilot123-repeat_mistake-1-copy0",
+          "pilot123-repeat_mistake-1-copy1",
+          "pilot123-repeat_mistake-1-copy2",
+          "pilot123-repeat_mistake-1-copy3",
+          "pilot123-repeat_mistake-1-copy4",
+          "pilot123-repeat_mistake-1-copy5",
+          "pilot123-repeat_mistake-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 655,
+        "elapsed_ms": 6451.256838000063
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-0",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-recency_counterexample-0-copy0",
+          "pilot123-recency_counterexample-0-copy1",
+          "pilot123-recency_counterexample-0-copy2",
+          "pilot123-recency_counterexample-0-copy3",
+          "pilot123-recency_counterexample-0-copy4",
+          "pilot123-recency_counterexample-0-copy5",
+          "pilot123-recency_counterexample-0-copy6",
+          "pilot123-recency_counterexample-0-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 654,
+        "elapsed_ms": 6510.363911000013
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-1",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-recency_counterexample-1-copy0",
+          "pilot123-recency_counterexample-1-copy1",
+          "pilot123-recency_counterexample-1-copy2",
+          "pilot123-recency_counterexample-1-copy3",
+          "pilot123-recency_counterexample-1-copy4",
+          "pilot123-recency_counterexample-1-copy5",
+          "pilot123-recency_counterexample-1-copy6",
+          "pilot123-recency_counterexample-1-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 654,
+        "elapsed_ms": 6419.050986000002
+      }
+    ],
+    "structured": [
+      {
+        "task_id": "pilot123-prior_failure-0",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-prior_failure-0-outcome",
+          "pilot123-prior_failure-0-copy0",
+          "pilot123-prior_failure-0-copy1",
+          "pilot123-prior_failure-0-copy2",
+          "pilot123-prior_failure-0-copy3",
+          "pilot123-prior_failure-0-copy4",
+          "pilot123-prior_failure-0-copy5",
+          "pilot123-prior_failure-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 647,
+        "elapsed_ms": 6558.497057000068
+      },
+      {
+        "task_id": "pilot123-prior_failure-1",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-prior_failure-1-copy0",
+          "pilot123-prior_failure-1-copy1",
+          "pilot123-prior_failure-1-copy2",
+          "pilot123-prior_failure-1-copy3",
+          "pilot123-prior_failure-1-copy4",
+          "pilot123-prior_failure-1-copy5",
+          "pilot123-prior_failure-1-copy6",
+          "pilot123-prior_failure-1-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 638,
+        "elapsed_ms": 6259.569247000059
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-0",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-0-outcome",
+          "pilot123-lesson_transfer-0-copy0",
+          "pilot123-lesson_transfer-0-copy1",
+          "pilot123-lesson_transfer-0-copy2",
+          "pilot123-lesson_transfer-0-copy3",
+          "pilot123-lesson_transfer-0-copy4",
+          "pilot123-lesson_transfer-0-copy5",
+          "pilot123-lesson_transfer-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 670,
+        "elapsed_ms": 6621.500266999988
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-1",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-1-outcome",
+          "pilot123-lesson_transfer-1-copy0",
+          "pilot123-lesson_transfer-1-copy1",
+          "pilot123-lesson_transfer-1-copy2",
+          "pilot123-lesson_transfer-1-copy3",
+          "pilot123-lesson_transfer-1-copy4",
+          "pilot123-lesson_transfer-1-copy5",
+          "pilot123-lesson_transfer-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 667,
+        "elapsed_ms": 6732.350176999944
+      },
+      {
+        "task_id": "pilot123-interruption-0",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-0-outcome",
+          "pilot123-interruption-0-copy0",
+          "pilot123-interruption-0-copy1",
+          "pilot123-interruption-0-copy2",
+          "pilot123-interruption-0-copy3",
+          "pilot123-interruption-0-copy4",
+          "pilot123-interruption-0-copy5",
+          "pilot123-interruption-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 691,
+        "elapsed_ms": 6927.28428800001
+      },
+      {
+        "task_id": "pilot123-interruption-1",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-1-outcome",
+          "pilot123-interruption-1-copy0",
+          "pilot123-interruption-1-copy1",
+          "pilot123-interruption-1-copy2",
+          "pilot123-interruption-1-copy3",
+          "pilot123-interruption-1-copy4",
+          "pilot123-interruption-1-copy5",
+          "pilot123-interruption-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 693,
+        "elapsed_ms": 6957.407254000032
+      },
+      {
+        "task_id": "pilot123-belief_update-0",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-belief_update-0-copy0",
+          "pilot123-belief_update-0-copy1",
+          "pilot123-belief_update-0-copy2",
+          "pilot123-belief_update-0-copy3",
+          "pilot123-belief_update-0-copy4",
+          "pilot123-belief_update-0-copy5",
+          "pilot123-belief_update-0-copy6",
+          "pilot123-belief_update-0-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 649,
+        "elapsed_ms": 6468.280354000058
+      },
+      {
+        "task_id": "pilot123-belief_update-1",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-belief_update-1-copy0",
+          "pilot123-belief_update-1-copy1",
+          "pilot123-belief_update-1-copy2",
+          "pilot123-belief_update-1-copy3",
+          "pilot123-belief_update-1-copy4",
+          "pilot123-belief_update-1-copy5",
+          "pilot123-belief_update-1-copy6",
+          "pilot123-belief_update-1-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 649,
+        "elapsed_ms": 6436.08429599999
+      },
+      {
+        "task_id": "pilot123-common_origin-0",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-common_origin-0-copy0",
+          "pilot123-common_origin-0-copy1",
+          "pilot123-common_origin-0-copy2",
+          "pilot123-common_origin-0-copy3",
+          "pilot123-common_origin-0-copy4",
+          "pilot123-common_origin-0-copy5",
+          "pilot123-common_origin-0-copy6",
+          "pilot123-common_origin-0-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 659,
+        "elapsed_ms": 6591.224860000011
+      },
+      {
+        "task_id": "pilot123-common_origin-1",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "A",
+        "expected": "A",
+        "success": true,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-common_origin-1-outcome",
+          "pilot123-common_origin-1-copy0",
+          "pilot123-common_origin-1-copy1",
+          "pilot123-common_origin-1-copy2",
+          "pilot123-common_origin-1-copy3",
+          "pilot123-common_origin-1-copy4",
+          "pilot123-common_origin-1-copy5",
+          "pilot123-common_origin-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 664,
+        "elapsed_ms": 6604.386760000011
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-0",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "A",
+        "expected": "B",
+        "success": false,
+        "false_yes": true,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-0-outcome",
+          "pilot123-repeat_mistake-0-copy0",
+          "pilot123-repeat_mistake-0-copy1",
+          "pilot123-repeat_mistake-0-copy2",
+          "pilot123-repeat_mistake-0-copy3",
+          "pilot123-repeat_mistake-0-copy4",
+          "pilot123-repeat_mistake-0-copy5",
+          "pilot123-repeat_mistake-0-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 655,
+        "elapsed_ms": 6535.812064999959
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-1",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "A",
+        "expected": "A",
+        "success": true,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-1-outcome",
+          "pilot123-repeat_mistake-1-copy0",
+          "pilot123-repeat_mistake-1-copy1",
+          "pilot123-repeat_mistake-1-copy2",
+          "pilot123-repeat_mistake-1-copy3",
+          "pilot123-repeat_mistake-1-copy4",
+          "pilot123-repeat_mistake-1-copy5",
+          "pilot123-repeat_mistake-1-copy6"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 655,
+        "elapsed_ms": 6556.97756699999
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-0",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-recency_counterexample-0-copy0",
+          "pilot123-recency_counterexample-0-copy1",
+          "pilot123-recency_counterexample-0-copy2",
+          "pilot123-recency_counterexample-0-copy3",
+          "pilot123-recency_counterexample-0-copy4",
+          "pilot123-recency_counterexample-0-copy5",
+          "pilot123-recency_counterexample-0-copy6",
+          "pilot123-recency_counterexample-0-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 654,
+        "elapsed_ms": 6553.683117000105
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-1",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-recency_counterexample-1-copy0",
+          "pilot123-recency_counterexample-1-copy1",
+          "pilot123-recency_counterexample-1-copy2",
+          "pilot123-recency_counterexample-1-copy3",
+          "pilot123-recency_counterexample-1-copy4",
+          "pilot123-recency_counterexample-1-copy5",
+          "pilot123-recency_counterexample-1-copy6",
+          "pilot123-recency_counterexample-1-copy7"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 654,
+        "elapsed_ms": 6360.633380999957
+      }
+    ],
+    "copy_diverse": [
+      {
+        "task_id": "pilot123-prior_failure-0",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-prior_failure-0-outcome",
+          "pilot123-prior_failure-0-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 239,
+        "elapsed_ms": 2261.718653999992
+      },
+      {
+        "task_id": "pilot123-prior_failure-1",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-prior_failure-1-copy0",
+          "pilot123-prior_failure-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 235,
+        "elapsed_ms": 2199.125583999944
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-0",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-0-outcome",
+          "pilot123-lesson_transfer-0-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 256,
+        "elapsed_ms": 2375.9641469999906
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-1",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-1-outcome",
+          "pilot123-lesson_transfer-1-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 253,
+        "elapsed_ms": 2361.5548880000006
+      },
+      {
+        "task_id": "pilot123-interruption-0",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-0-outcome",
+          "pilot123-interruption-0-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 253,
+        "elapsed_ms": 2355.174340000076
+      },
+      {
+        "task_id": "pilot123-interruption-1",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-1-outcome",
+          "pilot123-interruption-1-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 255,
+        "elapsed_ms": 2395.487659999958
+      },
+      {
+        "task_id": "pilot123-belief_update-0",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-belief_update-0-copy0",
+          "pilot123-belief_update-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 241,
+        "elapsed_ms": 2282.931199000018
+      },
+      {
+        "task_id": "pilot123-belief_update-1",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-belief_update-1-copy0",
+          "pilot123-belief_update-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 239,
+        "elapsed_ms": 2353.443617000039
+      },
+      {
+        "task_id": "pilot123-common_origin-0",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": false,
+        "context": [
+          "pilot123-common_origin-0-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 169,
+        "elapsed_ms": 1606.788402999996
+      },
+      {
+        "task_id": "pilot123-common_origin-1",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-common_origin-1-outcome",
+          "pilot123-common_origin-1-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 244,
+        "elapsed_ms": 2352.665373000036
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-0",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-0-outcome",
+          "pilot123-repeat_mistake-0-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 241,
+        "elapsed_ms": 2297.9229900000746
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-1",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-1-outcome",
+          "pilot123-repeat_mistake-1-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 241,
+        "elapsed_ms": 2309.298475999981
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-0",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-recency_counterexample-0-copy0",
+          "pilot123-recency_counterexample-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 237,
+        "elapsed_ms": 2274.109484000064
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-1",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-recency_counterexample-1-copy0",
+          "pilot123-recency_counterexample-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 237,
+        "elapsed_ms": 2302.6282890000402
+      }
+    ],
+    "neural": [
+      {
+        "task_id": "pilot123-prior_failure-0",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-prior_failure-0-copy0",
+          "pilot123-prior_failure-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 239,
+        "elapsed_ms": 3006.5365709999696
+      },
+      {
+        "task_id": "pilot123-prior_failure-1",
+        "family": "prior_failure",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-prior_failure-1-copy0",
+          "pilot123-prior_failure-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 235,
+        "elapsed_ms": 2712.8007050000633
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-0",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-0-copy0",
+          "pilot123-lesson_transfer-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 256,
+        "elapsed_ms": 3171.5999350000175
+      },
+      {
+        "task_id": "pilot123-lesson_transfer-1",
+        "family": "lesson_transfer",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-lesson_transfer-1-outcome",
+          "pilot123-lesson_transfer-1-copy0"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 253,
+        "elapsed_ms": 3333.101854000006
+      },
+      {
+        "task_id": "pilot123-interruption-0",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-0-copy0",
+          "pilot123-interruption-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 253,
+        "elapsed_ms": 3209.0174670000806
+      },
+      {
+        "task_id": "pilot123-interruption-1",
+        "family": "interruption",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-interruption-1-copy0",
+          "pilot123-interruption-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 255,
+        "elapsed_ms": 3161.843265000016
+      },
+      {
+        "task_id": "pilot123-belief_update-0",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-belief_update-0-copy0",
+          "pilot123-belief_update-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 241,
+        "elapsed_ms": 2872.1293909999304
+      },
+      {
+        "task_id": "pilot123-belief_update-1",
+        "family": "belief_update",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-belief_update-1-copy0",
+          "pilot123-belief_update-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 239,
+        "elapsed_ms": 2756.6173440000057
+      },
+      {
+        "task_id": "pilot123-common_origin-0",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-common_origin-0-copy0",
+          "pilot123-common_origin-0-outcome"
+        ],
+        "neural_only": [
+          "pilot123-common_origin-0-outcome"
+        ],
+        "prompt_tokens": 247,
+        "elapsed_ms": 2983.063414000071
+      },
+      {
+        "task_id": "pilot123-common_origin-1",
+        "family": "common_origin",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-common_origin-1-copy0",
+          "pilot123-common_origin-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 244,
+        "elapsed_ms": 2950.635035999994
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-0",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-0-copy0",
+          "pilot123-repeat_mistake-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 241,
+        "elapsed_ms": 2823.1641959999934
+      },
+      {
+        "task_id": "pilot123-repeat_mistake-1",
+        "family": "repeat_mistake",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-repeat_mistake-1-copy0",
+          "pilot123-repeat_mistake-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 241,
+        "elapsed_ms": 2819.743673000062
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-0",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "A",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-recency_counterexample-0-copy0",
+          "pilot123-recency_counterexample-0-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 237,
+        "elapsed_ms": 2692.6919800000633
+      },
+      {
+        "task_id": "pilot123-recency_counterexample-1",
+        "family": "recency_counterexample",
+        "split": "heldout",
+        "action": "C",
+        "expected": "B",
+        "success": false,
+        "false_yes": false,
+        "decisive_visible": true,
+        "context": [
+          "pilot123-recency_counterexample-1-copy0",
+          "pilot123-recency_counterexample-1-outcome"
+        ],
+        "neural_only": [],
+        "prompt_tokens": 237,
+        "elapsed_ms": 2666.053851000015
+      }
+    ]
+  },
+  "paired": {
+    "no_memory-no_memory": {
+      "mean_delta": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "resampling_families": 7
+    },
+    "no_memory-structured": {
+      "mean_delta": -0.14285714285714285,
+      "ci95": [
+        -0.2857142857142857,
+        0
+      ],
+      "resampling_families": 7
+    },
+    "raw_search-no_memory": {
+      "mean_delta": 0.14285714285714285,
+      "ci95": [
+        0,
+        0.2857142857142857
+      ],
+      "resampling_families": 7
+    },
+    "raw_search-structured": {
+      "mean_delta": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "resampling_families": 7
+    },
+    "structured-no_memory": {
+      "mean_delta": 0.14285714285714285,
+      "ci95": [
+        0,
+        0.2857142857142857
+      ],
+      "resampling_families": 7
+    },
+    "structured-structured": {
+      "mean_delta": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "resampling_families": 7
+    },
+    "copy_diverse-no_memory": {
+      "mean_delta": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "resampling_families": 7
+    },
+    "copy_diverse-structured": {
+      "mean_delta": -0.14285714285714285,
+      "ci95": [
+        -0.2857142857142857,
+        0
+      ],
+      "resampling_families": 7
+    },
+    "neural-no_memory": {
+      "mean_delta": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "resampling_families": 7
+    },
+    "neural-structured": {
+      "mean_delta": -0.14285714285714285,
+      "ci95": [
+        -0.2857142857142857,
+        0
+      ],
+      "resampling_families": 7
+    }
+  }
+}
