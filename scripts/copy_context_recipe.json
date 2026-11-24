@@ -1,0 +1,13 @@
+{
+  "version": "copy-context-119-v1",
+  "seed": 1192026,
+  "episodes_per_family": {"design": 2, "heldout": 8},
+  "families": ["copy_failure", "copy_clean", "independent_clean", "temporal_history", "same_time_conflict", "relabelled_failure", "recovery"],
+  "max_citations": 8,
+  "context_bytes": 8192,
+  "candidate_citations": 100,
+  "candidate_bytes": 65536,
+  "repetitions": 5,
+  "bootstrap_samples": 2000,
+  "bootstrap_seed": 0
+}

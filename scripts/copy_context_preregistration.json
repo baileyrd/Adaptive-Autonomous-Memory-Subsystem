@@ -1,0 +1,10 @@
+{
+  "base_sha": "0b09cfad4ff087ecd8195f8834c2b2a06d0e9fb5",
+  "cases_sha256": "b6e90f881aa4fc2f390ca7fc2349aedeaf0b78bca49d5541070cc4f0520ea26d",
+  "fresh_outcomes_inspected": false,
+  "generator_sha256": "7c2758e9ffad2c127387930f4a97ddcec35c315ac8337e0799e0b5101a62e27b",
+  "historical_trace_sha256": "9eb8a5db18b744a800bc70fb5d478f25f1517ec0bb00c8ad827de54819d1bf48",
+  "recipe_sha256": "957703d709b80d15b0b29eb124cd68c28060cad8a0fc68dcfe78de71a72ea150",
+  "source_disjointness": "Verified id/scope/source sets across splits and original #118",
+  "version": "copy-context-data-preregistration-v1"
+}
