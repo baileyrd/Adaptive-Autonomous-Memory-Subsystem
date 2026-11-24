@@ -6,7 +6,6 @@ Peak RSS is cumulative within each child; stage differences are NOT allocator ac
 
 import argparse
 import json
-import os
 import resource
 import subprocess
 import sys
