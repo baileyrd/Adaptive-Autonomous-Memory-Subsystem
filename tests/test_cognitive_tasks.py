@@ -120,6 +120,9 @@ class CognitiveTaskTests(unittest.TestCase):
                 )
                 with self.assertRaises(ValueError):
                     validate_context(store, task, [{**context[0], "digest": "tampered"}])
+                for field in ("producer", "status", "observed_at", "source_actor"):
+                    with self.subTest(field=field), self.assertRaises(ValueError):
+                        validate_context(store, task, [{**context[0], field: "tampered"}])
                 private = next(r for r in episode["observations"] if r["scope"] == "private")
                 with self.assertRaises(ValueError):
                     validate_context(store, task, [{**context[0], "evidence_id": private["id"]}])

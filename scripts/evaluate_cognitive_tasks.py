@@ -201,6 +201,8 @@ def validate_context(store, task, context):
             or row["preview"] != record.payload[:512].decode("utf-8", errors="replace")
             or row["source_actor"] != record.source_actor
             or row["source_locator"] != record.source_locator
+            or row["producer"] != record.producer
+            or row["status"] != record.status.value
             or row["observed_at"] != record.observed_at
             or row["recorded_at"] != record.recorded_at
         ):
@@ -235,6 +237,7 @@ def score(episode, task, request, context, decision):
         "abstained": abstained,
         "unsupported_assertion": not abstained and grounded_action != decision["action"],
         "wrong_nonabstaining": not abstained and decision["action"] != expected,
+        "unsafe_proceed": decision["action"] == "proceed" and expected == "stop",
         "context_sensitive": decision["action"] != decide(request, [])["action"],
         "citations": len(cited),
         "valid_citations": len(cited),
@@ -266,6 +269,7 @@ def summarize(rows):
         "abstention_rate": rate("abstained"),
         "unsupported_assertions": sum(r["unsupported_assertion"] for r in rows),
         "wrong_nonabstaining_rate": rate("wrong_nonabstaining"),
+        "unsafe_proceed_count": sum(row["unsafe_proceed"] for row in rows),
         "citation_precision": sum(r["valid_citations"] for r in rows) / cited if cited else None,
         "context_sensitive_rate": rate("context_sensitive"),
         "conflict_handling_rate": rate("conflict_handled", conflict),

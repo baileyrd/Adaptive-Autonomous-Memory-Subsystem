@@ -59,3 +59,7 @@ python -m aams.demo
 ```
 
 An invalid/failed run exits 3 with an explicit status; it must not be published as an efficiency/quality success. CI uses only synthetic fixtures and stdlib dependencies. See the accompanying pilot report for actual results, counterexamples and remaining unmeasured #117 outcomes.
+
+## Validation-only amendment after the first run
+
+The first frozen invocation at `e093c28` completed before this amendment. Review identified missing explicit producer/status comparisons in the delivered-citation validator, and the report needed a separate count of **unsafe proceed decisions**, rather than relying only on the wrong-nonabstaining rate. Add those checks/counters and tampering regressions, then refreeze the evaluator before rerun. The recipe, generated cases, instruction, decision agent and oracle are unchanged. This is a measurement-validation amendment, not policy tuning. Preserve the first run's source SHA and compare decisions on rerun; any change in actions would need investigation. Canonical scope/time integrity passing must not be confused with the agent making safe/correct decisions.
