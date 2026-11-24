@@ -2,6 +2,8 @@
 
 Tracking: [#115](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/115), coordinated through [#105](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/105). Audit date: 2026-11-23. This is workstream A; it does not close the task-level outcome or neural research workstreams.
 
+Follow-up: [#117's synthetic decision pilot](cognitive-task-pilot.md) now reports actual rule-agent decisions separately from evidence coverage, including unsafe choices and an inconclusive four-family comparison. The baseline statuses below remain bounded to the audited main SHA; the pilot does not establish model-agent reasoning, long-term learning, task checkpoints or unseen-domain transfer.
+
 ## Evidence boundary
 
 Audited implementation: main `79a4d1f0ae4026a185b03abaecc9507022444115`. The initial audit branch at `7eb791884e13743029d9ef54ae1c85908cb04cb9` adds documentation only and has identical product, script and test bytes. [Integrated main CI](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/actions/runs/45311798184) passed. This audit also reran all **137 tests**, formatting, lint, compilation, the MCP demo, governed-learning evaluation and synthetic retrieval replay on Python 3.12.14/Linux. [Machine-readable evidence](cognitive-memory-baseline.json) records commands, input hashes, environment and aggregate results. PR-head CI is recorded on the associated PR and #115; main CI is not substituted for changed-head CI.
