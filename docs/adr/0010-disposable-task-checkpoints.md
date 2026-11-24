@@ -1,0 +1,33 @@
+# ADR-0010: Scoped task checkpoint claims and disposable recovery
+
+Date: 2026-11-24. Status: **Proposed for contract review; evaluation-only**. Tracking: [#124](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/issues/124), O5 / FR-009 / H6, coordinated by #105. This does not authorize product persistence, migrations, native/MCP operations, automatic edits or model promotion. Existing ledger semantics and BM25/guarded defaults are unchanged.
+
+## Authority and identity
+
+A checkpoint is an immutable **claim about resumable task state**, not evidence that work completed. Its proposed versioned envelope identifies checkpoint, task, scope, producer, generation, superseded parent, task revision, recorded/effective times, expiry, completed/pending steps, open constraints and exact evidence references. References carry scoped ID, digest, source/producer and temporal metadata. A checkpoint cannot grant access or validate its own producer.
+
+A trusted host supplies the current task grant, authorized readers/proposer identity, active generation and registered candidate digest, current task revision and canonical state-head references. Host registry membership means only that this particular proposal is recognized; it does not make its progress claims authoritative. The experiment's host inputs are trusted fixtures, not an implemented authentication/registration service. Actual application authentication, signatures, concurrent registration and durable lifecycle enforcement need separate design review.
+
+## Proposed restore and lifecycle contract
+
+1. Authorize task and current principal/scope **before** inspecting proposal state or looking up references. Never derive an `AccessContext` from checkpoint content. A foreign/missing/revoked grant or unregistered/changed envelope returns the same public `unavailable` response without progress, references or task metadata.
+2. Bind the envelope to the host registry's digest, producer, generation and parent. Explicitly revoked candidates are unavailable. A known older generation is `superseded`; an unregistered/newer generation cannot self-promote. Parent/identity mismatches fail closed. No implicit fallback to a supposedly newer checkpoint or write on restore.
+3. A recognized, authorized checkpoint is usable only within recorded/effective query bounds and before expiry at restore time. Expired proposals return `expired` without state; historical time queries do not resurrect an expired cache. Revocation remains public-unavailable; the trusted experiment can classify revoked fixtures in its audit, never disclose protected existence to callers.
+4. Reauthorize **every** reference under the current host grant and both time bounds; verify canonical digest, preview-independent payload, source actor/locator, producer, recorded/observed time and status. Scope/digest/missing/time failures all return public-unavailable. Rejected proposals never return partially validated state. No restored or model-supplied text is executed.
+5. Task revision and the complete set of canonical state-head references must match the current host task view. Changed constraints/head/version makes an otherwise well-formed checkpoint `stale`, with no resumable state. Refresh/rebase is a future explicit operation, not an automatic belief or checkpoint write.
+6. Completion certificates are canonical reported task-state events from the host-authorized executor. In this prototype they specify completed work and constraints at a task revision. Multiple current heads that disagree yield `contradictory`; do not vote or erase either. A single untrusted summary, repeated claim or model assertion is not a completion certificate. The synthetic executor/source role is not proof of real-world authenticity.
+7. Completed steps, pending complement and constraints in a claim must agree with the validated current certificate. Fabricated completion/omitted constraints are `contradictory`; no partial acceptance. Restore returns `ready` with the checked state and validated citations only after all checks pass. It never upgrades evidence or belief authority.
+
+The caller-visible statuses are `ready`, `stale`, `expired`, `superseded`, `contradictory`, and uniform `unavailable`. The latter deliberately combines revoked, foreign, missing and invalid-reference cases. Structured rejection reasons can be counted in a trusted fixture audit, but not returned as an existence oracle. An authorized owner may learn their recognized candidate is stale/expired/superseded. No timing-side-channel claim is made.
+
+## Lifecycle and storage boundary
+
+The candidate lifecycle is proposed -> registered inert claim -> ready or rejected at read-time -> expired/revoked/superseded. Registration never promotes a claim into canonical completion. Supersession preserves identity and previous candidate history; revocation/expiry denies cache reuse without deleting immutable source evidence. Separate canonical evidence may remain readable through transcript reconstruction after cache expiry/revocation. Product retention/erasure and checkpoint tombstones remain open under #127.
+
+Only disposable sidecar JSON in an evaluator-owned temporary directory is written here, alongside a disposable existing AAMS database of immutable fixture evidence. A preparer publishes both, exits, and a different interpreter reopens them with a fresh read grant. No checkpoint table or API is added to `src/aams`. Product persistence cannot be called implemented by this prototype. Contract acceptance, schema/migration, quotas, transactional registration/supersession and host revocation must be reviewed in a later bounded PR before product writes.
+
+## Alternatives and open decisions
+
+Blindly replaying a summary is simpler but permits invented progress and stale constraints. Treating checkpoints as authoritative formations conflates agent claims with completed work. Automatic canonical rebase would expand authority and hide the stale-state decision. The proposed fail-closed contract favors observable rejection; it can reduce successful resumption compared with reconstructing current evidence, and the experiment must report that cost.
+
+Open before product implementation: authenticated completion attestations and task ownership; task-head concurrency; atomic checkpoint/registry snapshots; backward-compatible schemas; non-prefix task graphs; expiry/retention/erasure interaction; safe explicit refresh; resource quotas; model-driven reconstruction and independent model replacement. The experiment does not settle these by assuming an LLM follows the contract.
