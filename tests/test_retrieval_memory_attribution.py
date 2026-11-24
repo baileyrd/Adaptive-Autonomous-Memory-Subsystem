@@ -5,6 +5,7 @@ import platform
 import subprocess
 import tempfile
 import unittest
+from hashlib import sha256
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -39,8 +40,12 @@ class RetrievalMemoryTests(unittest.TestCase):
                 db=Path(root) / "memory.db",
                 repetitions=2,
             )
+            args.data.write_bytes(b"fixture")
+            args.groups = Path(root) / "groups.json"
+            args.groups.write_text(json.dumps(GROUPS))
+            args.groups_sha256 = probe.file_sha256(args.groups)
             with (
-                patch.object(probe, "groups_for", return_value=GROUPS),
+                patch.dict(probe.DATASET_PINS, {"dev": probe.file_sha256(args.data)}),
                 patch.object(
                     probe, "OnnxSentenceEncoder", side_effect=AssertionError("Optional import")
                 ),
@@ -76,11 +81,19 @@ class RetrievalMemoryTests(unittest.TestCase):
             args = SimpleNamespace(
                 model=root, variant=variant, data=root / "data", partition="dev", repetitions=2
             )
+            args.data.write_bytes(b"fixture")
             calls = []
 
             def child(command, **kwargs):
                 self.assertIn("-I", command)
                 self.assertTrue(kwargs["check"])
+                if "--prepare" in command:
+                    Path(command[command.index("--groups") + 1]).write_text(json.dumps(GROUPS))
+                    return SimpleNamespace(stdout="")
+                self.assertEqual(
+                    command[command.index("--groups-sha256") + 1],
+                    sha256(json.dumps(GROUPS).encode()).hexdigest(),
+                )
                 arm = command[command.index("--arm") + 1]
                 stage = command[command.index("--stage") + 1]
                 calls.append((arm, stage, command[command.index("--db") + 1]))
@@ -93,7 +106,7 @@ class RetrievalMemoryTests(unittest.TestCase):
                 return SimpleNamespace(stdout=json.dumps(row))
 
             with (
-                patch.object(probe, "groups_for", return_value=GROUPS),
+                patch.dict(probe.DATASET_PINS, {"dev": probe.file_sha256(args.data)}),
                 patch.object(probe.subprocess, "run", side_effect=child),
             ):
                 report = probe.run(args)
@@ -105,7 +118,7 @@ class RetrievalMemoryTests(unittest.TestCase):
                 self.assertNotEqual(calls[1][2], calls[4][2])
                 self.assertTrue(report["resource_screen"]["passes"])
             with (
-                patch.object(probe, "groups_for", return_value=GROUPS),
+                patch.dict(probe.DATASET_PINS, {"dev": probe.file_sha256(args.data)}),
                 patch.object(
                     probe.subprocess, "run", side_effect=subprocess.CalledProcessError(1, "child")
                 ),

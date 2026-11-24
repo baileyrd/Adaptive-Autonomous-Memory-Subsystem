@@ -17,7 +17,7 @@ from time import perf_counter_ns
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from benchmark_onnx_cpu import DATASET_PINS, groups_for, percentile  # noqa: E402
+from benchmark_onnx_cpu import DATASET_PINS, percentile  # noqa: E402
 from evaluate_semantic import timestamp  # noqa: E402
 from memory_probe import build  # noqa: E402
 from onnx_encoder import OnnxSentenceEncoder, Variant, file_sha256  # noqa: E402
@@ -55,9 +55,13 @@ def recall_pass(memory, groups, provider):
 
 
 def measure(args):
-    # Reverify dataset in every child, using precisely the existing bounded workload.
+    # Hash with bounded buffers; never parse the full dataset in a measured child.
     started = perf_counter_ns()
-    groups = groups_for(args.data, args.partition)
+    if file_sha256(args.data) != DATASET_PINS[args.partition]:
+        raise ValueError("Dataset checksum mismatch")
+    if file_sha256(args.groups) != args.groups_sha256:
+        raise ValueError("Prepared workload checksum mismatch")
+    groups = json.loads(args.groups.read_text())
     points = {"workload_loaded": snapshot()}
     load_start = perf_counter_ns()
     provider = (
@@ -109,10 +113,36 @@ def measure(args):
 def run(args):
     if sys.platform != "linux":
         raise ValueError("RSS protocol requires Linux (ru_maxrss is KiB)")
-    groups_for(args.data, args.partition)  # Refuse invalid data before launching children.
+    if file_sha256(args.data) != DATASET_PINS[args.partition]:
+        raise ValueError("Dataset checksum mismatch")
     variant = Variant(**json.loads(args.variant.read_text()))
     rows = {}
     with tempfile.TemporaryDirectory(prefix="aams-memory-") as directory:
+        groups = Path(directory) / "groups.json"
+        # Full SQuAD parsing must not inflate the parent or measured-child RSS floor.
+        subprocess.run(
+            [
+                sys.executable,
+                "-I",
+                str(Path(__file__).resolve()),
+                "--model",
+                str(args.model.resolve()),
+                "--variant",
+                str(args.variant.resolve()),
+                "--data",
+                str(args.data.resolve()),
+                "--partition",
+                args.partition,
+                "--prepare",
+                "--groups",
+                str(groups),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+        groups_digest = file_sha256(groups)
         for arm in ARMS:
             db = Path(directory) / f"{arm}.db"
             rows[arm] = {}
@@ -131,6 +161,10 @@ def run(args):
                     args.partition,
                     "--repetitions",
                     str(args.repetitions),
+                    "--groups",
+                    str(groups),
+                    "--groups-sha256",
+                    groups_digest,
                     "--arm",
                     arm,
                     "--stage",
@@ -170,6 +204,7 @@ def run(args):
         "cpuinfo_sha256": file_sha256(Path("/proc/cpuinfo")),
         "dataset_sha256": DATASET_PINS[args.partition],
         "partition": args.partition,
+        "prepared_workload_sha256": groups_digest,
         "variant": json.loads(args.variant.read_text()),
         "model_files_verified_by_encoder": variant.files,
         "arms": rows,
@@ -194,11 +229,19 @@ def main():
     parser.add_argument("--arm", choices=ARMS, help=argparse.SUPPRESS)
     parser.add_argument("--stage", choices=STAGES, help=argparse.SUPPRESS)
     parser.add_argument("--db", type=Path, help=argparse.SUPPRESS)
+    parser.add_argument("--groups", type=Path, help=argparse.SUPPRESS)
+    parser.add_argument("--groups-sha256", help=argparse.SUPPRESS)
+    parser.add_argument("--prepare", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if sys.platform != "linux" or not 1 <= args.repetitions <= 20:
         parser.error("Use Linux and 1 to 20 repetitions")
     if any((args.arm, args.stage, args.db)) and not all((args.arm, args.stage, args.db)):
         parser.error("Child arm, stage and db must be supplied together")
+    if args.prepare:
+        from benchmark_onnx_cpu import groups_for
+
+        args.groups.write_text(json.dumps(groups_for(args.data, args.partition)))
+        return
     print(json.dumps(measure(args) if args.arm else run(args), indent=2))
 
 
