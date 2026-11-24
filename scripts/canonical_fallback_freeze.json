@@ -1,0 +1,9 @@
+{
+  "cases_sha256": "2a4316a99593ab8c785fe61f09b7d1de98ab3175fa7ef76fba81817d792e4152",
+  "files": {
+    "scripts/canonical_fallback_cases.py": "498540dc2066db06d21315e3f6f6cd88284bb9168090d29cc423bef3d1f9a2ca",
+    "scripts/checkpoint_recovery_cases.py": "322ee3687740ddfb6b3d292ed70202e41b5e3126b5bbcd5238eb20f23b17c574",
+    "scripts/checkpoint_recovery_recipe.json": "7eab8789da423dfaf1fe7447586866f9dee05261003a3c3bc7636a12f8dbc113",
+    "docs/audit/canonical-fallback-protocol.md": "e8bd90cd417f9e6dd7b4fefdd6302d7bab5763ac52e58cedec219f0216ce46c6"
+  }
+}
