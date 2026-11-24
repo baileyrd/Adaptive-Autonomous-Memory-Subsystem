@@ -42,3 +42,34 @@ The workflow is [`static-embedder-eval.yml`](../../.github/workflows/static-embe
 | 63,091 × 512 | Within noise | 3.84× (fails) |
 
 With random vectors, `bm25_rerank` lost about 15 pp against `bm25_guarded`. The harness can therefore show harm, and real vectors must recover that loss before they can show any gain.
+
+## Results
+
+Run [45314502181](https://github.com/baileyrd/Adaptive-Autonomous-Memory-Subsystem/actions/runs/45314502181) at head `6d63be6`. Hosted Linux, Python 3.12.16. Tokenizer parity: 18,929/18,929 texts were identical for both models.
+
+**Cost gate** (static_rerank vs guarded, same runner):
+
+| Model | Dev added p95 / RSS | Train added p95 / RSS | Gate |
+| --- | --- | --- | --- |
+| potion-base-8M | +0.371 ms / 1.660× | +0.367 ms / 1.668× | **PASS** |
+| potion-retrieval-32M | Within budget / over 2× | +0.748 ms / 3.673× | **FAIL** (RSS); quality NOT MEASURED |
+
+The 8M encoder adds 0.32 ms p95 itself. This is the first encoder to pass both v0.9 gates.
+
+**Quality, potion-base-8M** (held-out splits; paired task-success delta vs `bm25_guarded`, 95% grouped CI):
+
+| Workload | `bm25_rerank` (pre-registered) | nDCG@3 Δ | `bm25_guarded_onnx` (full-scan score fusion, comparison only) | nDCG@3 Δ | Its added p95 |
+| --- | --- | --- | --- | --- | --- |
+| SQuAD dev | −0.88 pp [−2.04, +0.41] | −0.032 | **+1.34 pp [+0.41, +2.40]** | +0.012 | +7.3 ms |
+| SQuAD train (48) | +0.30 pp [−0.55, +1.42] | −0.017 | **+1.87 pp [+1.10, +2.71]** | +0.018 | +11.2 ms |
+| SciFact | +0.77 pp [−0.15, +1.72] | −0.006 | **+1.70 pp [+0.71, +2.86]** | +0.017 | +24.4 ms |
+
+Every arm had zero scope leaks, zero time leaks and zero contradiction regressions on the v0.6 fixture. The dense-only arm lost 5 to 13 pp, and `rrf_onnx` lost up to 2.3 pp.
+
+## Disposition
+
+- **`bm25_rerank`: no-go.** It gives no significant task gain on any workload, and nDCG@3 is slightly negative on all three.
+- **The static encoder: cost go.** It passes both resource gates without NumPy or onnxruntime, and its vectors carry real signal.
+- **Score fusion.** The existing score-averaging fusion (`bm25_guarded_onnx`) improves every workload significantly. It fails latency only because the full-scan snapshot path reads and verifies every vector in the scope on each query; encoding is not the cause.
+- **Hypothesis for the next pre-registration (post hoc, untested here):** the same score fusion, restricted to BM25 guarded's top 20 cited vectors, keeps the gain at rerank cost. It must be tested on fresh partitions or under a stated reuse caveat, because it was chosen after seeing these results.
+- No runtime or default change is authorized by these results.
