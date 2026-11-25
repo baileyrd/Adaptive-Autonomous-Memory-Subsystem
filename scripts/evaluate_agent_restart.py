@@ -45,7 +45,13 @@ def eligible(store, task):
     for _, evidence in store.scan_recall(
         access, recorded_as_of=task["as_of"], effective_at=task["effective_at"], kinds=()
     ):
-        records.update({r.evidence_id: row(r) for r in evidence.values()})
+        records.update(
+            {
+                r.evidence_id: row(r)
+                for r in evidence.values()
+                if r.recorded_at <= task["as_of"] and r.observed_at <= task["effective_at"]
+            }
+        )
     return list(records.values())
 
 

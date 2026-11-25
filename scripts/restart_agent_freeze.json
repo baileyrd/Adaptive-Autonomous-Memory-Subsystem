@@ -12,7 +12,7 @@
     "scripts/cognitive_task_cases.py": "bb9e7ab30abd666240ff8d024e2cb510a7ee7d7ce6ff699869f00320c56e8f4d",
     "scripts/copy_context_cases.py": "7c2758e9ffad2c127387930f4a97ddcec35c315ac8337e0799e0b5101a62e27b",
     "scripts/copy_context_selector.py": "fa9b754725077efdb47dcbb4903eb58ac00dcb770ed1c3737a7b4efc2fb27174",
-    "scripts/evaluate_agent_restart.py": "c1d0dbe19dbbd0c376f978da308c9fc59f825a87e89cf36fb26490c3c46ca885",
+    "scripts/evaluate_agent_restart.py": "7c73e4fca6ec6d7db041997eddcbc90bb191b9db41ad65b2c2433405bf862336",
     "scripts/evaluate_canonical_fallback.py": "ec9943601e387a3bfb5e9c182b18c923a7fa5a9d7ad3299c593f293237ad6fa7",
     "scripts/evaluate_checkpoint_recovery.py": "5224b8aa2677b82a76146e4714ac19b4a9053b70526331b899a3933eac9c8af0",
     "scripts/evaluate_cognitive_tasks.py": "84d2fa661645d80360fcc5ce7de73688ccb99cb9d18bb163fd7bcabce38e74cb",
