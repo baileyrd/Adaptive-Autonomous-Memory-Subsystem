@@ -1,0 +1,202 @@
+{
+  "cases_sha256": "2a4316a99593ab8c785fe61f09b7d1de98ab3175fa7ef76fba81817d792e4152",
+  "executed_commit": "794e637bdc761e21c44811053805c2a3ec7dec61",
+  "file_count": 79,
+  "manifest_sha256": "1f5fc81a2e15f02f65fe219c25716ef3d227db441f426e6634a540797167e016",
+  "median_decision_ns": {
+    "canonical": 216714.5,
+    "checkpoint": 240835.0,
+    "fallback": 436204.5
+  },
+  "platform": "Linux-6.18.58.1-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "preregistration": "17881e2dc1cabe1eb833cb997bee6ea62affdf5d",
+  "python": "3.14.8",
+  "rows": 252,
+  "splits": {
+    "design": {
+      "delta": {
+        "ci95": [
+          0.42857142857142855,
+          0.8571428571428571
+        ],
+        "families": 14,
+        "mean_delta": 0.6428571428571429
+      },
+      "gains": 18,
+      "regressions": 0,
+      "totals": {
+        "canonical": {
+          "by_family_correct": {
+            "changed_constraints": 2,
+            "contradictory_state": 0,
+            "cross_scope_ref": 2,
+            "expired": 2,
+            "fabricated_progress": 2,
+            "foreign_candidate": 2,
+            "head_after_cutoff": 0,
+            "missing_candidate": 2,
+            "reader_without_owner": 2,
+            "ready": 2,
+            "revoked_access": 2,
+            "revoked_between": 2,
+            "revoked_checkpoint": 2,
+            "superseded": 2
+          },
+          "correct_denial": 4,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "repeat": 0,
+          "resumed_correctly": 20,
+          "success": 24,
+          "unavailable_active_constraints": 0,
+          "valid_citations": 20
+        },
+        "checkpoint": {
+          "by_family_correct": {
+            "changed_constraints": 0,
+            "contradictory_state": 0,
+            "cross_scope_ref": 0,
+            "expired": 0,
+            "fabricated_progress": 0,
+            "foreign_candidate": 0,
+            "head_after_cutoff": 0,
+            "missing_candidate": 0,
+            "reader_without_owner": 0,
+            "ready": 2,
+            "revoked_access": 2,
+            "revoked_between": 2,
+            "revoked_checkpoint": 0,
+            "superseded": 0
+          },
+          "correct_denial": 4,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "repeat": 0,
+          "resumed_correctly": 2,
+          "success": 6,
+          "unavailable_active_constraints": 2,
+          "valid_citations": 2
+        },
+        "fallback": {
+          "by_family_correct": {
+            "changed_constraints": 2,
+            "contradictory_state": 0,
+            "cross_scope_ref": 2,
+            "expired": 2,
+            "fabricated_progress": 2,
+            "foreign_candidate": 2,
+            "head_after_cutoff": 0,
+            "missing_candidate": 2,
+            "reader_without_owner": 2,
+            "ready": 2,
+            "revoked_access": 2,
+            "revoked_between": 2,
+            "revoked_checkpoint": 2,
+            "superseded": 2
+          },
+          "correct_denial": 4,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "repeat": 0,
+          "resumed_correctly": 20,
+          "success": 24,
+          "unavailable_active_constraints": 0,
+          "valid_citations": 20
+        }
+      }
+    },
+    "heldout": {
+      "delta": {
+        "ci95": [
+          0.42857142857142855,
+          0.8571428571428571
+        ],
+        "families": 14,
+        "mean_delta": 0.6428571428571429
+      },
+      "gains": 36,
+      "regressions": 0,
+      "totals": {
+        "canonical": {
+          "by_family_correct": {
+            "changed_constraints": 4,
+            "contradictory_state": 0,
+            "cross_scope_ref": 4,
+            "expired": 4,
+            "fabricated_progress": 4,
+            "foreign_candidate": 4,
+            "head_after_cutoff": 0,
+            "missing_candidate": 4,
+            "reader_without_owner": 4,
+            "ready": 4,
+            "revoked_access": 4,
+            "revoked_between": 4,
+            "revoked_checkpoint": 4,
+            "superseded": 4
+          },
+          "correct_denial": 8,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "repeat": 0,
+          "resumed_correctly": 40,
+          "success": 48,
+          "unavailable_active_constraints": 0,
+          "valid_citations": 40
+        },
+        "checkpoint": {
+          "by_family_correct": {
+            "changed_constraints": 0,
+            "contradictory_state": 0,
+            "cross_scope_ref": 0,
+            "expired": 0,
+            "fabricated_progress": 0,
+            "foreign_candidate": 0,
+            "head_after_cutoff": 0,
+            "missing_candidate": 0,
+            "reader_without_owner": 0,
+            "ready": 4,
+            "revoked_access": 4,
+            "revoked_between": 4,
+            "revoked_checkpoint": 0,
+            "superseded": 0
+          },
+          "correct_denial": 8,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "repeat": 0,
+          "resumed_correctly": 4,
+          "success": 12,
+          "unavailable_active_constraints": 4,
+          "valid_citations": 4
+        },
+        "fallback": {
+          "by_family_correct": {
+            "changed_constraints": 4,
+            "contradictory_state": 0,
+            "cross_scope_ref": 4,
+            "expired": 4,
+            "fabricated_progress": 4,
+            "foreign_candidate": 4,
+            "head_after_cutoff": 0,
+            "missing_candidate": 4,
+            "reader_without_owner": 4,
+            "ready": 4,
+            "revoked_access": 4,
+            "revoked_between": 4,
+            "revoked_checkpoint": 4,
+            "superseded": 4
+          },
+          "correct_denial": 8,
+          "invented_progress": 0,
+          "lost_constraints": 0,
+          "repeat": 0,
+          "resumed_correctly": 40,
+          "success": 48,
+          "unavailable_active_constraints": 0,
+          "valid_citations": 40
+        }
+      }
+    }
+  },
+  "trace_sha256": "c936d8bf499a84736f2bdbd09ea2d5aff2e1f2b251fa054e908bf7f31afab7e4"
+}
