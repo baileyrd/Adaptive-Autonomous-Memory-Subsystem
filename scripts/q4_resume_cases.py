@@ -43,7 +43,9 @@ RULE = (
 def prompt(packet: dict) -> str:
     """Serialize only the public task, its grant and authorized observations."""
     return (
-        "<|im_start|>system\n" + RULE + "<|im_end|>\n<|im_start|>user\n"
+        "<|im_start|>system\n"
+        + RULE
+        + "<|im_end|>\n<|im_start|>user\n"
         + json.dumps(packet, sort_keys=True, separators=(",", ":"))
         + "<|im_end|>\n<|im_start|>assistant\n"
     )
@@ -59,40 +61,79 @@ def fixtures() -> tuple[list, dict]:
                     continue
                 key = sha256(f"q4-archive-27/{split}/{index}/{variant}".encode()).hexdigest()[:12]
                 goal = "accession archive folio " + key
-                task = dict(task_id=key, goal=goal, scope="folio-" + key, principal="clerk-" + key,
-                            executor="registrar-" + key, allowed=family != "revoked",
-                            as_of=day(6), effective_at=day(6), now=day(6))
+                task = dict(
+                    task_id=key,
+                    goal=goal,
+                    scope="folio-" + key,
+                    principal="clerk-" + key,
+                    executor="registrar-" + key,
+                    allowed=family != "revoked",
+                    as_of=day(6),
+                    effective_at=day(6),
+                    now=day(6),
+                )
                 records = []
 
                 def add(slot, payload, observed, recorded, *, foreign=False, journal=False):
                     text = json.dumps(payload, separators=(",", ":"), sort_keys=True)
                     actor = "scribe-" + key if journal else task["executor"]
                     rid = sha256(f"{key}/{slot}".encode()).hexdigest()[:16]
-                    records.append(dict(id=rid, scope=("vault-" + key if foreign else task["scope"]),
-                        source_actor=actor, producer=actor, source_locator="folio://" + key,
-                        observed_at=day(observed), recorded_at=day(recorded), text=text,
-                        digest="sha256:" + sha256(text.encode()).hexdigest()))
+                    records.append(
+                        dict(
+                            id=rid,
+                            scope=("vault-" + key if foreign else task["scope"]),
+                            source_actor=actor,
+                            producer=actor,
+                            source_locator="folio://" + key,
+                            observed_at=day(observed),
+                            recorded_at=day(recorded),
+                            text=text,
+                            digest="sha256:" + sha256(text.encode()).hexdigest(),
+                        )
+                    )
                     return rid
 
                 def cert(fields):
                     completed, failed, constraints = fields
-                    return dict(kind="restart_state", completed=completed, failed_attempts=failed,
-                                constraints=constraints, goal=goal)
+                    return dict(
+                        kind="restart_state",
+                        completed=completed,
+                        failed_attempts=failed,
+                        constraints=constraints,
+                        goal=goal,
+                    )
 
                 initial = add("binding", cert(old), 2, 3)
-                required = [add(f"receipt-{i}", cert(fields), 5, 5)
-                            for i, fields in enumerate(updates)] or [initial]
+                required = [
+                    add(f"receipt-{i}", cert(fields), 5, 5) for i, fields in enumerate(updates)
+                ] or [initial]
                 for i in range(3 if split == "diagnostic" else 9):
-                    add(f"log-{i}", dict(kind="note", text=f"Inventory shelf {i} inspected."), 6, 6,
-                        journal=True)
+                    add(
+                        f"log-{i}",
+                        dict(kind="note", text=f"Inventory shelf {i} inspected."),
+                        6,
+                        6,
+                        journal=True,
+                    )
                 add("restricted", cert(V), 5, 5, foreign=True)
                 add("late", cert(V), 5, 8)
                 add("premature", cert(V), 8, 5)
-                cases.append(dict(id=key, split=split, family=family, request=task, records=records,
-                                  expires_at=day(5 if family == "expired" else 9),
-                                  foreign_checkpoint=False))
-                labels[key] = dict(action=KEY[family][variant], required=required if task["allowed"] else [],
-                                   worlds=[cert(fields) for fields in updates or [old]])
+                cases.append(
+                    dict(
+                        id=key,
+                        split=split,
+                        family=family,
+                        request=task,
+                        records=records,
+                        expires_at=day(5 if family == "expired" else 9),
+                        foreign_checkpoint=False,
+                    )
+                )
+                labels[key] = dict(
+                    action=KEY[family][variant],
+                    required=required if task["allowed"] else [],
+                    worlds=[cert(fields) for fields in updates or [old]],
+                )
     return cases, labels
 
 
