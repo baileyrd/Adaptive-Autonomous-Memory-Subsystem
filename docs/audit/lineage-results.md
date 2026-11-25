@@ -1,12 +1,12 @@
 # Can explicit report ancestry change a release decision?
 
-**Visible links corrected eight unsafe releases in 32 paired shipment histories.** The link-aware arm retained all 18 genuine independent observations across the four corroboration controls. Correct decisions rose from 16/32 to 24/32. No previously correct action regressed, 24 actions tied, and eight unsafe releases remained. The gain was confined to fully linked aliases and multi-hop copies. The preregistered overall-benefit criterion was **not met**: the eight-family paired bootstrap interval for correctness was **[0, +62.5] percentage points**, with an observed difference of +25 points. The unsafe-rate difference was −25 points, interval [−62.5, 0]. These intervals describe the constructed family mix.
+**Visible links corrected eight unsafe releases in 32 paired shipment histories.** The link-aware arm retained all 18 genuine independent observations across the four corroboration controls, all of which had no lineage links. Correct decisions rose from 16/32 to 24/32. No previously correct action regressed, 24 actions tied, and eight unsafe releases remained. The gain was confined to fully linked aliases and multi-hop copies. The preregistered overall-benefit criterion was **not met**: the eight-family paired bootstrap interval for correctness was **[0, +62.5] percentage points**, with an observed difference of +25 points. The unsafe-rate difference was −25 points, interval [−62.5, 0]. These intervals describe the constructed family mix.
 
 | Held-out family (four histories each) | Correct A → B | Unsafe A → B | Source groups A → B, summed | What reached the decision |
 |---|---:|---:|---:|---|
 | Aliased copies | 0 → 4 | 4 → 0 | 32 → 8 | One clear representative and the newer blocked inspection |
 | Multi-hop copies | 0 → 4 | 4 → 0 | 32 → 8 | Authorized chains also freed a slot for the blocker |
-| Independent agreement | 4 → 4 | 0 → 0 | 18 → 18 | Both arms kept 3, 4, 5 and 6 distinct simulator acquisitions |
+| Independent agreement (unlinked) | 4 → 4 | 0 → 0 | 18 → 18 | Both arms kept 3, 4, 5 and 6 distinct simulator acquisitions |
 | Unknown origins | 4 → 4 | 0 → 0 | 32 → 32 | Both proceeded on clear evidence; independence was unverified |
 | Same-origin dispute | 4 → 4 | 0 → 0 | 22 → 4 | Both retained clear and blocked assertions and abstained |
 | Partial links | 0 → 0 | 4 → 4 | 32 → 32 | Enough unlinked copies remained to exclude the blocker |
@@ -15,7 +15,7 @@
 
 **How the decision changed.** For task `63af315752cc32`, native recall returned 11 candidates in both arms. The frozen #122 D selector used all eight slots for `a00` through `a07`, each reporting clear on day 2, and the rule chose proceed. With the explicit links, the selector delivered `a00` and `z`. The latter was a separate, day-5 blocked inspection. The same latest-observation rule chose stop. The agent never saw the links or voted on source counts. The dispute family illustrates the opposite result: grouping reduced the source proxy, but the correct abstention stayed the same. [Full candidate order, delivered citations, actions and oracle scores](lineage-rows.jsonl)
 
-**Source independence.** The summed group proxy fell from 200 to 134. On fully attributed contexts the excess above simulator origins fell from 130 to 56. Both arms made **zero unsupported independence assertions**: neither interface certifies an independent pair. Each arm returned 32 unknown-origin rows, excluded from the proxy-excess calculation. All 18 known independent acquisitions survived in the positive controls. The sidecars were explicitly supplied and accurate in these fixtures. They do not establish the accuracy or authority of real-world lineage, and false links between genuinely independent observations were outside this protocol.
+**Source independence.** The summed group proxy fell from 200 to 134. On fully attributed contexts the excess above simulator origins fell from 130 to 56. Both arms made **zero unsupported independence assertions**: neither interface certifies an independent pair. Each arm returned 32 unknown-origin rows, excluded from the proxy-excess calculation. The 18/18 retention result covers unlinked independent acquisitions only. The sidecars were explicitly supplied and accurate in these fixtures. They do not establish the accuracy or authority of real-world lineage, and false links between genuinely independent observations were outside this protocol.
 
 **Authorization.** The common experiment host withheld the individually revoked record before staging the disposable DB. Whole-request revocation stopped recall. Traversal checked each link’s reader, grant, scope and both dates before admitting the edge, then required canonical, eligible, in-pool endpoints. On the four missing-family histories the visible overlay changed all four proceeds to stops. Nine unavailable overlays per history produced the same full public response as absent links on **36/36** comparisons, including evidence bytes, counts, independence status and decision. The unavailable variants covered private/foreign/late/premature links and paths through foreign, late, premature, revoked and nonexistent endpoints. Endpoint and link permission checks were also exercised independently in toy tests. These overlays are repeated controls, outside the 32 paired histories. This is a disposable host grant and sidecar experiment, with no new product authority. [Matched responses](lineage-controls.jsonl) · [Family scorecards](lineage-scorecards.json)
 
@@ -56,3 +56,15 @@ cd "$repo"
 ```
 
 One next action is independent review of the frozen traces, especially the four partial-link failures and protected-path controls, before considering any separate authority or serving decision.
+
+## Unscored multi-parent probe added after review
+
+Two independent inspections record identical clear payloads at the same observation time. A third report cites both and repeats that payload. Both supplied links accurately describe the report. With no links the frozen selector returns the two inspections and the report (three source groups). With both links visible it joins all three into one connected component, returns only the first inspection and reports one group. Thus independent inspections retained fall from two to one. Both arms still choose proceed.
+
+Connectivity through a shared child does not establish that its parents share an origin. Using a component as a single origin requires a single-origin assumption; accurate links alone do not supply it. The original 32 histories, 36 unavailable-overlay checks, scorecards and interval exclude this post-review case.
+
+Run the [unscored probe](../../tests/test_lineage_multi_parent.py) from the repository root on Linux:
+
+```sh
+PYTHONPATH=src:scripts python -m unittest discover -s tests -p test_lineage_multi_parent.py -v
+```
