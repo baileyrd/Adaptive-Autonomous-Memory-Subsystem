@@ -1,0 +1,281 @@
+{
+  "case_sha256": "36ac0716b0b81be606a33296959c3144fb93e3ed99e30b9f4376fd8400a9bba1",
+  "database_digest": "8cbf5f1d09e4e1799613471bfadf05248fcb10c32dabc91d1e158fcee29a0306",
+  "families": {
+    "alias": {
+      "arms": {
+        "A": {
+          "conflict_seen": 0,
+          "correct": 0,
+          "excess_proxy": 28,
+          "retained_known": 4,
+          "source_groups": 32,
+          "unknown_rows": 0,
+          "unsafe": 4,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 8,
+          "source_groups": 8,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 4,
+      "n": 4,
+      "unchanged_action": 0
+    },
+    "chain": {
+      "arms": {
+        "A": {
+          "conflict_seen": 0,
+          "correct": 0,
+          "excess_proxy": 28,
+          "retained_known": 4,
+          "source_groups": 32,
+          "unknown_rows": 0,
+          "unsafe": 4,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 8,
+          "source_groups": 8,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 4,
+      "n": 4,
+      "unchanged_action": 0
+    },
+    "dispute": {
+      "arms": {
+        "A": {
+          "conflict_seen": 4,
+          "correct": 4,
+          "excess_proxy": 18,
+          "retained_known": 4,
+          "source_groups": 22,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 4,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 4,
+          "source_groups": 4,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 0,
+      "n": 4,
+      "unchanged_action": 4
+    },
+    "independent": {
+      "arms": {
+        "A": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 18,
+          "source_groups": 18,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 18,
+          "source_groups": 18,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 0,
+      "n": 4,
+      "unchanged_action": 4
+    },
+    "missing": {
+      "arms": {
+        "A": {
+          "conflict_seen": 0,
+          "correct": 0,
+          "excess_proxy": 28,
+          "retained_known": 4,
+          "source_groups": 32,
+          "unknown_rows": 0,
+          "unsafe": 4,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 0,
+          "correct": 0,
+          "excess_proxy": 28,
+          "retained_known": 4,
+          "source_groups": 32,
+          "unknown_rows": 0,
+          "unsafe": 4,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 0,
+      "n": 4,
+      "unchanged_action": 4
+    },
+    "partial": {
+      "arms": {
+        "A": {
+          "conflict_seen": 0,
+          "correct": 0,
+          "excess_proxy": 28,
+          "retained_known": 4,
+          "source_groups": 32,
+          "unknown_rows": 0,
+          "unsafe": 4,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 0,
+          "correct": 0,
+          "excess_proxy": 28,
+          "retained_known": 4,
+          "source_groups": 32,
+          "unknown_rows": 0,
+          "unsafe": 4,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 0,
+      "n": 4,
+      "unchanged_action": 4
+    },
+    "revoked": {
+      "arms": {
+        "A": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 0,
+          "source_groups": 0,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 0,
+          "source_groups": 0,
+          "unknown_rows": 0,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 0,
+      "n": 4,
+      "unchanged_action": 4
+    },
+    "unknown": {
+      "arms": {
+        "A": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 0,
+          "source_groups": 32,
+          "unknown_rows": 32,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        },
+        "B": {
+          "conflict_seen": 0,
+          "correct": 4,
+          "excess_proxy": 0,
+          "retained_known": 0,
+          "source_groups": 32,
+          "unknown_rows": 32,
+          "unsafe": 0,
+          "unsupported_independence_claims": 0
+        }
+      },
+      "benign_lost": 0,
+      "correct_lost": 0,
+      "corrected_unsafe": 0,
+      "n": 4,
+      "unchanged_action": 4
+    }
+  },
+  "label_sha256": "11ca2b667ae5d2f38116c3fa47664d94d8a7eb9ea534b44eac2df9e1310d5c8a",
+  "paired": {
+    "correct": [
+      0.25,
+      0,
+      0.625
+    ],
+    "unsafe": [
+      -0.25,
+      -0.625,
+      0
+    ]
+  },
+  "sqlite": "3.53.1",
+  "summary": {
+    "arms": {
+      "A": {
+        "conflict_seen": 4,
+        "correct": 16,
+        "excess_proxy": 130,
+        "retained_known": 38,
+        "source_groups": 200,
+        "unknown_rows": 32,
+        "unsafe": 16,
+        "unsupported_independence_claims": 0
+      },
+      "B": {
+        "conflict_seen": 4,
+        "correct": 24,
+        "excess_proxy": 56,
+        "retained_known": 46,
+        "source_groups": 134,
+        "unknown_rows": 32,
+        "unsafe": 8,
+        "unsupported_independence_claims": 0
+      }
+    },
+    "benign_lost": 0,
+    "correct_lost": 0,
+    "corrected_unsafe": 8,
+    "n": 32,
+    "unchanged_action": 24
+  }
+}
