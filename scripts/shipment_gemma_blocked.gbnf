@@ -1,0 +1,2 @@
+root ::= "{" ws "\"answer\"" ws ":" ws "\"" [AB] "\"" ws "}" ws
+ws ::= " "?
