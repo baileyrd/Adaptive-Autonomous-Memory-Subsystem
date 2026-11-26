@@ -21,7 +21,7 @@ def cases():
         (
             "u04",
             True,
-            "PA",
+            "AP",
             [(4, "blocked", "rail-a"), (4, "clear", "rail-b"), (1, "clear", "rail-old")],
             (1, 2),
         ),
@@ -59,7 +59,7 @@ def cases():
         (
             "u08",
             False,
-            "AP",
+            "PA",
             [
                 (3, "blocked", None),
                 (8, "clear", "silo-a"),
