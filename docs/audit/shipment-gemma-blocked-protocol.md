@@ -1,0 +1,16 @@
+# Gemma unanimous-blocking versus shipment action (#125, #105)
+
+Start at main `487e50558d68a9f13fec37b1db83c6699fc467f4`, the merge of #142. Gemma abstained on unanimously blocked verified observations with and without citations in #142. This diagnostic asks whether the same actor can recognize unanimous blocking when asked directly and whether it stops when asked for a shipment action in a separate session.
+
+## Frozen inputs
+
+Reuse #142's Gemma 3 4B IT Q4_K_M GGUF SHA-256 `04a43a22e8d2003deda5acc262f68ec1005fa76c735a9962a8c77042a74a7d19`, llama.cpp b6500 CPU CLI SHA-256 `b411ede792661c7098a7bd8965ec92b062952010fecd816fd5f77b76b450631c`, and decoding flags (four CPU threads, zero GPU layers, 2,048 context, 64 output tokens, greedy temperature zero, seed 42, no conversation or warm-up). Use separate fresh processes. Keep the source order and exact serialized verified facts identical within each pair. Derive current rows from independently checked row IDs, cross-check their timestamps, and derive the current states and receipt slots. Neither prompt receives the expected predicate or action. The action prompt is composed without the predicate response.
+
+Eight fresh fixtures, SHA-256 `bad1914424e8182abeacf04afce4205589d45ef15205d36de1e8ec1c4eedc82f`. Four are unanimously blocked. Two are unanimously clear with distinct current receipts and two are mixed. The latter four are NO controls. Hand-checked current row IDs preserve stale boundaries, unreceipted rows, copies, and both sides of conflicts. Balance predicate answer labels and which session runs first within YES and NO cases. Clear and mixed controls each use both mappings and both orders.
+
+- P asks only “Are all current inspection records blocked?” and requests a JSON answer label. A/B means YES/NO or NO/YES according to the displayed mapping. Prompt SHA-256 `c42c1c5d87e5fb61b404ee6cd65a5c5ef4039629f620e8c70fd2785c222ee9cd`, grammar SHA-256 `b0418af279d4212b83d404ccd78f893299f1f380c0612408daf2c064defea3ee`.
+- A uses #142's exact action-only prompt and grammar with cyclic action-label rotations. Prompt SHA-256 `5446d87cb8a6a9bd5c1e564246030537e18c482e5eda308d20f8d59897f6e3cf`, grammar SHA-256 `2afca47e0beb0c28828b01225650b5ff9a60521b1f9bc96b08280d334d390f63`.
+
+## Frozen scoring and interpretation
+
+Decode labels using their displayed legends. A predicate is correct when YES matches a nonempty set of current rows with only blocked states or NO matches a clear or mixed set. Report semantic YES/NO by fixture type, invalid outputs separately, and identify always-YES or always-NO behavior from the full case set. Decode the action under #142's unchanged rule and count exact action correctness. For each blocked case report YES with STOP, YES without STOP, NO (failure to recognize), or invalid predicate. Record the actual action in every category, including malformed outputs. Correct recognition with failure to stop shows the actor can give the correct predicate under direct questioning while still failing in an independent action session. It does not establish what the actor represents internally in that session. If recognition also fails, the diagnostic cannot attribute abstention exclusively to a downstream decision step. No qualification, packet comparison, or production changes.

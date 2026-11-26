@@ -1,0 +1,10 @@
+<start_of_turn>user
+Are all current inspection records blocked?
+Use only the inspection records below. Each row lists citation ID, state, and original slot. A null slot means no original receipt. Respond with exactly one JSON object with an answer label.
+Allowed answer labels:
+{legend}
+Latest inspection extraction:
+{facts}
+Response shape: {{"answer":"label"}}
+<end_of_turn>
+<start_of_turn>model
