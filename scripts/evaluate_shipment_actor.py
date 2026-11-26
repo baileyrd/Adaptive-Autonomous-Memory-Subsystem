@@ -27,7 +27,6 @@ FLAGS = [
     "--no-conversation",
     "--no-display-prompt",
     "--simple-io",
-    "--log-disable",
     "--no-warmup",
     "-ngl",
     "0",
@@ -112,6 +111,11 @@ def assess(raw, packet, mapping, expected):
     )
 
 
+def response_text(stdout):
+    # b6500 writes generated pieces and this end marker through the stdout logger.
+    return stdout.strip().removesuffix("[end of text]").rstrip()
+
+
 def execute(model, cli, template, grammar, evidence, rotation, expected):
     packet = {f"R{i}": row for i, row in enumerate(evidence, 1)}
     mapping = legend(rotation)
@@ -124,12 +128,13 @@ def execute(model, cli, template, grammar, evidence, rotation, expected):
         timeout=120,
         env={"PATH": os.defpath, "LANG": "C.UTF-8"},
     )
-    raw = run.stdout.strip()
+    raw = response_text(run.stdout)
     return dict(
         prompt=prompt,
         prompt_sha256=sha256(prompt.encode()).hexdigest(),
         packet=packet,
         legend=mapping,
+        stdout=run.stdout,
         raw=raw,
         **assess(raw, packet, mapping, expected),
     )

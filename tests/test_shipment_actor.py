@@ -7,10 +7,15 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from evaluate_shipment_actor import assess, legend, run
+from evaluate_shipment_actor import assess, legend, response_text, run
 
 
 class ShipmentActorTests(unittest.TestCase):
+    def test_output_transport_removes_only_runtime_marker(self):
+        payload = '{"action":"A","citations":["R1"]}'
+        self.assertEqual(response_text(payload + " [end of text]\n\n"), payload)
+        self.assertEqual(response_text(payload + " unexpected"), payload + " unexpected")
+
     def test_release_requires_two_distinct_current_citations(self):
         packet = {
             "R1": (2, "clear", "east"),
