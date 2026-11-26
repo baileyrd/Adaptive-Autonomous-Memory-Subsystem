@@ -1,6 +1,6 @@
 # Gemma 3 shipment qualification result (#125, #105)
 
-**Gemma 3 4B IT Q4_K_M failed the frozen 18/18 gate.** It made the right action on 6/18 trials and supplied sufficient citations on 0/18. The runner stopped before constructing held-out histories or packets. The effect of #138 versus #137 on this model remains unmeasured.
+**Gemma 3 4B IT Q4_K_M failed the frozen 18/18 gate.** It chose the right action on 6/18 trials and earned 0/18 supported correct. The runner stopped before constructing held-out histories or packets. The effect of #138 versus #137 on this model remains unmeasured.
 
 | Required action | Trials | Emitted action | Correct action | Supported correct |
 | --- | ---: | --- | ---: | ---: |
