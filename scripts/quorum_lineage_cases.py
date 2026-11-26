@@ -21,7 +21,9 @@ def fixtures():
         for replica in range(4):
             key = sha256(f"freight-125-quorum/{family}/{replica}".encode()).hexdigest()[:14]
             scope, topic = "quorum-dock-" + key, "quorum-load-" + key
-            task = dict(id=key, scope=scope, topic=topic, checks=["seal"], day=6, as_of=6, allowed=True)
+            task = dict(
+                id=key, scope=scope, topic=topic, checks=["seal"], day=6, as_of=6, allowed=True
+            )
             records, receipts, links = [], {}, []
 
             def record(order, *, slot=None, state="clear"):
@@ -33,7 +35,9 @@ def fixtures():
                         source=rid,
                         observed=2,
                         recorded=2,
-                        text=json.dumps(dict(topic=topic, check="seal", state=state), sort_keys=True),
+                        text=json.dumps(
+                            dict(topic=topic, check="seal", state=state), sort_keys=True
+                        ),
                     )
                 )
                 if slot is not None:
@@ -43,13 +47,20 @@ def fixtures():
             def link(child, parent):
                 links.append(
                     dict(
-                        child=child, parent=parent, scope=scope, principal="pilot",
-                        granted=True, recorded=4, effective=3,
+                        child=child,
+                        parent=parent,
+                        scope=scope,
+                        principal="pilot",
+                        granted=True,
+                        recorded=4,
+                        effective=3,
                     )
                 )
 
             a = record("10", slot="first") if family != "unknown" else record("10")
-            b = record("20", slot="second" if family in {"dual", "nested", "overlap", "conflict"} else None)
+            b = record(
+                "20", slot="second" if family in {"dual", "nested", "overlap", "conflict"} else None
+            )
             report = record("05" if replica % 2 else "30")
             if family in {"dual", "nested", "overlap", "conflict", "partial"}:
                 link(report, a)
@@ -77,8 +88,16 @@ def fixtures():
                 for index in range(replica):
                     record(f"4{index}")
 
-            cases.append(dict(id=key, family=family, tasks=[task], observations=records,
-                              receipts=receipts, links=links))
+            cases.append(
+                dict(
+                    id=key,
+                    family=family,
+                    tasks=[task],
+                    observations=records,
+                    receipts=receipts,
+                    links=links,
+                )
+            )
             labels[key] = dict(expected=expected, originals=sorted(receipts))
     return cases, labels
 
