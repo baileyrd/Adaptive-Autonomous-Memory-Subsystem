@@ -1,0 +1,2057 @@
+{
+  "baseline_sha256": "9f6d3c1d625024e727d99a4e20cf3d76cc669a9f873d0980ecd6042078defad7",
+  "controls": [
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": false,
+        "B": false
+      },
+      "overlay": "visible",
+      "public_response_sha256": {
+        "A": "7f0522877ac3e0a9b0f9df8de379c0cc83c74bb4878917cca4c69aa1200a5e4b",
+        "B": "1f6f14e3f94158f9f5c6aa5a4df23df1f7029d6602749afd138b277b6cd00ad9"
+      }
+    },
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "absent",
+      "public_response_sha256": {
+        "A": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6",
+        "B": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6"
+      }
+    },
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "restricted",
+      "public_response_sha256": {
+        "A": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6",
+        "B": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6"
+      }
+    },
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_reader",
+      "public_response_sha256": {
+        "A": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6",
+        "B": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6"
+      }
+    },
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_scope",
+      "public_response_sha256": {
+        "A": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6",
+        "B": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6"
+      }
+    },
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_recording",
+      "public_response_sha256": {
+        "A": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6",
+        "B": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6"
+      }
+    },
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_effective",
+      "public_response_sha256": {
+        "A": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6",
+        "B": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6"
+      }
+    },
+    {
+      "id": "47242c94ab9005",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "missing_endpoint",
+      "public_response_sha256": {
+        "A": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6",
+        "B": "d62494d8ea8cf8c792dcac509bdeed60e54cdb43c0da60276cf07506296d9ef6"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": false,
+        "B": false
+      },
+      "overlay": "visible",
+      "public_response_sha256": {
+        "A": "8413e24a4529c26335ff3b33ed9d0a98c4237a67ef1cb24eadbd5528a7c6073c",
+        "B": "c713b842cbdeb37828c186f58504fbb9e2ab1a9cf0105e62be2de4dcf33782cd"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "absent",
+      "public_response_sha256": {
+        "A": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402",
+        "B": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "restricted",
+      "public_response_sha256": {
+        "A": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402",
+        "B": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_reader",
+      "public_response_sha256": {
+        "A": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402",
+        "B": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_scope",
+      "public_response_sha256": {
+        "A": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402",
+        "B": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_recording",
+      "public_response_sha256": {
+        "A": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402",
+        "B": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_effective",
+      "public_response_sha256": {
+        "A": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402",
+        "B": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402"
+      }
+    },
+    {
+      "id": "d6a9d99ac1e44e",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "missing_endpoint",
+      "public_response_sha256": {
+        "A": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402",
+        "B": "83a1302f18b680eca3be6184aa46b7569ed0448544ea69a6385f23e726f8d402"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": false,
+        "B": false
+      },
+      "overlay": "visible",
+      "public_response_sha256": {
+        "A": "5928a84997b5e462a630b0e6311ede90816fbb9334159fab6cc0873e27a69e04",
+        "B": "ad704b5384417c55427ebe205af046d489d7801f2f09137ef90a747294573fdd"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "absent",
+      "public_response_sha256": {
+        "A": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719",
+        "B": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "restricted",
+      "public_response_sha256": {
+        "A": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719",
+        "B": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_reader",
+      "public_response_sha256": {
+        "A": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719",
+        "B": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_scope",
+      "public_response_sha256": {
+        "A": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719",
+        "B": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_recording",
+      "public_response_sha256": {
+        "A": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719",
+        "B": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_effective",
+      "public_response_sha256": {
+        "A": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719",
+        "B": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719"
+      }
+    },
+    {
+      "id": "9a88ccd927e2b9",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "missing_endpoint",
+      "public_response_sha256": {
+        "A": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719",
+        "B": "80ab2a6e2a3a47f12bb73c104db1474ecf0bda66f8af5b8891e50092c32fb719"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": false,
+        "B": false
+      },
+      "overlay": "visible",
+      "public_response_sha256": {
+        "A": "e5bc386fcb5a2eee8d37e0c5c4b2f1a46178d8cb6004fdd2246341d3be34e5a0",
+        "B": "d226d42b7a66292ef5fda86c6c0c7cee6a5b59b94cc81dbefd23668bb187bb30"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "absent",
+      "public_response_sha256": {
+        "A": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b",
+        "B": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "restricted",
+      "public_response_sha256": {
+        "A": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b",
+        "B": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_reader",
+      "public_response_sha256": {
+        "A": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b",
+        "B": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "other_scope",
+      "public_response_sha256": {
+        "A": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b",
+        "B": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_recording",
+      "public_response_sha256": {
+        "A": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b",
+        "B": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "future_effective",
+      "public_response_sha256": {
+        "A": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b",
+        "B": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b"
+      }
+    },
+    {
+      "id": "053d575ada5e82",
+      "matches_absent": {
+        "A": true,
+        "B": true
+      },
+      "overlay": "missing_endpoint",
+      "public_response_sha256": {
+        "A": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b",
+        "B": "6568ecc779eb49293e603f7b5c9f2a53175624893f855e2bcf8e72a93d62085b"
+      }
+    }
+  ],
+  "database_digest": "60094891eefce636c1f91ed716b52b5d9fbc2b005c492896de4ac9b800cd8297",
+  "fixture_sha256": "0b3a698fcca98108cc406a7a7347ddf4a3237a437a07601cbed61d818cc1314c",
+  "gates": {
+    "mechanism": true,
+    "overall": true
+  },
+  "label_sha256": "8075e22aa5c560463bd73d7bae69fddb14fcb90bf76e8164bd76261783ab4f52",
+  "paired": {
+    "correct": [
+      0.375,
+      0.125,
+      0.75
+    ],
+    "unnecessary_hold": [
+      -0.375,
+      -0.75,
+      -0.125
+    ],
+    "unsafe": [
+      0,
+      0,
+      0
+    ]
+  },
+  "rows": [
+    {
+      "common_pool": [
+        "47242c94ab9005-10",
+        "47242c94ab9005-20",
+        "47242c94ab9005-30"
+      ],
+      "expected": "proceed",
+      "family": "dual",
+      "id": "47242c94ab9005",
+      "originals": [
+        "47242c94ab9005-10",
+        "47242c94ab9005-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "47242c94ab9005-10"
+          ],
+          "selected": [
+            "47242c94ab9005-10"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "47242c94ab9005-10",
+            "47242c94ab9005-20"
+          ],
+          "selected": [
+            "47242c94ab9005-10",
+            "47242c94ab9005-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "d6a9d99ac1e44e-05",
+        "d6a9d99ac1e44e-10",
+        "d6a9d99ac1e44e-20"
+      ],
+      "expected": "proceed",
+      "family": "dual",
+      "id": "d6a9d99ac1e44e",
+      "originals": [
+        "d6a9d99ac1e44e-10",
+        "d6a9d99ac1e44e-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "d6a9d99ac1e44e-05"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "d6a9d99ac1e44e-10",
+            "d6a9d99ac1e44e-20"
+          ],
+          "selected": [
+            "d6a9d99ac1e44e-10",
+            "d6a9d99ac1e44e-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "9a88ccd927e2b9-10",
+        "9a88ccd927e2b9-20",
+        "9a88ccd927e2b9-30"
+      ],
+      "expected": "proceed",
+      "family": "dual",
+      "id": "9a88ccd927e2b9",
+      "originals": [
+        "9a88ccd927e2b9-10",
+        "9a88ccd927e2b9-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "9a88ccd927e2b9-10"
+          ],
+          "selected": [
+            "9a88ccd927e2b9-10"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "9a88ccd927e2b9-10",
+            "9a88ccd927e2b9-20"
+          ],
+          "selected": [
+            "9a88ccd927e2b9-10",
+            "9a88ccd927e2b9-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "053d575ada5e82-05",
+        "053d575ada5e82-10",
+        "053d575ada5e82-20"
+      ],
+      "expected": "proceed",
+      "family": "dual",
+      "id": "053d575ada5e82",
+      "originals": [
+        "053d575ada5e82-10",
+        "053d575ada5e82-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "053d575ada5e82-05"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "053d575ada5e82-10",
+            "053d575ada5e82-20"
+          ],
+          "selected": [
+            "053d575ada5e82-10",
+            "053d575ada5e82-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "0a8b0f96b7cb04-10",
+        "0a8b0f96b7cb04-20",
+        "0a8b0f96b7cb04-30",
+        "0a8b0f96b7cb04-40",
+        "0a8b0f96b7cb04-41"
+      ],
+      "expected": "proceed",
+      "family": "nested",
+      "id": "0a8b0f96b7cb04",
+      "originals": [
+        "0a8b0f96b7cb04-10",
+        "0a8b0f96b7cb04-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "0a8b0f96b7cb04-10"
+          ],
+          "selected": [
+            "0a8b0f96b7cb04-10"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "0a8b0f96b7cb04-10",
+            "0a8b0f96b7cb04-20"
+          ],
+          "selected": [
+            "0a8b0f96b7cb04-10",
+            "0a8b0f96b7cb04-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "413a66d933fbd3-05",
+        "413a66d933fbd3-10",
+        "413a66d933fbd3-20",
+        "413a66d933fbd3-40",
+        "413a66d933fbd3-41",
+        "413a66d933fbd3-42"
+      ],
+      "expected": "proceed",
+      "family": "nested",
+      "id": "413a66d933fbd3",
+      "originals": [
+        "413a66d933fbd3-10",
+        "413a66d933fbd3-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "413a66d933fbd3-05"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "413a66d933fbd3-10",
+            "413a66d933fbd3-20"
+          ],
+          "selected": [
+            "413a66d933fbd3-10",
+            "413a66d933fbd3-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "c385dc9e3232a4-10",
+        "c385dc9e3232a4-20",
+        "c385dc9e3232a4-30",
+        "c385dc9e3232a4-40",
+        "c385dc9e3232a4-41",
+        "c385dc9e3232a4-42",
+        "c385dc9e3232a4-43"
+      ],
+      "expected": "proceed",
+      "family": "nested",
+      "id": "c385dc9e3232a4",
+      "originals": [
+        "c385dc9e3232a4-10",
+        "c385dc9e3232a4-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "c385dc9e3232a4-10"
+          ],
+          "selected": [
+            "c385dc9e3232a4-10"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "c385dc9e3232a4-10",
+            "c385dc9e3232a4-20"
+          ],
+          "selected": [
+            "c385dc9e3232a4-10",
+            "c385dc9e3232a4-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "e48f2b39fb47dd-05",
+        "e48f2b39fb47dd-10",
+        "e48f2b39fb47dd-20",
+        "e48f2b39fb47dd-40",
+        "e48f2b39fb47dd-41",
+        "e48f2b39fb47dd-42",
+        "e48f2b39fb47dd-43",
+        "e48f2b39fb47dd-44"
+      ],
+      "expected": "proceed",
+      "family": "nested",
+      "id": "e48f2b39fb47dd",
+      "originals": [
+        "e48f2b39fb47dd-10",
+        "e48f2b39fb47dd-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "e48f2b39fb47dd-05"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "e48f2b39fb47dd-10",
+            "e48f2b39fb47dd-20"
+          ],
+          "selected": [
+            "e48f2b39fb47dd-10",
+            "e48f2b39fb47dd-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "5675b952776356-06",
+        "5675b952776356-10",
+        "5675b952776356-20",
+        "5675b952776356-25",
+        "5675b952776356-30"
+      ],
+      "expected": "proceed",
+      "family": "overlap",
+      "id": "5675b952776356",
+      "originals": [
+        "5675b952776356-10",
+        "5675b952776356-20",
+        "5675b952776356-25"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "5675b952776356-06"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second",
+            "third"
+          ],
+          "retained_originals": [
+            "5675b952776356-10",
+            "5675b952776356-20",
+            "5675b952776356-25"
+          ],
+          "selected": [
+            "5675b952776356-10",
+            "5675b952776356-20",
+            "5675b952776356-25"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "69a0405d796fb6-05",
+        "69a0405d796fb6-06",
+        "69a0405d796fb6-10",
+        "69a0405d796fb6-20",
+        "69a0405d796fb6-25"
+      ],
+      "expected": "proceed",
+      "family": "overlap",
+      "id": "69a0405d796fb6",
+      "originals": [
+        "69a0405d796fb6-10",
+        "69a0405d796fb6-20",
+        "69a0405d796fb6-25"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "69a0405d796fb6-05"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second",
+            "third"
+          ],
+          "retained_originals": [
+            "69a0405d796fb6-10",
+            "69a0405d796fb6-20",
+            "69a0405d796fb6-25"
+          ],
+          "selected": [
+            "69a0405d796fb6-10",
+            "69a0405d796fb6-20",
+            "69a0405d796fb6-25"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "63ca1f3980c371-06",
+        "63ca1f3980c371-10",
+        "63ca1f3980c371-20",
+        "63ca1f3980c371-25",
+        "63ca1f3980c371-30"
+      ],
+      "expected": "proceed",
+      "family": "overlap",
+      "id": "63ca1f3980c371",
+      "originals": [
+        "63ca1f3980c371-10",
+        "63ca1f3980c371-20",
+        "63ca1f3980c371-25"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "63ca1f3980c371-06"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second",
+            "third"
+          ],
+          "retained_originals": [
+            "63ca1f3980c371-10",
+            "63ca1f3980c371-20",
+            "63ca1f3980c371-25"
+          ],
+          "selected": [
+            "63ca1f3980c371-10",
+            "63ca1f3980c371-20",
+            "63ca1f3980c371-25"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "c01e2291414967-05",
+        "c01e2291414967-06",
+        "c01e2291414967-10",
+        "c01e2291414967-20",
+        "c01e2291414967-25"
+      ],
+      "expected": "proceed",
+      "family": "overlap",
+      "id": "c01e2291414967",
+      "originals": [
+        "c01e2291414967-10",
+        "c01e2291414967-20",
+        "c01e2291414967-25"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": false,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "c01e2291414967-05"
+          ],
+          "unnecessary_hold": true,
+          "unsafe": false
+        },
+        "B": {
+          "action": "proceed",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second",
+            "third"
+          ],
+          "retained_originals": [
+            "c01e2291414967-10",
+            "c01e2291414967-20",
+            "c01e2291414967-25"
+          ],
+          "selected": [
+            "c01e2291414967-10",
+            "c01e2291414967-20",
+            "c01e2291414967-25"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "cde1d7f13553af-10",
+        "cde1d7f13553af-20",
+        "cde1d7f13553af-30",
+        "cde1d7f13553af-40",
+        "cde1d7f13553af-41",
+        "cde1d7f13553af-42",
+        "cde1d7f13553af-43",
+        "cde1d7f13553af-44",
+        "cde1d7f13553af-45",
+        "cde1d7f13553af-46",
+        "cde1d7f13553af-47"
+      ],
+      "expected": "abstain",
+      "family": "single",
+      "id": "cde1d7f13553af",
+      "originals": [
+        "cde1d7f13553af-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "cde1d7f13553af-10"
+          ],
+          "selected": [
+            "cde1d7f13553af-10"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "cde1d7f13553af-10"
+          ],
+          "selected": [
+            "cde1d7f13553af-10"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "3be0fd1eaf9032-05",
+        "3be0fd1eaf9032-10",
+        "3be0fd1eaf9032-20",
+        "3be0fd1eaf9032-40",
+        "3be0fd1eaf9032-41",
+        "3be0fd1eaf9032-42",
+        "3be0fd1eaf9032-43",
+        "3be0fd1eaf9032-44",
+        "3be0fd1eaf9032-45",
+        "3be0fd1eaf9032-46",
+        "3be0fd1eaf9032-47",
+        "3be0fd1eaf9032-48"
+      ],
+      "expected": "abstain",
+      "family": "single",
+      "id": "3be0fd1eaf9032",
+      "originals": [
+        "3be0fd1eaf9032-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "3be0fd1eaf9032-05"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "3be0fd1eaf9032-10"
+          ],
+          "selected": [
+            "3be0fd1eaf9032-10"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "53eeb0c04cd4f6-10",
+        "53eeb0c04cd4f6-20",
+        "53eeb0c04cd4f6-30",
+        "53eeb0c04cd4f6-40",
+        "53eeb0c04cd4f6-41",
+        "53eeb0c04cd4f6-42",
+        "53eeb0c04cd4f6-43",
+        "53eeb0c04cd4f6-44",
+        "53eeb0c04cd4f6-45",
+        "53eeb0c04cd4f6-46",
+        "53eeb0c04cd4f6-47",
+        "53eeb0c04cd4f6-48",
+        "53eeb0c04cd4f6-49"
+      ],
+      "expected": "abstain",
+      "family": "single",
+      "id": "53eeb0c04cd4f6",
+      "originals": [
+        "53eeb0c04cd4f6-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "53eeb0c04cd4f6-10"
+          ],
+          "selected": [
+            "53eeb0c04cd4f6-10"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "53eeb0c04cd4f6-10"
+          ],
+          "selected": [
+            "53eeb0c04cd4f6-10"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "87b7e5714f68c0-05",
+        "87b7e5714f68c0-10",
+        "87b7e5714f68c0-20",
+        "87b7e5714f68c0-40",
+        "87b7e5714f68c0-41",
+        "87b7e5714f68c0-410",
+        "87b7e5714f68c0-42",
+        "87b7e5714f68c0-43",
+        "87b7e5714f68c0-44",
+        "87b7e5714f68c0-45",
+        "87b7e5714f68c0-46",
+        "87b7e5714f68c0-47",
+        "87b7e5714f68c0-48",
+        "87b7e5714f68c0-49"
+      ],
+      "expected": "abstain",
+      "family": "single",
+      "id": "87b7e5714f68c0",
+      "originals": [
+        "87b7e5714f68c0-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "87b7e5714f68c0-05"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "87b7e5714f68c0-10"
+          ],
+          "selected": [
+            "87b7e5714f68c0-10"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "7e1e254d85f83a-10",
+        "7e1e254d85f83a-20",
+        "7e1e254d85f83a-30",
+        "7e1e254d85f83a-60"
+      ],
+      "expected": "abstain",
+      "family": "conflict",
+      "id": "7e1e254d85f83a",
+      "originals": [
+        "7e1e254d85f83a-10",
+        "7e1e254d85f83a-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "7e1e254d85f83a-10"
+          ],
+          "selected": [
+            "7e1e254d85f83a-10",
+            "7e1e254d85f83a-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "7e1e254d85f83a-10",
+            "7e1e254d85f83a-20"
+          ],
+          "selected": [
+            "7e1e254d85f83a-10",
+            "7e1e254d85f83a-20",
+            "7e1e254d85f83a-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "38d3776d6bcc20-05",
+        "38d3776d6bcc20-10",
+        "38d3776d6bcc20-20",
+        "38d3776d6bcc20-60"
+      ],
+      "expected": "abstain",
+      "family": "conflict",
+      "id": "38d3776d6bcc20",
+      "originals": [
+        "38d3776d6bcc20-10",
+        "38d3776d6bcc20-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "38d3776d6bcc20-05",
+            "38d3776d6bcc20-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "38d3776d6bcc20-10",
+            "38d3776d6bcc20-20"
+          ],
+          "selected": [
+            "38d3776d6bcc20-10",
+            "38d3776d6bcc20-20",
+            "38d3776d6bcc20-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "404c9dec1cd92f-10",
+        "404c9dec1cd92f-20",
+        "404c9dec1cd92f-30",
+        "404c9dec1cd92f-60"
+      ],
+      "expected": "abstain",
+      "family": "conflict",
+      "id": "404c9dec1cd92f",
+      "originals": [
+        "404c9dec1cd92f-10",
+        "404c9dec1cd92f-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "404c9dec1cd92f-10"
+          ],
+          "selected": [
+            "404c9dec1cd92f-10",
+            "404c9dec1cd92f-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "404c9dec1cd92f-10",
+            "404c9dec1cd92f-20"
+          ],
+          "selected": [
+            "404c9dec1cd92f-10",
+            "404c9dec1cd92f-20",
+            "404c9dec1cd92f-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "3d9081832521fe-05",
+        "3d9081832521fe-10",
+        "3d9081832521fe-20",
+        "3d9081832521fe-60"
+      ],
+      "expected": "abstain",
+      "family": "conflict",
+      "id": "3d9081832521fe",
+      "originals": [
+        "3d9081832521fe-10",
+        "3d9081832521fe-20"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "3d9081832521fe-05",
+            "3d9081832521fe-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": true,
+          "correct": true,
+          "latest_original_slots": [
+            "first",
+            "second"
+          ],
+          "retained_originals": [
+            "3d9081832521fe-10",
+            "3d9081832521fe-20"
+          ],
+          "selected": [
+            "3d9081832521fe-10",
+            "3d9081832521fe-20",
+            "3d9081832521fe-60"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "7d0dd615751e48-10",
+        "7d0dd615751e48-20",
+        "7d0dd615751e48-30"
+      ],
+      "expected": "abstain",
+      "family": "missing",
+      "id": "7d0dd615751e48",
+      "originals": [
+        "7d0dd615751e48-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "7d0dd615751e48-10"
+          ],
+          "selected": [
+            "7d0dd615751e48-10",
+            "7d0dd615751e48-20",
+            "7d0dd615751e48-30"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "7d0dd615751e48-10"
+          ],
+          "selected": [
+            "7d0dd615751e48-10",
+            "7d0dd615751e48-20",
+            "7d0dd615751e48-30"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "bc482e5af86196-05",
+        "bc482e5af86196-10",
+        "bc482e5af86196-20",
+        "bc482e5af86196-40"
+      ],
+      "expected": "abstain",
+      "family": "missing",
+      "id": "bc482e5af86196",
+      "originals": [
+        "bc482e5af86196-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "bc482e5af86196-10"
+          ],
+          "selected": [
+            "bc482e5af86196-05",
+            "bc482e5af86196-10",
+            "bc482e5af86196-20",
+            "bc482e5af86196-40"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "bc482e5af86196-10"
+          ],
+          "selected": [
+            "bc482e5af86196-05",
+            "bc482e5af86196-10",
+            "bc482e5af86196-20",
+            "bc482e5af86196-40"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "73ede1b2631e1f-10",
+        "73ede1b2631e1f-20",
+        "73ede1b2631e1f-30",
+        "73ede1b2631e1f-40",
+        "73ede1b2631e1f-41"
+      ],
+      "expected": "abstain",
+      "family": "missing",
+      "id": "73ede1b2631e1f",
+      "originals": [
+        "73ede1b2631e1f-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "73ede1b2631e1f-10"
+          ],
+          "selected": [
+            "73ede1b2631e1f-10",
+            "73ede1b2631e1f-20",
+            "73ede1b2631e1f-30",
+            "73ede1b2631e1f-40",
+            "73ede1b2631e1f-41"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "73ede1b2631e1f-10"
+          ],
+          "selected": [
+            "73ede1b2631e1f-10",
+            "73ede1b2631e1f-20",
+            "73ede1b2631e1f-30",
+            "73ede1b2631e1f-40",
+            "73ede1b2631e1f-41"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "1822e737fd7649-05",
+        "1822e737fd7649-10",
+        "1822e737fd7649-20",
+        "1822e737fd7649-40",
+        "1822e737fd7649-41",
+        "1822e737fd7649-42"
+      ],
+      "expected": "abstain",
+      "family": "missing",
+      "id": "1822e737fd7649",
+      "originals": [
+        "1822e737fd7649-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "1822e737fd7649-10"
+          ],
+          "selected": [
+            "1822e737fd7649-05",
+            "1822e737fd7649-10",
+            "1822e737fd7649-20",
+            "1822e737fd7649-40",
+            "1822e737fd7649-41",
+            "1822e737fd7649-42"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "1822e737fd7649-10"
+          ],
+          "selected": [
+            "1822e737fd7649-05",
+            "1822e737fd7649-10",
+            "1822e737fd7649-20",
+            "1822e737fd7649-40",
+            "1822e737fd7649-41",
+            "1822e737fd7649-42"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "0cd3cbdbdaf30a-10",
+        "0cd3cbdbdaf30a-20",
+        "0cd3cbdbdaf30a-30"
+      ],
+      "expected": "abstain",
+      "family": "partial",
+      "id": "0cd3cbdbdaf30a",
+      "originals": [
+        "0cd3cbdbdaf30a-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "0cd3cbdbdaf30a-10"
+          ],
+          "selected": [
+            "0cd3cbdbdaf30a-10",
+            "0cd3cbdbdaf30a-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "0cd3cbdbdaf30a-10"
+          ],
+          "selected": [
+            "0cd3cbdbdaf30a-10",
+            "0cd3cbdbdaf30a-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "df4d43122f545c-05",
+        "df4d43122f545c-10",
+        "df4d43122f545c-20"
+      ],
+      "expected": "abstain",
+      "family": "partial",
+      "id": "df4d43122f545c",
+      "originals": [
+        "df4d43122f545c-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "df4d43122f545c-05",
+            "df4d43122f545c-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "df4d43122f545c-10"
+          ],
+          "selected": [
+            "df4d43122f545c-10",
+            "df4d43122f545c-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "1ff4d9fc94c969-10",
+        "1ff4d9fc94c969-20",
+        "1ff4d9fc94c969-30"
+      ],
+      "expected": "abstain",
+      "family": "partial",
+      "id": "1ff4d9fc94c969",
+      "originals": [
+        "1ff4d9fc94c969-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "1ff4d9fc94c969-10"
+          ],
+          "selected": [
+            "1ff4d9fc94c969-10",
+            "1ff4d9fc94c969-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "1ff4d9fc94c969-10"
+          ],
+          "selected": [
+            "1ff4d9fc94c969-10",
+            "1ff4d9fc94c969-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "d023caea1920f7-05",
+        "d023caea1920f7-10",
+        "d023caea1920f7-20"
+      ],
+      "expected": "abstain",
+      "family": "partial",
+      "id": "d023caea1920f7",
+      "originals": [
+        "d023caea1920f7-10"
+      ],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "d023caea1920f7-05",
+            "d023caea1920f7-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [
+            "first"
+          ],
+          "retained_originals": [
+            "d023caea1920f7-10"
+          ],
+          "selected": [
+            "d023caea1920f7-10",
+            "d023caea1920f7-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "b119c12970fa17-10",
+        "b119c12970fa17-20",
+        "b119c12970fa17-30"
+      ],
+      "expected": "abstain",
+      "family": "unknown",
+      "id": "b119c12970fa17",
+      "originals": [],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "b119c12970fa17-10",
+            "b119c12970fa17-20",
+            "b119c12970fa17-30"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "b119c12970fa17-10",
+            "b119c12970fa17-20",
+            "b119c12970fa17-30"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "b3eeacb1f6ced3-05",
+        "b3eeacb1f6ced3-10",
+        "b3eeacb1f6ced3-20"
+      ],
+      "expected": "abstain",
+      "family": "unknown",
+      "id": "b3eeacb1f6ced3",
+      "originals": [],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "b3eeacb1f6ced3-05",
+            "b3eeacb1f6ced3-10",
+            "b3eeacb1f6ced3-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "b3eeacb1f6ced3-05",
+            "b3eeacb1f6ced3-10",
+            "b3eeacb1f6ced3-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "36217399b61491-10",
+        "36217399b61491-20",
+        "36217399b61491-30"
+      ],
+      "expected": "abstain",
+      "family": "unknown",
+      "id": "36217399b61491",
+      "originals": [],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "36217399b61491-10",
+            "36217399b61491-20",
+            "36217399b61491-30"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "36217399b61491-10",
+            "36217399b61491-20",
+            "36217399b61491-30"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    },
+    {
+      "common_pool": [
+        "4381e9554a48a5-05",
+        "4381e9554a48a5-10",
+        "4381e9554a48a5-20"
+      ],
+      "expected": "abstain",
+      "family": "unknown",
+      "id": "4381e9554a48a5",
+      "originals": [],
+      "scores": {
+        "A": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "4381e9554a48a5-05",
+            "4381e9554a48a5-10",
+            "4381e9554a48a5-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        },
+        "B": {
+          "action": "abstain",
+          "conflict": false,
+          "correct": true,
+          "latest_original_slots": [],
+          "retained_originals": [],
+          "selected": [
+            "4381e9554a48a5-05",
+            "4381e9554a48a5-10",
+            "4381e9554a48a5-20"
+          ],
+          "unnecessary_hold": false,
+          "unsafe": false
+        }
+      }
+    }
+  ],
+  "summary": {
+    "arms": {
+      "A": {
+        "abstain": 32,
+        "conflict": 4,
+        "correct": 20,
+        "stop": 0,
+        "unnecessary_hold": 12,
+        "unsafe": 0
+      },
+      "B": {
+        "abstain": 20,
+        "conflict": 4,
+        "correct": 32,
+        "stop": 0,
+        "unnecessary_hold": 0,
+        "unsafe": 0
+      }
+    },
+    "correct_lost": 0,
+    "corrected_unsafe": 0,
+    "introduced_unsafe": 0,
+    "n": 32
+  }
+}
