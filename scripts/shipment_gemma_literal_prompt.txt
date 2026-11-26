@@ -1,0 +1,7 @@
+<start_of_turn>user
+{question}
+Use only the inspection records below. Each row lists citation ID, state, and original slot. A null slot means no original receipt. Respond with exactly YES or NO.
+Latest inspection extraction:
+{facts}
+<end_of_turn>
+<start_of_turn>model
