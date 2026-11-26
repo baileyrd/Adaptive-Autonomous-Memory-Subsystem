@@ -1,0 +1,6 @@
+root ::= "{" ws "\"states\"" ws ":" ws "[" ws (state (ws "," ws state){0,7})? ws "]" ws "," ws "\"slots\"" ws ":" ws "[" ws (slot (ws "," ws slot){0,7})? ws "]" ws "," ws "\"rows\"" ws ":" ws "[" ws (row (ws "," ws row){0,7})? ws "]" ws "}"
+state ::= "\"clear\"" | "\"blocked\""
+slot ::= "\"" [a-z] [a-z0-9-]{0,19} "\""
+rid ::= "\"R" [1-8] "\""
+row ::= "[" ws rid ws "," ws state ws "," ws (slot | "null") ws "]"
+ws ::= " "?
