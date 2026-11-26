@@ -1,0 +1,4 @@
+root ::= "{" ws "\"action\"" ws ":" ws action ws "," ws "\"citations\"" ws ":" ws "[" ws (citation (ws "," ws citation){0,7})? ws "]" ws "}"
+action ::= "\"" [ABC] "\""
+citation ::= "\"R" [1-8] "\""
+ws ::= " "?
