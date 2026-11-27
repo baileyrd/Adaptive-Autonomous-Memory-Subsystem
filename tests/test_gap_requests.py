@@ -1,11 +1,12 @@
-"""Scope and request guards on toy records, separate from the frozen histories."""
+"""Scope, request, and citation-scoring guards for the gap experiment."""
 
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from evaluate_gap_requests import decision, request_for
+from evaluate_gap_requests import decision, replay, request_for
 
 
 class GapRequestTests(unittest.TestCase):
@@ -43,3 +44,14 @@ class GapRequestTests(unittest.TestCase):
         self.assertEqual(request["observation"]["id"], "r")
         self.assertEqual(request["could_change"]["fail_to"], "withhold")
         self.assertIsNone(request_for(self.task, {**manifest, "scope": "b"}))
+
+    def test_replay_rejects_unrelated_citation_for_correct_action(self):
+        def unrelated_citation(task, readings):
+            result = decision(task, readings)
+            if result["action"] != "abstain":
+                return {**result, "citations": [{"id": "unrelated", "digest": "sha256:unrelated"}]}
+            return result
+
+        with patch("evaluate_gap_requests.decision", side_effect=unrelated_citation):
+            with self.assertRaisesRegex(ValueError, "Unsupported substantive action"):
+                replay()

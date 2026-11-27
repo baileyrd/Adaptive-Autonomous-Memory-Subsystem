@@ -163,6 +163,34 @@ def run_case(case, path, foreign=False):
     )
 
 
+def validate_support(task, result, readings):
+    action = result["action"]
+    if action == "abstain":
+        return
+    supported = [
+        {"id": row["id"], "digest": row["digest"]}
+        for row in readings
+        if reading_matches(task, row) and ACTIONS[row["payload"]["status"]] == action
+    ]
+    citations = result["citations"]
+    if not citations or any(citation not in supported for citation in citations):
+        raise ValueError("Unsupported substantive action")
+
+
+def validate_case_support(task, outcome):
+    packet = outcome["packet"]
+    for arm, result in outcome["public"].items():
+        validate_support(task, result["initial"], packet)
+        available = packet
+        if (
+            arm == "B"
+            and outcome["route"] in {"recovered", "supplied"}
+            and outcome["handoff"] is not None
+        ):
+            available = [*packet, outcome["handoff"]]
+        validate_support(task, result["final"], available)
+
+
 def summarize(rows):
     correct = {arm: sum(r["scores"][arm]["correct"] for r in rows) for arm in "AB"}
     incomplete = {arm: sum(r["scores"][arm]["incomplete"] for r in rows) for arm in "AB"}
@@ -198,6 +226,7 @@ def replay():
         for case in cases:
             task = case["task"]
             outcome = run_case(case, root / (task["id"] + ".db"))
+            validate_case_support(task, outcome)
             label = labels[task["id"]]
             scores = {}
             for arm, result in outcome["public"].items():
@@ -205,8 +234,6 @@ def replay():
                     raise ValueError("Frozen initial eligibility mismatch")
                 final = result["final"]
                 action = final["action"]
-                if action != "abstain" and not final["citations"]:
-                    raise ValueError("Unsupported substantive action")
                 scores[arm] = dict(
                     correct=action == label["expected"],
                     incomplete=action == "abstain",
@@ -215,6 +242,7 @@ def replay():
             rows.append(dict(task=task, **label, **outcome, scores=scores))
             if case["foreign_shadow"] is not None:
                 comparison = run_case(case, root / (task["id"] + "-shadow.db"), foreign=True)
+                validate_case_support(task, comparison)
                 if any(
                     comparison[field] != outcome[field]
                     for field in ("public", "packet", "work", "route")
