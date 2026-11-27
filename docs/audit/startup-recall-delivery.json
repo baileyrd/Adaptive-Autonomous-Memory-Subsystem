@@ -1,0 +1,74 @@
+{
+  "A": {
+    "evidence_ids": [],
+    "first_argv_prompt": "<|im_start|>system\nYou are a coding agent resuming a small change in a disposable checkout.\nOrdinary handoff: \u201cDisplay label normalization was interrupted. The attempted edit was reverted after a check. Continue the pending edit in resume_fixture/labels.py. Do not expand the task.\u201d\nRead the file and request task memory before making an edit. The tool may return no memory. Use the available evidence. Make at most one change. Cite the evidence IDs that justify the edit. If you cannot choose, use stop with a short reason.\nEmit exactly one JSON tool call per turn:\n{\"tool\":\"read\"}\n{\"tool\":\"recall\"}\n{\"tool\":\"edit\",\"replacement\":\"    return value\",\"citations\":[\"evidence-id\"],\"reason\":\"brief reason\"}\n{\"tool\":\"stop\",\"reason\":\"brief reason\"}\nThe edit replaces the one return statement in resume_fixture/labels.py. Do not output a full file. A read or recall result is provided in the next turn.\n<|im_end|>\n<|im_start|>user\nResume the pending edit.\nStartup memory packet: {\"items\":[]}<|im_end|>\n<|im_start|>assistant\n",
+    "first_input": "<|im_start|>system\nYou are a coding agent resuming a small change in a disposable checkout.\nOrdinary handoff: \u201cDisplay label normalization was interrupted. The attempted edit was reverted after a check. Continue the pending edit in resume_fixture/labels.py. Do not expand the task.\u201d\nRead the file and request task memory before making an edit. The tool may return no memory. Use the available evidence. Make at most one change. Cite the evidence IDs that justify the edit. If you cannot choose, use stop with a short reason.\nEmit exactly one JSON tool call per turn:\n{\"tool\":\"read\"}\n{\"tool\":\"recall\"}\n{\"tool\":\"edit\",\"replacement\":\"    return value\",\"citations\":[\"evidence-id\"],\"reason\":\"brief reason\"}\n{\"tool\":\"stop\",\"reason\":\"brief reason\"}\nThe edit replaces the one return statement in resume_fixture/labels.py. Do not output a full file. A read or recall result is provided in the next turn.\n<|im_end|>\n<|im_start|>user\nResume the pending edit.\nStartup memory packet: {\"items\":[]}<|im_end|>\n<|im_start|>assistant\n",
+    "first_input_sha256": "9029a63be86cbee622136eb648a8d9c4e63a43afcc8f32c14c93f64ccef0fb71",
+    "first_tokens": 217,
+    "lesson_id": null,
+    "packet": {
+      "items": []
+    },
+    "packet_sha256": "eef46741adfc3a9f76294d3b78f37a45f113092ac9d44ee77c7a038a88ff09a1",
+    "token_ids_sha256": "d1981b0d785d636ef1918c4be4d9a74dabec4aa40e46f53b1d214c507720334f"
+  },
+  "B": {
+    "evidence_ids": [
+      "display-contract",
+      "open-linebreak",
+      "trial-strip",
+      "decision-ascii"
+    ],
+    "first_argv_prompt": "<|im_start|>system\nYou are a coding agent resuming a small change in a disposable checkout.\nOrdinary handoff: \u201cDisplay label normalization was interrupted. The attempted edit was reverted after a check. Continue the pending edit in resume_fixture/labels.py. Do not expand the task.\u201d\nRead the file and request task memory before making an edit. The tool may return no memory. Use the available evidence. Make at most one change. Cite the evidence IDs that justify the edit. If you cannot choose, use stop with a short reason.\nEmit exactly one JSON tool call per turn:\n{\"tool\":\"read\"}\n{\"tool\":\"recall\"}\n{\"tool\":\"edit\",\"replacement\":\"    return value\",\"citations\":[\"evidence-id\"],\"reason\":\"brief reason\"}\n{\"tool\":\"stop\",\"reason\":\"brief reason\"}\nThe edit replaces the one return statement in resume_fixture/labels.py. Do not output a full file. A read or recall result is provided in the next turn.\n<|im_end|>\n<|im_start|>user\nResume the pending edit.\nStartup memory packet: {\"items\":[{\"digest\":\"sha256:6006536c61279aa6dfa635c4465fc0ee72e5c9ae679d9f45331687587c4c241b\",\"id\":\"display-contract\",\"text\":\"labelresume: NBSP at the ends of display labels is significant and must survive normalization.\"},{\"digest\":\"sha256:8c17e048b6e56365581669949f0c88de3f0be1837c3186d63f02e6ef55fa7306\",\"id\":\"open-linebreak\",\"text\":\"labelresume: Whether to trim carriage returns and linefeeds is unresolved. Leave both intact for now.\"},{\"digest\":\"sha256:34a148a9c278f8a58fdd04aac6a6b9872993f04bd8a241805d7e8b40d0df2615\",\"id\":\"trial-strip\",\"text\":\"labelresume: Concrete failed edit was return value.strip(). Input '\\\\\\\\xa0Oak\\\\\\\\xa0', observed 'Oak', required '\\\\\\\\xa0Oak\\\\\\\\xa0'. The edit was reverted.\"},{\"digest\":\"sha256:a7620a407c083f2afcf21862950028fcc6223ef1074f1ae013097652a7bf0142\",\"id\":\"decision-ascii\",\"text\":\"labelresume: Prior decision: trim only ASCII space and tab at the two ends of display labels. Do not change stored values.\"}],\"reviewed_lesson\":{\"id\":\"lesson-strip\",\"review\":[{\"reviewer\":\"fixture-reviewer\",\"state\":\"validated\",\"version\":1},{\"reviewer\":\"fixture-reviewer\",\"state\":\"approved\",\"version\":2}],\"sources\":[\"trial-strip\",\"display-contract\"],\"text\":\"Use explicit ASCII horizontal padding characters in strip; default strip removed NBSP.\"}}<|im_end|>\n<|im_start|>assistant\n",
+    "first_input": "<|im_start|>system\nYou are a coding agent resuming a small change in a disposable checkout.\nOrdinary handoff: \u201cDisplay label normalization was interrupted. The attempted edit was reverted after a check. Continue the pending edit in resume_fixture/labels.py. Do not expand the task.\u201d\nRead the file and request task memory before making an edit. The tool may return no memory. Use the available evidence. Make at most one change. Cite the evidence IDs that justify the edit. If you cannot choose, use stop with a short reason.\nEmit exactly one JSON tool call per turn:\n{\"tool\":\"read\"}\n{\"tool\":\"recall\"}\n{\"tool\":\"edit\",\"replacement\":\"    return value\",\"citations\":[\"evidence-id\"],\"reason\":\"brief reason\"}\n{\"tool\":\"stop\",\"reason\":\"brief reason\"}\nThe edit replaces the one return statement in resume_fixture/labels.py. Do not output a full file. A read or recall result is provided in the next turn.\n<|im_end|>\n<|im_start|>user\nResume the pending edit.\nStartup memory packet: {\"items\":[{\"digest\":\"sha256:6006536c61279aa6dfa635c4465fc0ee72e5c9ae679d9f45331687587c4c241b\",\"id\":\"display-contract\",\"text\":\"labelresume: NBSP at the ends of display labels is significant and must survive normalization.\"},{\"digest\":\"sha256:8c17e048b6e56365581669949f0c88de3f0be1837c3186d63f02e6ef55fa7306\",\"id\":\"open-linebreak\",\"text\":\"labelresume: Whether to trim carriage returns and linefeeds is unresolved. Leave both intact for now.\"},{\"digest\":\"sha256:34a148a9c278f8a58fdd04aac6a6b9872993f04bd8a241805d7e8b40d0df2615\",\"id\":\"trial-strip\",\"text\":\"labelresume: Concrete failed edit was return value.strip(). Input '\\\\xa0Oak\\\\xa0', observed 'Oak', required '\\\\xa0Oak\\\\xa0'. The edit was reverted.\"},{\"digest\":\"sha256:a7620a407c083f2afcf21862950028fcc6223ef1074f1ae013097652a7bf0142\",\"id\":\"decision-ascii\",\"text\":\"labelresume: Prior decision: trim only ASCII space and tab at the two ends of display labels. Do not change stored values.\"}],\"reviewed_lesson\":{\"id\":\"lesson-strip\",\"review\":[{\"reviewer\":\"fixture-reviewer\",\"state\":\"validated\",\"version\":1},{\"reviewer\":\"fixture-reviewer\",\"state\":\"approved\",\"version\":2}],\"sources\":[\"trial-strip\",\"display-contract\"],\"text\":\"Use explicit ASCII horizontal padding characters in strip; default strip removed NBSP.\"}}<|im_end|>\n<|im_start|>assistant\n",
+    "first_input_sha256": "04240e603c500b7aca0e280f11b41c4b063903681a08f674761431bb7267f09e",
+    "first_tokens": 689,
+    "lesson_id": "lesson-strip",
+    "packet": {
+      "items": [
+        {
+          "digest": "sha256:6006536c61279aa6dfa635c4465fc0ee72e5c9ae679d9f45331687587c4c241b",
+          "id": "display-contract",
+          "text": "labelresume: NBSP at the ends of display labels is significant and must survive normalization."
+        },
+        {
+          "digest": "sha256:8c17e048b6e56365581669949f0c88de3f0be1837c3186d63f02e6ef55fa7306",
+          "id": "open-linebreak",
+          "text": "labelresume: Whether to trim carriage returns and linefeeds is unresolved. Leave both intact for now."
+        },
+        {
+          "digest": "sha256:34a148a9c278f8a58fdd04aac6a6b9872993f04bd8a241805d7e8b40d0df2615",
+          "id": "trial-strip",
+          "text": "labelresume: Concrete failed edit was return value.strip(). Input '\\xa0Oak\\xa0', observed 'Oak', required '\\xa0Oak\\xa0'. The edit was reverted."
+        },
+        {
+          "digest": "sha256:a7620a407c083f2afcf21862950028fcc6223ef1074f1ae013097652a7bf0142",
+          "id": "decision-ascii",
+          "text": "labelresume: Prior decision: trim only ASCII space and tab at the two ends of display labels. Do not change stored values."
+        }
+      ],
+      "reviewed_lesson": {
+        "id": "lesson-strip",
+        "review": [
+          {
+            "reviewer": "fixture-reviewer",
+            "state": "validated",
+            "version": 1
+          },
+          {
+            "reviewer": "fixture-reviewer",
+            "state": "approved",
+            "version": 2
+          }
+        ],
+        "sources": [
+          "trial-strip",
+          "display-contract"
+        ],
+        "text": "Use explicit ASCII horizontal padding characters in strip; default strip removed NBSP."
+      }
+    },
+    "packet_sha256": "82db318250010411029a6448bd03ea9b41accc50d8832f22daa29f9201b7e491",
+    "token_ids_sha256": "fc7146d30b15779cf3867235e10ef64c1d5f26d5f56e50e125bebc759381d5ae"
+  }
+}
