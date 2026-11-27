@@ -8,6 +8,7 @@ import unittest
 from contextlib import closing
 from hashlib import sha256
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from evaluate_learning import TIME, review, seed
@@ -60,19 +61,20 @@ class FixtureAuthority:
         # Trusted test state stands in for a durable, independently obtained head.
         self.heads[scope] = sha256(raw).hexdigest()
 
-    def entries(self, scope):
+    def read_fence(self, scope):
         try:
             raw = self.journal_path(scope).read_bytes()
         except OSError as exc:
             raise FenceUnavailable("Scope unavailable") from exc
-        if self.heads.get(scope) != sha256(raw).hexdigest():
+        digest = sha256(raw).hexdigest()
+        if self.heads.get(scope) != digest:
             raise FenceUnavailable("Scope unavailable")
-        return json.loads(raw)["entries"]
+        return json.loads(raw)["entries"], digest
 
     def erase(self, principal, scope, origin, request):
         if (principal, scope) != ("operator-a", "A"):
             raise PermissionError("Erasure denied")
-        entries = self.entries(scope)
+        entries, _ = self.read_fence(scope)
         for index, entry in enumerate(entries, 1):
             if entry["request"] == request:
                 if entry["origin"] != origin:
@@ -86,10 +88,10 @@ class FixtureView:
     """Build a new serving projection from the scoped, fenced fixture subset."""
 
     def __init__(self, directory, quarantined_file, authority, scope):
-        erased = {entry["origin"] for entry in authority.entries(scope)}
+        entries, self.head = authority.read_fence(scope)
+        erased = {entry["origin"] for entry in entries}
         self.authority = authority
         self.scope = scope
-        self.head = authority.heads[scope]
         self.access = AccessContext("reader", scope)
         self.provider = DeterministicFixtureProvider()
         quarantined = SQLiteMemoryStore(quarantined_file)
@@ -136,10 +138,11 @@ class FixtureView:
         self.memory = CognitiveMemory(self.store)
         self.index = RepresentationIndex(self.store)
         self.index.rebuild(AccessContext("builder", scope, True), self.provider)
+        self.check()
 
     def check(self):
-        self.authority.entries(self.scope)
-        if self.authority.heads[self.scope] != self.head:
+        _, head = self.authority.read_fence(self.scope)
+        if head != self.head:
             raise FenceUnavailable("Scope unavailable")
 
     def evidence(self, identifier):
@@ -222,8 +225,8 @@ class ErasureRestoreContractTests(unittest.TestCase):
         for principal, scope in (("reader", "A"), ("operator-a", "B")):
             with self.assertRaises(PermissionError):
                 self.authority.erase(principal, scope, ORIGIN, "replica-purge")
-        self.assertEqual(self.authority.entries("A"), [])
-        self.assertEqual(self.authority.entries("B"), [])
+        self.assertEqual(self.authority.read_fence("A")[0], [])
+        self.assertEqual(self.authority.read_fence("B")[0], [])
         receipt = self.authority.erase("operator-a", "A", ORIGIN, "replica-purge")
         first = self.authority.journal_path("A").read_bytes()
         self.assertEqual(self.authority.erase("operator-a", "A", ORIGIN, "replica-purge"), receipt)
@@ -280,3 +283,34 @@ class ErasureRestoreContractTests(unittest.TestCase):
         with self.assertRaises(FenceUnavailable):
             self.view("changed", self.backup)
         self.assertEqual(self.view("available-b", self.backup, "B").vector_ids(), {"primary"})
+
+    def test_view_binds_to_the_head_of_the_entries_it_filtered(self):
+        read_fence = self.authority.read_fence
+        advanced = False
+
+        def advance_after_first_read(scope):
+            nonlocal advanced
+            verified = read_fence(scope)
+            if not advanced:
+                advanced = True
+                self.authority.erase("operator-a", "A", ORIGIN, "race-at-read")
+            return verified
+
+        with patch.object(self.authority, "read_fence", side_effect=advance_after_first_read):
+            with self.assertRaises(FenceUnavailable):
+                self.view("raced-read", self.backup)
+        self.assert_erased(self.view("retry-read", self.backup))
+
+    def test_view_rejects_a_fence_that_advances_during_index_rebuild(self):
+        rebuild = RepresentationIndex.rebuild
+
+        def advance_during_rebuild(index, access, provider):
+            self.authority.erase("operator-a", "A", ORIGIN, "race-at-rebuild")
+            return rebuild(index, access, provider)
+
+        with patch.object(
+            RepresentationIndex, "rebuild", autospec=True, side_effect=advance_during_rebuild
+        ):
+            with self.assertRaises(FenceUnavailable):
+                self.view("raced-rebuild", self.backup)
+        self.assert_erased(self.view("retry-rebuild", self.backup))
