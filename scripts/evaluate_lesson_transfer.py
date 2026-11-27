@@ -208,12 +208,13 @@ def replay(path):
         {arm: choose(case["task"], packet) for arm, packet in memory.items()} for case in cases
     ]
 
-    results = []
+    results, key_mismatches = [], []
     for case, pair in zip(cases, decisions, strict=True):
         outcomes = {arm: simulate(case["task"]["configuration"], arm) for arm in RATES}
         best = winners(outcomes)
-        if best != [keys[case["id"]]]:
-            raise ValueError(f"Frozen key disagrees with measured outcomes: {case['id']}")
+        expected = keys[case["id"]]
+        if best != [expected]:
+            key_mismatches.append(dict(id=case["id"], frozen_expected=expected, observed_best=best))
         scores = {}
         for arm, decision in pair.items():
             measured = outcomes[decision["action"]]
@@ -249,6 +250,8 @@ def replay(path):
         memory_bytes={arm: len(encoded(packet)) for arm, packet in memory.items()},
         memory=memory,
         outcome_revisions=revisions,
+        frozen_key_check_passed=not key_mismatches,
+        frozen_key_mismatches=key_mismatches,
         rows=results,
         transitions=Counter(row["transition"] for row in results),
         unchanged_actions=sum(
