@@ -1,0 +1,315 @@
+[
+  {
+    "domain": "irrigation",
+    "split": "heldout",
+    "records": [
+      [
+        "irrigation-0",
+        "irrigation",
+        1,
+        "The ruptured lateral pipe halted irrigation.",
+        "irrigation-0"
+      ],
+      [
+        "irrigation-1",
+        "irrigation",
+        1,
+        "The drip controller displayed a battery warning.",
+        "irrigation-1"
+      ],
+      [
+        "irrigation-0",
+        "irrigation-private",
+        1,
+        "What ended water delivery after the buried line failed?",
+        "irrigation-foreign"
+      ],
+      [
+        "irrigation-future",
+        "irrigation",
+        3,
+        "What ended water delivery after the buried line failed?",
+        "irrigation-future"
+      ]
+    ],
+    "tasks": [
+      {
+        "query": "What ended water delivery after the buried line failed?",
+        "day": 1,
+        "opt_in": true,
+        "relevant": [
+          "irrigation-0"
+        ],
+        "required": [
+          "irrigation-0"
+        ],
+        "contradiction": false
+      }
+    ]
+  },
+  {
+    "domain": "rail",
+    "split": "heldout",
+    "records": [
+      [
+        "rail-0",
+        "rail",
+        1,
+        "The operator applied sand and traction returned.",
+        "rail-0"
+      ],
+      [
+        "rail-1",
+        "rail",
+        1,
+        "A platform attendant raised the departure lantern.",
+        "rail-1"
+      ],
+      [
+        "rail-0",
+        "rail-private",
+        1,
+        "Which behavior corrected wheel slip during departure?",
+        "rail-foreign"
+      ],
+      [
+        "rail-future",
+        "rail",
+        3,
+        "Which behavior corrected wheel slip during departure?",
+        "rail-future"
+      ]
+    ],
+    "tasks": [
+      {
+        "query": "Which behavior corrected wheel slip during departure?",
+        "day": 1,
+        "opt_in": true,
+        "relevant": [
+          "rail-0"
+        ],
+        "required": [
+          "rail-0"
+        ],
+        "contradiction": false
+      }
+    ]
+  },
+  {
+    "domain": "archive",
+    "split": "heldout",
+    "records": [
+      [
+        "archive-0",
+        "archive",
+        1,
+        "Rebuilding the corrupted search index restored lookup.",
+        "archive-0"
+      ],
+      [
+        "archive-1",
+        "archive",
+        1,
+        "The archivist unlocked the cabinet containing the original card.",
+        "archive-1"
+      ],
+      [
+        "archive-0",
+        "archive-private",
+        1,
+        "What made the catalog entry readable again?",
+        "archive-foreign"
+      ],
+      [
+        "archive-future",
+        "archive",
+        3,
+        "What made the catalog entry readable again?",
+        "archive-future"
+      ]
+    ],
+    "tasks": [
+      {
+        "query": "What made the catalog entry readable again?",
+        "day": 1,
+        "opt_in": true,
+        "relevant": [
+          "archive-0"
+        ],
+        "required": [
+          "archive-0"
+        ],
+        "contradiction": false
+      }
+    ]
+  },
+  {
+    "domain": "vent",
+    "split": "heldout",
+    "records": [
+      [
+        "vent-0",
+        "vent",
+        1,
+        "The morning gauge log reports the valve open.",
+        "vent-0"
+      ],
+      [
+        "vent-1",
+        "vent",
+        1,
+        "The simultaneous field inspection reports the valve closed.",
+        "vent-1"
+      ],
+      [
+        "vent-2",
+        "vent",
+        2,
+        "The afternoon inspection reports the valve open.",
+        "vent-2"
+      ],
+      [
+        "vent-0",
+        "vent-private",
+        1,
+        "Was the valve open or closed during the morning inspection?",
+        "vent-foreign"
+      ],
+      [
+        "vent-future",
+        "vent",
+        3,
+        "Was the valve open or closed during the morning inspection?",
+        "vent-future"
+      ]
+    ],
+    "tasks": [
+      {
+        "query": "Was the valve open or closed during the morning inspection?",
+        "day": 1,
+        "opt_in": true,
+        "relevant": [
+          "vent-0",
+          "vent-1"
+        ],
+        "required": [
+          "vent-0",
+          "vent-1"
+        ],
+        "contradiction": true
+      }
+    ]
+  },
+  {
+    "domain": "light",
+    "split": "heldout",
+    "records": [
+      [
+        "light-0",
+        "light",
+        1,
+        "The first inspector observed illuminated emergency exit signs.",
+        "light-0"
+      ],
+      [
+        "light-1",
+        "light",
+        1,
+        "The first electrician found the emergency exit circuit dead.",
+        "light-1"
+      ],
+      [
+        "light-2",
+        "light",
+        2,
+        "The emergency exit signs worked after the scheduled evening repair.",
+        "light-2"
+      ],
+      [
+        "light-0",
+        "light-private",
+        1,
+        "Was emergency lighting working at the first safety inspection?",
+        "light-foreign"
+      ],
+      [
+        "light-future",
+        "light",
+        3,
+        "Was emergency lighting working at the first safety inspection?",
+        "light-future"
+      ]
+    ],
+    "tasks": [
+      {
+        "query": "Was emergency lighting working at the first safety inspection?",
+        "day": 1,
+        "opt_in": true,
+        "relevant": [
+          "light-0",
+          "light-1"
+        ],
+        "required": [
+          "light-0",
+          "light-1"
+        ],
+        "contradiction": true
+      }
+    ]
+  },
+  {
+    "domain": "survey",
+    "split": "heldout",
+    "records": [
+      [
+        "survey-0",
+        "survey",
+        1,
+        "The surveyor established elevation by triangulation.",
+        "survey-0"
+      ],
+      [
+        "survey-1",
+        "survey",
+        1,
+        "The site report repeated the surveyor's triangulated elevation.",
+        "survey-0"
+      ],
+      [
+        "survey-2",
+        "survey",
+        1,
+        "A clerk estimated the mast height by counting ladder rungs.",
+        "survey-2"
+      ],
+      [
+        "survey-0",
+        "survey-private",
+        1,
+        "What measurement confirmed the height of the mast?",
+        "survey-foreign"
+      ],
+      [
+        "survey-future",
+        "survey",
+        3,
+        "What measurement confirmed the height of the mast?",
+        "survey-future"
+      ]
+    ],
+    "tasks": [
+      {
+        "query": "What measurement confirmed the height of the mast?",
+        "day": 1,
+        "opt_in": true,
+        "relevant": [
+          "survey-0"
+        ],
+        "required": [
+          "survey-0"
+        ],
+        "contradiction": false
+      }
+    ]
+  }
+]
