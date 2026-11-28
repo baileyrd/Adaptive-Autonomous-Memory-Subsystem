@@ -46,6 +46,15 @@ def _uri(path, mode):
     return Path(path).resolve().as_uri() + "?mode=" + mode
 
 
+def _unique_members(pairs):
+    members = {}
+    for key, value in pairs:
+        if key in members:
+            raise RestoreUnavailable()
+        members[key] = value
+    return members
+
+
 @contextmanager
 def _lease(authority, scope, backup_digest):
     # An external writer advancing the head must serialize with publication.
@@ -62,7 +71,7 @@ def _lease(authority, scope, backup_digest):
             ).fetchone()
             if row is None or type(row[0]) is not int or row[0] < 0:
                 raise RestoreUnavailable()
-            closure = json.loads(row[1])
+            closure = json.loads(row[1], object_pairs_hook=_unique_members)
             if (
                 not isinstance(closure, dict)
                 or set(closure) != set(_CLOSURE)
