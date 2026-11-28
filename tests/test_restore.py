@@ -104,6 +104,22 @@ class RestoreTests(unittest.IsolatedAsyncioTestCase):
             with self.assertRaises(RestoreUnavailable):
                 index.rebuild(self.a, provider)
 
+    def test_duplicate_coverage_blocks_open_and_existing_view(self):
+        ambiguous = (
+            '{"evidence":["primary","copy"],"evidence":[],"formations":[],'
+            '"beliefs":[],"candidates":[],"episodes":[]}'
+        )
+        with open_restored_scope(self.backup, self.authority, "A") as view:
+            self.assertIsNotNone(view.get_evidence(self.a, "other"))
+            self.authority_write(
+                "UPDATE restore_coverage SET closure=? WHERE scope='A'", (ambiguous,)
+            )
+            with self.assertRaises(RestoreUnavailable):
+                view.get_evidence(self.a, "other")
+            with self.assertRaises(RestoreUnavailable):
+                with open_restored_scope(self.backup, self.authority, "A"):
+                    self.fail("Ambiguous coverage opened")
+
     def test_incomplete_or_wrong_coverage_refuses_to_open(self):
         for field, value in (("complete", 0), ("backup_sha256", "wrong"), ("closure", "{}")):
             with self.subTest(field=field):
