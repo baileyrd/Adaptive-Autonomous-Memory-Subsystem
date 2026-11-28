@@ -136,7 +136,7 @@ class RetrievalTelemetry:
         key = self._key(access)
         if type(limit) is not int or not 1 <= limit <= MAX_OBSERVATIONS:
             raise ValueError("Invalid retrieval telemetry limit")
-        with closing(self.store._connect()) as db:
+        with self.store._reading() as db:
             rows = db.execute(
                 """SELECT * FROM retrieval_observation WHERE scope=? AND principal=? AND recorded_at>=?
                    ORDER BY recorded_at DESC, attempt_id LIMIT ?""",

@@ -132,6 +132,7 @@ class CognitiveMemory:
         provider: RepresentationProvider | None = None,
         requested_mode: RetrievalMode | None = None,
     ) -> dict:
+        self.store.check_current()
         result = self._recall(access, need, provider, requested_mode)
         if self._shadow is not None and need.identifier is None and result["items"]:
             try:
@@ -144,6 +145,7 @@ class CognitiveMemory:
             except Exception:
                 # Optional observation must never affect an already-authorized response.
                 pass
+        self.store.check_current()
         return result
 
     def _recall(self, access, need, provider, requested_mode) -> dict:
@@ -299,9 +301,11 @@ class CognitiveMemory:
         return cached
 
     def explain(self, access: AccessContext, need: CognitiveNeed) -> dict:
+        self.store.check_current()
         if need.identifier is None or need.entity is None:
             raise ValueError("Explanation requires an exact target")
         item = self._item(access, need, need.entity, need.identifier)
+        self.store.check_current()
         if item is None:
             return _response([], need.max_items, need.max_bytes)
         if need.max_depth == 0 and need.entity != "evidence":

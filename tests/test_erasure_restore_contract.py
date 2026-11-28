@@ -164,6 +164,36 @@ class FixtureView:
         }
 
 
+def seed_erasure_backup(live, backup):
+    store = SQLiteMemoryStore(live)
+    seed(
+        store,
+        {
+            "evidence": [
+                ("primary", "A", "sensor-a", ORIGIN, "fixture:primary", TOKEN),
+                ("copy", "A", "sensor-copy", ORIGIN, "fixture:copy", TOKEN + " copy"),
+                ("other", "A", "sensor-b", "support-origin-02", "fixture:other", "retainalpha"),
+                ("third", "A", "sensor-c", "support-origin-03", "fixture:third", "retainbeta"),
+                ("primary", "B", "sensor-private", ORIGIN, "fixture:private", "foreignpayload"),
+            ]
+        },
+    )
+    if create_lesson(store, "single", ("primary",), f"{TOKEN} staged draft"):
+        raise AssertionError("Single-source fixture unexpectedly approved")
+    if not create_lesson(store, "multi", ("primary", "other", "third"), f"{TOKEN} reviewed lesson"):
+        raise AssertionError("Multi-source lesson fixture must be approved")
+    index = RepresentationIndex(store)
+    index.rebuild(AccessContext("builder", "A", True), DeterministicFixtureProvider())
+    snapshot(live, backup)
+
+
+def create_lesson(store, name, supports, claim):
+    author = AccessContext("author", "A", True)
+    candidate = LearningCandidate(name, "A", author.principal, claim, TIME, supports)
+    store.create_candidate(author, name, candidate)
+    return review(store, candidate, AccessContext("reviewer", "A", True, True))
+
+
 class ErasureRestoreContractTests(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
@@ -172,33 +202,7 @@ class ErasureRestoreContractTests(unittest.TestCase):
         self.live = self.root / "live.sqlite"
         self.backup = self.root / "old.sqlite"
         self.authority = FixtureAuthority(self.root / "outside-backup")
-        store = SQLiteMemoryStore(self.live)
-        seed(
-            store,
-            {
-                "evidence": [
-                    ("primary", "A", "sensor-a", ORIGIN, "fixture:primary", TOKEN),
-                    ("copy", "A", "sensor-copy", ORIGIN, "fixture:copy", TOKEN + " copy"),
-                    ("other", "A", "sensor-b", "support-origin-02", "fixture:other", "retainalpha"),
-                    ("third", "A", "sensor-c", "support-origin-03", "fixture:third", "retainbeta"),
-                    ("primary", "B", "sensor-private", ORIGIN, "fixture:private", "foreignpayload"),
-                ]
-            },
-        )
-        self.create_lesson(store, "single", ("primary",), f"{TOKEN} staged draft", approved=False)
-        self.create_lesson(
-            store, "multi", ("primary", "other", "third"), f"{TOKEN} reviewed lesson"
-        )
-        index = RepresentationIndex(store)
-        index.rebuild(AccessContext("builder", "A", True), DeterministicFixtureProvider())
-        snapshot(self.live, self.backup)
-
-    def create_lesson(self, store, name, supports, claim, *, approved=True):
-        author = AccessContext("author", "A", True)
-        candidate = LearningCandidate(name, "A", author.principal, claim, TIME, supports)
-        store.create_candidate(author, name, candidate)
-        result = review(store, candidate, AccessContext("reviewer", "A", True, True))
-        self.assertEqual(result, approved)
+        seed_erasure_backup(self.live, self.backup)
 
     def view(self, name, source, scope="A"):
         return FixtureView(self.root / name, source, self.authority, scope)
@@ -263,7 +267,9 @@ class ErasureRestoreContractTests(unittest.TestCase):
         self.assertTrue(foreign.recall("foreignpayload")["items"])
         self.assertEqual(foreign.vector_ids(), {"primary"})
 
-        self.create_lesson(raw, "survivors-only", ("other", "third"), "independent revised lesson")
+        self.assertTrue(
+            create_lesson(raw, "survivors-only", ("other", "third"), "independent revised lesson")
+        )
         refreshed = self.view("re-reviewed", restored)
         self.assert_erased(refreshed)
         self.assertEqual(refreshed.lesson("survivors-only"), "independent revised lesson")

@@ -43,3 +43,68 @@ Tests exercise that in-process gate, scoped materialization and native rebuild o
 ```sh
 PYTHONPATH=src python -m unittest discover -s tests -p test_erasure_restore_contract.py -v
 ```
+
+## Approved restore protection
+
+Use `open_restored_scope(backup, authority, scope)` from `aams.restore` for native reads
+and index rebuilds. For MCP, start one read-only server per authorized scope with
+`--restore-backup BACKUP --restore-authority AUTHORITY --principal PRINCIPAL --scope SCOPE`.
+The host binds the principal and scope using its existing access policy and supplies the
+trusted authority path. The backup must be a standalone SQLite snapshot of the currently
+supported schema. Live-mode opening via `SQLiteMemoryStore(path)` or MCP `--db` accepts a
+trusted live database. Never publish an old snapshot or a restore projection using those
+live-mode entry points.
+
+The authority lives outside the backup and rollback domain. Its SQLite interface is:
+
+```sql
+CREATE TABLE restore_scope_head (
+    scope TEXT PRIMARY KEY,
+    generation INTEGER NOT NULL CHECK (generation >= 0)
+);
+CREATE TABLE restore_coverage (
+    scope TEXT NOT NULL,
+    generation INTEGER NOT NULL CHECK (generation >= 0),
+    backup_sha256 TEXT NOT NULL,
+    complete INTEGER NOT NULL CHECK (complete IN (0, 1)),
+    closure TEXT NOT NULL,
+    PRIMARY KEY (scope, generation, backup_sha256)
+);
+```
+
+Administrators must configure the authority from the current, independently verified
+erasure record. Only its trusted writer may advance a scope head. Generations increase
+monotonically, and the authority must remain outside the restore and rollback process.
+The writer uses SQLite transactions against the same authority file. As part of advancing
+a head, it can publish coverage in the same transaction or leave the scope unavailable
+until verification completes. Do not replace or roll back the authority database out of
+band. This interface consumes authenticated, current coverage supplied by the host.
+It does not issue erasure decisions, authenticate a remote journal, or detect rollback
+of the trusted authority itself.
+
+Coverage binds a head to the SHA-256 of the exact backup bytes. The closure JSON object
+contains five arrays of scoped IDs, named `evidence`, `formations`, `beliefs`,
+`candidates`, and `episodes`. Include aliases, copies, and dependent records that
+cannot be discovered through persisted relationships. Set `complete=1` only when
+the current authority can account for all relevant erasures and dependency paths in
+that snapshot. An empty closure is an affirmative verification. Unknown coverage or
+lineage leaves the scope unavailable.
+
+Opening captures the untouched backup into private quarantine, verifies coverage, and
+creates a separate scope-only projection. Persisted evidence links expand the excluded
+set to formations, complete belief chains, learning candidates and reviews, and complete
+outcome chains. Outcomes associated with an excluded candidate are excluded too. Even
+with surviving sources, an old reviewed lesson stays excluded if it depended on erased
+evidence. A future lesson would require a new review of independent surviving sources.
+The projection imports neither cached vectors nor telemetry or ingestion replay rows.
+The context manages the lifetime of the temporary files.
+
+Native and MCP reads revalidate the pinned coverage before exposing results. An open
+view becomes unavailable if that coverage disappears or the scope head advances. A
+separately verified scope can continue serving. Reopen a stale view only after coverage
+for the current head is available. Persisted vector publication shares an authority
+transaction with the head check through the projection commit, so a head advance during
+encoding prevents publication. The old view also cannot serve a previously built index
+after a head advance. This protects serving and publication, including a previously opened
+guarded view. Backup retention and physical purge still require their separate authority
+decision.
