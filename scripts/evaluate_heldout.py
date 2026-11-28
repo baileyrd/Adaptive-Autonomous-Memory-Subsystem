@@ -28,6 +28,7 @@ VARIANTS = json.loads((ROOT / "onnx_variant_pins.json").read_text())
 STATIC = json.loads((ROOT / "static_embedder_pins.json").read_text())
 CANDIDATES = ("bge-float", *VARIANTS, *STATIC)
 ARMS = ("bm25", "bm25_guarded", *ONNX_ARMS)
+NATIVE_CITATION_ARMS = {"bm25", "bm25_guarded", "bm25_guarded_onnx"}
 SQUAD = {
     "dev": ("95aa6a52d5d6a735563366753ca50492a658031da74f301ac5238b03966972c9", 0),
     "train": ("3527663986b8295af4f7fcdff1ba1ff3f72d07d61a20f487cb238a6ef92fd955", 48),
@@ -84,7 +85,7 @@ def opened(candidate, directory):
     return encoder, json.loads((ROOT / "onnx_pins.json").read_text())
 
 
-def audit_packet(packet, visible):
+def audit_packet(packet, visible, *, require_native_provenance):
     found = []
     for item in packet["items"]:
         for citation in item["citations"]:
@@ -94,7 +95,7 @@ def audit_packet(packet, visible):
             expected = visible[identifier]
             if any(key in citation and citation[key] != value for key, value in expected.items()):
                 raise InvalidRun(f"Citation provenance mismatch: {identifier}")
-            if len(citation) > 1 and not expected.keys() <= citation.keys():
+            if require_native_provenance and not expected.keys() <= citation.keys():
                 raise InvalidRun(f"Incomplete native provenance: {identifier}")
             found.append(identifier)
     return found
@@ -182,7 +183,7 @@ def run(groups, encoder):
         visible = {
             name: fields for name, (day, fields) in provenance[domain].items() if day <= task["day"]
         }
-        found = audit_packet(packet, visible)
+        found = audit_packet(packet, visible, require_native_provenance=arm in NATIVE_CITATION_ARMS)
         if not set(task["required"]) <= visible.keys():
             raise InvalidRun("Evaluator required evidence is out of scope or time")
         observed[arm] = found

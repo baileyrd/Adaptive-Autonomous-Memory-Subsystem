@@ -36,7 +36,16 @@ class HeldoutEvidenceTests(unittest.TestCase):
             {"evidence_id": "a", "digest": "good"},
         ):
             with self.subTest(citation=citation), self.assertRaises(InvalidRun):
-                audit_packet({"items": [{"citations": [citation]}]}, visible)
+                audit_packet(
+                    {"items": [{"citations": [citation]}]}, visible, require_native_provenance=True
+                )
+
+    def test_id_only_citation_requires_an_id_only_arm(self):
+        visible = {"a": {"digest": "good", "source_locator": "fixture:source"}}
+        packet = {"items": [{"citations": [{"evidence_id": "a"}]}]}
+        with self.assertRaisesRegex(InvalidRun, "Incomplete native provenance"):
+            audit_packet(packet, visible, require_native_provenance=True)
+        self.assertEqual(audit_packet(packet, visible, require_native_provenance=False), ["a"])
 
     def test_semantic_fixture_runs_through_native_replay(self):
         groups, _ = groups_for("semantic", None)
