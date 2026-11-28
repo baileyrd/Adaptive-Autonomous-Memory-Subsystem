@@ -2,11 +2,6 @@ name: Held-out retrieval evidence (#109)
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - .github/workflows/heldout-evidence.yml
-      - scripts/evaluate_heldout.py
-      - scripts/heldout_evidence_cases.json
 
 permissions:
   contents: read
@@ -34,8 +29,6 @@ jobs:
       WORKLOAD: ${{ matrix.workload }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
