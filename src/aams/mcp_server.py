@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from .contracts import BeliefProposal, EpistemicState, Evidence, EvidenceStatus, MemoryFormation
 from .contracts import MemoryKind
 from .recall import CognitiveMemory, CognitiveNeed, Entity
+from .restore import RestoreUnavailable, open_restored_scope
 from .storage import AccessContext, SQLiteMemoryStore, StoreIntegrityError, VersionConflict
 from .storage import WriteConflict
 
@@ -239,13 +240,29 @@ async def _serve(server: Server) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Serve AAMS over MCP stdio")
-    parser.add_argument("--db", required=True, help="Path to the local SQLite database")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--db", help="Path to the live SQLite database")
+    source.add_argument("--restore-backup", help="Path to the quarantined SQLite backup")
+    parser.add_argument("--restore-authority", help="Trusted external restore authority database")
     parser.add_argument("--principal", required=True, help="Host-assigned principal")
     parser.add_argument("--scope", required=True, help="Host-assigned scope")
     parser.add_argument("--write", action="store_true", help="Grant writes to this process")
     args = parser.parse_args()
+    if bool(args.restore_backup) != bool(args.restore_authority):
+        parser.error("--restore-backup and --restore-authority are required together")
+    if args.restore_backup and args.write:
+        parser.error("Restored scopes are read-only")
     access = AccessContext(args.principal, args.scope, args.write)
-    asyncio.run(_serve(build_server(SQLiteMemoryStore(args.db), access)))
+    if args.restore_backup:
+        try:
+            with open_restored_scope(
+                args.restore_backup, args.restore_authority, args.scope
+            ) as store:
+                asyncio.run(_serve(build_server(store, access)))
+        except RestoreUnavailable:
+            parser.exit(1, "Restored scope unavailable\n")
+    else:
+        asyncio.run(_serve(build_server(SQLiteMemoryStore(args.db), access)))
 
 
 if __name__ == "__main__":

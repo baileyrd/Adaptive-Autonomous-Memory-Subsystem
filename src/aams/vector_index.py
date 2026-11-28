@@ -62,7 +62,7 @@ class RepresentationIndex:
         previous = self.snapshot(access, spec)
         if previous.status == "fresh":
             return previous
-        with closing(self.store._connect()) as db, db:
+        with self.store._reading() as db:
             db.execute("BEGIN")
             count = _count(db, access.scope)
             records = tuple(
@@ -90,7 +90,7 @@ class RepresentationIndex:
             if vector.spec != spec:
                 raise ValueError("Provider changed representation space during rebuild")
             vectors.append(vector)
-        with closing(self.store._connect()) as db, db:
+        with self.store._index_publication(access.scope), closing(self.store._connect()) as db, db:
             db.execute("BEGIN IMMEDIATE")
             if _count(db, access.scope) != count:
                 return RepresentationSnapshot("stale")
@@ -110,7 +110,7 @@ class RepresentationIndex:
     def snapshot(self, access, spec: RepresentationSpec) -> RepresentationSnapshot:
         key = _key(access, spec)
         try:
-            with closing(self.store._connect()) as db, db:
+            with self.store._reading() as db:
                 db.execute("BEGIN")
                 batch = db.execute(
                     "SELECT * FROM representation_batch WHERE " + _WHERE, key
@@ -153,5 +153,5 @@ class RepresentationIndex:
     def invalidate(self, access, spec: RepresentationSpec) -> None:
         if not access.writable:
             raise PermissionError("Representation invalidation denied")
-        with closing(self.store._connect()) as db, db:
+        with self.store._index_publication(access.scope), closing(self.store._connect()) as db, db:
             db.execute("DELETE FROM representation_batch WHERE " + _WHERE, _key(access, spec))

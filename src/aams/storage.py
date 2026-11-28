@@ -3,7 +3,7 @@
 import json
 import sqlite3
 from collections.abc import Iterator
-from contextlib import closing
+from contextlib import closing, contextmanager
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
@@ -279,6 +279,20 @@ class SQLiteMemoryStore:
             db.close()
             raise
 
+    def check_current(self) -> None:
+        """Live stores have no restore generation to check."""
+
+    @contextmanager
+    def _reading(self):
+        self.check_current()
+        with closing(self._connect()) as db, db:
+            yield db
+        self.check_current()
+
+    @contextmanager
+    def _index_publication(self, scope: str):
+        yield
+
     def ingest(
         self,
         access: AccessContext,
@@ -348,7 +362,7 @@ class SQLiteMemoryStore:
         """Return the trusted, previously committed ingestion time for an idempotency key."""
         require_text(request_key)
         try:
-            with closing(self._connect()) as db:
+            with self._reading() as db:
                 row = db.execute(
                     """SELECT formation.created_at FROM ingestion JOIN formation
                        ON formation.scope=ingestion.scope
@@ -363,7 +377,7 @@ class SQLiteMemoryStore:
 
     def get_evidence(self, access: AccessContext, evidence_id: str) -> Evidence | None:
         try:
-            with closing(self._connect()) as db:
+            with self._reading() as db:
                 return self._read_evidence(db, access.scope, evidence_id)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot verify evidence") from error
@@ -384,7 +398,7 @@ class SQLiteMemoryStore:
 
     def get_formation(self, access: AccessContext, formation_id: str) -> MemoryFormation | None:
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 row = db.execute(
                     "SELECT * FROM formation WHERE scope=? AND formation_id=?",
@@ -414,7 +428,7 @@ class SQLiteMemoryStore:
     def verify_integrity(self) -> None:
         """Check SQLite structure, scoped references and canonical record invariants."""
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                     raise StoreIntegrityError("SQLite integrity check failed")
@@ -516,7 +530,7 @@ class SQLiteMemoryStore:
 
     def belief_history(self, access: AccessContext, belief_id: str) -> tuple[BeliefRevision, ...]:
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 rows = db.execute(
                     """SELECT * FROM belief_revision WHERE scope=? AND belief_id=?
@@ -539,7 +553,7 @@ class SQLiteMemoryStore:
         recorded = utc_timestamp(recorded_as_of) if recorded_as_of is not None else None
         effective = utc_timestamp(effective_at) if effective_at is not None else None
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 return self._read_belief(db, access.scope, belief_id, recorded, effective)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
@@ -602,7 +616,7 @@ class SQLiteMemoryStore:
     ) -> Iterator[tuple[MemoryFormation | BeliefRevision, dict[str, Evidence]]]:
         """Yield allowed records and their resolved evidence from one SQLite snapshot."""
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 for row in db.execute(
                     """SELECT * FROM formation
@@ -612,10 +626,9 @@ class SQLiteMemoryStore:
                 ):
                     formation = self._decode_formation(db, row)
                     if not kinds or formation.kind in kinds:
-                        yield (
-                            formation,
-                            self._resolve_evidence(db, access.scope, formation.evidence_ids),
-                        )
+                        evidence = self._resolve_evidence(db, access.scope, formation.evidence_ids)
+                        self.check_current()
+                        yield formation, evidence
                 if kinds:
                     return
                 for row in db.execute(
@@ -627,7 +640,9 @@ class SQLiteMemoryStore:
                     if revision is not None:
                         proposal = revision.proposal
                         links = proposal.support_ids + proposal.refute_ids
-                        yield revision, self._resolve_evidence(db, access.scope, links)
+                        evidence = self._resolve_evidence(db, access.scope, links)
+                        self.check_current()
+                        yield revision, evidence
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
             raise StoreIntegrityError("Cannot scan canonical memory") from error
 
@@ -698,7 +713,7 @@ class SQLiteMemoryStore:
 
     def get_candidate(self, access: AccessContext, candidate_id: str) -> CandidateRecord | None:
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 return self._read_candidate(db, access.scope, candidate_id)
         except (sqlite3.DatabaseError, ValueError, TypeError) as error:
@@ -756,7 +771,7 @@ class SQLiteMemoryStore:
         self, access: AccessContext, candidate_id: str
     ) -> CandidateValidation | None:
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 record = self._read_candidate(db, access.scope, candidate_id)
                 return (
@@ -886,7 +901,7 @@ class SQLiteMemoryStore:
         if since > through or type(limit) is not int or not 1 <= limit <= 256:
             raise ValueError("Invalid learning sample window or limit")
         try:
-            with closing(self._connect()) as db:
+            with self._reading() as db:
                 rows = db.execute(
                     """SELECT * FROM evidence WHERE scope=? AND recorded_at BETWEEN ? AND ?
                        AND length(payload)<=4096
@@ -974,7 +989,7 @@ class SQLiteMemoryStore:
         self, access: AccessContext, episode_id: str
     ) -> tuple[OutcomeRevision, ...]:
         try:
-            with closing(self._connect()) as db, db:
+            with self._reading() as db:
                 db.execute("BEGIN")
                 rows = db.execute(
                     "SELECT * FROM outcome_revision WHERE scope=? AND episode_id=? ORDER BY version",

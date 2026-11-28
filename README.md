@@ -84,7 +84,7 @@ print("backup verified")
 PY
 ```
 
-To restore, stop the service and launch it against the verified backup path or a private copy. Keep the damaged database for diagnosis. The acceptance tests exercise backup and restore and process-kill recovery. This procedure covers a single local SQLite database and requires the host to protect both originals and backups.
+To restore, stop the service and preserve both the backup and the damaged database. Serve each verified scope from a guarded restore view using the independent erasure authority described in [ADR-0011](docs/adr/0011-governed-erasure-and-restore.md#approved-restore-protection). For MCP, use `python -m aams.mcp_server --restore-backup BACKUP --restore-authority AUTHORITY --principal PRINCIPAL --scope SCOPE`. For native reads and index rebuilds, use `with open_restored_scope(backup, authority, scope) as store` from `aams.restore`. Missing or stale coverage blocks serving for that scope. Keep restored snapshots out of the normal live-database path.
 
 ## Tested profile and limitations
 
