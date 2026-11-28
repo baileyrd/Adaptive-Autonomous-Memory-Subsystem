@@ -1,0 +1,83 @@
+name: Held-out retrieval evidence (#109)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/heldout-evidence.yml
+      - scripts/evaluate_heldout.py
+      - scripts/heldout_evidence_cases.json
+
+permissions:
+  contents: read
+
+env:
+  PYTHONPATH: src
+  PYTHONHASHSEED: "0"
+  SQUAD: https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/eee5fdbf62f8613a7812b03419e6b29617b74fd1/dataset
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [bge-float, bge-q8, minilm-l3-q8, potion-retrieval-32m]
+        workload: [dev, train, scifact, semantic]
+        include:
+          # Only the new synthetic cases lack an #112 quality result for the 8M model.
+          - candidate: potion-base-8m
+            workload: semantic
+    env:
+      CANDIDATE: ${{ matrix.candidate }}
+      WORKLOAD: ${{ matrix.workload }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prepare pinned artifacts
+        run: |
+          mkdir -p model/onnx out
+          case "$CANDIDATE" in
+            bge-*)
+              python -m pip install onnxruntime==1.32.0 tokenizers==0.23.3 numpy==2.5.3
+              ;;
+            minilm-l3-q8)
+              python -m pip install onnxruntime==1.32.0 tokenizers==0.23.3 numpy==2.5.3
+              ;;
+          esac
+          case "$CANDIDATE" in
+            bge-float)
+              rev=$(python -c 'import json; print(json.load(open("scripts/onnx_pins.json"))["revision"])')
+              for file in onnx/model.onnx tokenizer.json; do
+                curl -fsSL --retry 2 --max-time 120 "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/$rev/$file" -o "model/$file"
+              done
+              ;;
+            *-q8) python scripts/prepare_onnx_variant.py "$CANDIDATE" model ;;
+            potion-*) python scripts/prepare_static_embedder.py "$CANDIDATE" model ;;
+          esac
+      - name: Compare paired queries
+        run: |
+          args=()
+          case "$WORKLOAD" in
+            dev|train)
+              curl -fsSL --retry 2 --max-time 120 "$SQUAD/$WORKLOAD-v1.1.json" -o data.json
+              args=(--dataset data.json)
+              ;;
+            scifact)
+              curl -fsSL --retry 2 --max-time 120 https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz -o data.tar.gz
+              args=(--dataset data.tar.gz)
+              ;;
+          esac
+          timeout 30m python scripts/evaluate_heldout.py "$WORKLOAD" "$CANDIDATE" "${args[@]}" --model model > result.json
+          mv result.json out/
+          python -c 'import json; x=json.load(open("out/result.json")); print(json.dumps({k:{b:{i:y for i,y in z.items() if i!="changes"} for b,z in v.items()} for k,v in x["comparisons"].items()}))'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: heldout-${{ matrix.candidate }}-${{ matrix.workload }}
+          path: out/result.json

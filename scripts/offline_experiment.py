@@ -94,6 +94,7 @@ def replay(
     rankings=(),
     encoder=None,
     build_ms=None,
+    observe_packet=None,
 ):
     """Replay every strategy per task. Each ranking adds lexical, hybrid and guarded arms.
 
@@ -195,6 +196,8 @@ def replay(
                     latency.append((perf_counter_ns() - start) / 1e6)
                     if packet != expected:
                         raise RuntimeError("Controlled replay changed result")
+                if observe_packet is not None:
+                    observe_packet(group, ordinal, task, strategy, expected)
                 found = [
                     edge["evidence_id"] for item in expected["items"] for edge in item["citations"]
                 ]
